@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>KasBot Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1D9E75;--red:#D85A30;--bg:#F7F7F5;--surface:#FFFFFF;
+  --border:#E8E8E4;--text:#1A1A1A;--muted:#6B6B65;--hint:#A8A89F;
+  --radius:10px;--radius-sm:6px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:10}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;letter-spacing:-.3px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.header-right{display:flex;align-items:center;gap:10px}
+#last-update{font-size:12px;color:var(--hint);font-family:'DM Mono',monospace}
+
+main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem}
+
+.controls{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap}
+.controls-left{font-size:13px;color:var(--muted);flex:1}
+select{font-family:'DM Sans',sans-serif;font-size:13px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;outline:none}
+select:focus{border-color:#999}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13px;padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:.15s}
+.btn:hover{background:var(--bg);color:var(--text)}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.section-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--hint);margin-bottom:10px}
+
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:2rem}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem 1rem}
+.metric-label{font-size:11px;color:var(--muted);margin-bottom:6px}
+.metric-value{font-size:20px;font-weight:600;letter-spacing:-.5px;line-height:1}
+.metric-sub{font-size:11px;color:var(--hint);margin-top:4px;font-family:'DM Mono',monospace}
+.green{color:var(--green)}.red{color:var(--red)}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem}
+.card-head{padding:.75rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:500}
+.card-body{padding:1.25rem}
+
+.chart-wrap{display:flex;align-items:flex-end;gap:6px;height:150px}
+.bar-group{display:flex;flex-direction:column;align-items:center;flex:1;height:100%;gap:4px}
+.bars{display:flex;align-items:flex-end;gap:2px;width:100%;flex:1}
+.bar{flex:1;border-radius:3px 3px 0 0;min-height:2px;transition:height .4s ease}
+.bar-lbl{font-size:10px;color:var(--hint);font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50px;text-align:center}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-bottom:10px}
+.legend span{display:flex;align-items:center;gap:5px}
+.dot{width:8px;height:8px;border-radius:2px}
+
+.tabs{display:flex;gap:4px}
+.tab{font-family:'DM Sans',sans-serif;font-size:12px;padding:4px 10px;border-radius:var(--radius-sm);border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted);transition:.15s}
+.tab.active{background:var(--bg);border-color:var(--border);color:var(--text);font-weight:500}
+
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--hint);padding:10px 12px;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFAF8}
+.mono{font-family:'DM Mono',monospace;font-size:12px}
+.tag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:3px;background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+.tag-masuk{background:#EAF3DE;color:#3B6D11;border-color:#C0DD97}
+.tag-keluar{background:#FAECE7;color:#993C1D;border-color:#F5C4B3}
+
+.empty{text-align:center;padding:2.5rem;color:var(--hint);font-size:13px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--muted);border-radius:50%;animation:spin .6s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:600px){
+  main{padding:1rem}
+  header{padding:0 1rem}
+  .metrics-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    KasBot
+  </div>
+  <div class="header-right">
+    <span id="last-update">—</span>
+    <button class="btn" onclick="loadAll()">
+      <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Refresh
+    </button>
+  </div>
+</header>
+
+<main>
+  <div class="controls">
+    <div class="controls-left">Dashboard kas real-time dari Google Sheets</div>
+    <select id="filter-bulan" onchange="applyFilter()">
+      <option value="">Semua bulan</option>
+    </select>
+    <button class="btn" onclick="exportCSV()">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export CSV
+    </button>
+  </div>
+
+  <div class="section-label">Ringkasan kas</div>
+  <div class="metrics-grid">
+    <div class="metric"><div class="metric-label">Kas besar — masuk</div><div class="metric-value green" id="kb-masuk">—</div></div>
+    <div class="metric"><div class="metric-label">Kas besar — keluar</div><div class="metric-value red" id="kb-keluar">—</div></div>
+    <div class="metric"><div class="metric-label">Saldo kas besar</div><div class="metric-value" id="kb-saldo">—</div><div class="metric-sub" id="kb-trx">—</div></div>
+    <div class="metric"><div class="metric-label">Kas kecil — masuk</div><div class="metric-value green" id="kk-masuk">—</div></div>
+    <div class="metric"><div class="metric-label">Kas kecil — keluar</div><div class="metric-value red" id="kk-keluar">—</div></div>
+    <div class="metric"><div class="metric-label">Saldo kas kecil</div><div class="metric-value" id="kk-saldo">—</div><div class="metric-sub" id="kk-trx">—</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Grafik transaksi kas besar</div>
+      <div class="legend">
+        <span><div class="dot" style="background:var(--green)"></div>Masuk</span>
+        <span><div class="dot" style="background:var(--red)"></div>Keluar</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="chart-wrap" id="chart-area"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Transaksi</div>
+      <div class="tabs">
+        <button class="tab active" id="tab-besar" onclick="switchTab('besar')">Kas besar</button>
+        <button class="tab" id="tab-kecil" onclick="switchTab('kecil')">Kas kecil</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto"><div id="trx-content"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">Petty cash</div></div>
+    <div style="overflow-x:auto"><div id="petty-content"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+  </div>
+</main>
+
+<script>
+const BASE='https://kasbot-backend-production.up.railway.app';
+let allTrx=[];
+let currentTab='besar';
+let currentBulan='';
+
+function fmt(n){return'Rp '+Math.round(n).toLocaleString('id-ID')}
+
+function parseTgl(s){
+  if(!s||s.includes('TOTAL')||s.includes('SALDO'))return null;
+  const p=s.split('/');
+  if(p.length===3)return new Date(p[2],p[1]-1,p[0]);
+  return null;
+}
+
+function getBulanKey(d){return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')}
+function getBulanLabel(d){return d.toLocaleString('id-ID',{month:'long',year:'numeric'})}
+
+function populateFilter(data){
+  const keys=new Map();
+  data.forEach(t=>{const d=parseTgl(t.tanggal);if(d)keys.set(getBulanKey(d),getBulanLabel(d));});
+  const sel=document.getElementById('filter-bulan');
+  [...keys.entries()].sort((a,b)=>b[0].localeCompare(a[0])).forEach(([k,v])=>{
+    const o=document.createElement('option');o.value=k;o.textContent=v;sel.appendChild(o);
+  });
+}
+
+function filterData(data){
+  if(!currentBulan)return data;
+  return data.filter(t=>{const d=parseTgl(t.tanggal);return d&&getBulanKey(d)===currentBulan;});
+}
+
+function applyFilter(){
+  currentBulan=document.getElementById('filter-bulan').value;
+  renderTrx(currentTab);renderChart();
+}
+
+async function loadSummary(){
+  try{
+    const d=await fetch(BASE+'/api/summary').then(r=>r.json());
+    if(!d.success)throw 0;
+    document.getElementById('kb-masuk').textContent=fmt(d.kas_besar.masuk);
+    document.getElementById('kb-keluar').textContent=fmt(d.kas_besar.keluar);
+    document.getElementById('kb-saldo').textContent=fmt(d.kas_besar.saldo);
+    document.getElementById('kb-trx').textContent=d.kas_besar.total_transaksi+' transaksi';
+    document.getElementById('kk-masuk').textContent=fmt(d.kas_kecil.masuk);
+    document.getElementById('kk-keluar').textContent=fmt(d.kas_kecil.keluar);
+    document.getElementById('kk-saldo').textContent=fmt(d.kas_kecil.saldo);
+    document.getElementById('kk-trx').textContent=d.kas_kecil.total_transaksi+' transaksi';
+    document.getElementById('last-update').textContent=new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit'});
+  }catch(e){document.getElementById('kb-masuk').textContent='Error'}
+}
+
+async function loadTrxAll(){
+  try{
+    const d=await fetch(BASE+'/api/transaksi').then(r=>r.json());
+    if(!d.success)throw 0;
+    allTrx=d.data.filter(t=>t.jenis&&t.tanggal&&!t.tanggal.includes('TOTAL')&&!t.tanggal.includes('SALDO'));
+    populateFilter(allTrx);
+    renderTrx(currentTab);renderChart();
+  }catch(e){document.getElementById('trx-content').innerHTML='<div class="empty">Gagal memuat transaksi</div>';}
+}
+
+function renderTrx(group){
+  const el=document.getElementById('trx-content');
+  const grp=group==='besar'?'KAS BESAR':'KAS KECIL';
+  const data=filterData(allTrx).filter(t=>t.group===grp);
+  if(!data.length){el.innerHTML='<div class="empty">Tidak ada data</div>';return;}
+  let html='<table><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Kategori</th><th>Jenis</th><th style="text-align:right">Nominal</th></tr></thead><tbody>';
+  data.forEach(t=>{
+    const cls=t.jenis==='Dana Keluar'?'tag-keluar':'tag-masuk';
+    const nomCls=t.jenis==='Dana Keluar'?'red':'green';
+    const desc=(t.deskripsi||t.vendor||'—').substring(0,50);
+    html+=`<tr><td class="mono">${t.tanggal}</td><td>${desc}</td><td>${t.kategori||'—'}</td><td><span class="tag ${cls}">${t.jenis}</span></td><td style="text-align:right" class="mono ${nomCls}">${fmt(t.nominal)}</td></tr>`;
+  });
+  html+='</tbody></table>';
+  el.innerHTML=html;
+}
+
+function renderChart(){
+  const el=document.getElementById('chart-area');
+  const data=filterData(allTrx).filter(t=>t.group==='KAS BESAR');
+  if(!data.length){el.innerHTML='<div class="empty">Tidak ada data</div>';return;}
+  const byBulan={};
+  data.forEach(t=>{
+    const d=parseTgl(t.tanggal);if(!d)return;
+    const k=getBulanKey(d);
+    const lbl=d.toLocaleString('id-ID',{month:'short'})+" '"+String(d.getFullYear()).slice(2);
+    if(!byBulan[k])byBulan[k]={lbl,masuk:0,keluar:0};
+    if(t.jenis==='Dana Masuk')byBulan[k].masuk+=t.nominal;
+    else byBulan[k].keluar+=t.nominal;
+  });
+  const keys=Object.keys(byBulan).sort();
+  const maxVal=Math.max(...keys.map(k=>Math.max(byBulan[k].masuk,byBulan[k].keluar)),1);
+  let html='';
+  keys.forEach(k=>{
+    const b=byBulan[k];
+    const hM=Math.max(Math.round((b.masuk/maxVal)*140),2);
+    const hK=Math.max(Math.round((b.keluar/maxVal)*140),2);
+    html+=`<div class="bar-group"><div class="bars"><div class="bar" style="height:${hM}px;background:var(--green)" title="${fmt(b.masuk)}"></div><div class="bar" style="height:${hK}px;background:var(--red)" title="${fmt(b.keluar)}"></div></div><div class="bar-lbl">${b.lbl}</div></div>`;
+  });
+  el.innerHTML=html;
+}
+
+async function loadPetty(){
+  const el=document.getElementById('petty-content');
+  try{
+    const d=await fetch(BASE+'/api/petty').then(r=>r.json());
+    if(!d.success||!d.data||!d.data.length){el.innerHTML='<div class="empty">Tidak ada data petty cash</div>';return;}
+    let html='<table><thead><tr><th>Tanggal</th><th>Keterangan</th><th style="text-align:right">Jumlah</th></tr></thead><tbody>';
+    d.data.forEach(t=>{html+=`<tr><td class="mono">${t.tanggal||'—'}</td><td>${t.keterangan||'—'}</td><td style="text-align:right mono">${fmt(t.jumlah||0)}</td></tr>`;});
+    html+='</tbody></table>';
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<div class="empty">Gagal memuat petty cash</div>';}
+}
+
+function switchTab(group){
+  currentTab=group;
+  document.getElementById('tab-besar').className='tab'+(group==='besar'?' active':'');
+  document.getElementById('tab-kecil').className='tab'+(group==='kecil'?' active':'');
+  renderTrx(group);
+}
+
+function exportCSV(){
+  const data=filterData(allTrx);
+  if(!data.length){alert('Tidak ada data untuk di-export');return;}
+  let csv='Tanggal,Group,Jenis,Kategori,Vendor,Deskripsi,Nominal\n';
+  data.forEach(t=>{
+    const desc=(t.deskripsi||'').replace(/,/g,' ');
+    const vend=(t.vendor||'').replace(/,/g,' ');
+    csv+=`${t.tanggal},${t.group},${t.jenis},${t.kategori||''},${vend},${desc},${t.nominal}\n`;
+  });
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`kasbot-${currentBulan||'semua'}.csv`;
+  a.click();
+}
+
+function loadAll(){loadSummary();loadTrxAll();loadPetty();}
+loadAll();
+</script>
+</body>
+</html>
