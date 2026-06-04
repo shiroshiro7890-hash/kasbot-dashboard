@@ -224,15 +224,33 @@ function renderTrx(group){
   const grp=group==='besar'?'KAS BESAR':'KAS KECIL';
   const data=filterData(allTrx).filter(t=>t.group===grp);
   if(!data.length){el.innerHTML='<div class="empty">Tidak ada data</div>';return;}
-  let html='<table><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Kategori</th><th>Jenis</th><th style="text-align:right">Nominal</th></tr></thead><tbody>';
-  data.forEach(t=>{
-    const cls=t.jenis==='Dana Keluar'?'tag-keluar':'tag-masuk';
-    const nomCls=t.jenis==='Dana Keluar'?'red':'green';
-    const desc=(t.deskripsi||t.vendor||'—').substring(0,50);
-    html+=`<tr><td class="mono">${t.tanggal}</td><td>${desc}</td><td>${t.kategori||'—'}</td><td><span class="tag ${cls}">${t.jenis}</span></td><td style="text-align:right" class="mono ${nomCls}">${fmt(t.nominal)}</td></tr>`;
-  });
-  html+='</tbody></table>';
-  el.innerHTML=html;
+
+  if(group==='besar'){
+    let html='<table><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Kategori</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th><th style="text-align:right">Saldo</th><th>Foto</th></tr></thead><tbody>';
+    data.forEach(t=>{
+      const nomCls=t.jenis==='Dana Keluar'?'red':'green';
+      const desc=(t.deskripsi||t.vendor||'—').substring(0,40);
+      const keluar=t.jenis==='Dana Keluar'?`<span class="red">${fmt(t.nominal)}</span>`:'—';
+      const masuk=t.jenis==='Dana Masuk'?`<span class="green">${fmt(t.nominal)}</span>`:'—';
+      const saldo=t.saldo>0?fmt(t.saldo):'—';
+      const foto=t.foto?`<a href="${t.foto}" target="_blank" style="color:var(--green);font-size:11px">Lihat</a>`:'—';
+      html+=`<tr><td class="mono">${t.tanggal}</td><td>${desc}</td><td>${t.kategori||'—'}</td><td style="text-align:right" class="mono">${keluar}</td><td style="text-align:right" class="mono">${masuk}</td><td style="text-align:right" class="mono">${saldo}</td><td>${foto}</td></tr>`;
+    });
+    html+='</tbody></table>';
+    el.innerHTML=html;
+  } else {
+    let html='<table><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th><th style="text-align:right">Saldo</th><th>Foto</th></tr></thead><tbody>';
+    data.forEach(t=>{
+      const desc=(t.deskripsi||'—').substring(0,40);
+      const keluar=t.jenis==='Dana Keluar'?`<span class="red">${fmt(t.nominal)}</span>`:'—';
+      const masuk=t.jenis==='Dana Masuk'?`<span class="green">${fmt(t.nominal)}</span>`:'—';
+      const saldo=t.saldo>0?fmt(t.saldo):'—';
+      const foto=t.foto?`<a href="${t.foto}" target="_blank" style="color:var(--green);font-size:11px">Lihat</a>`:'—';
+      html+=`<tr><td class="mono">${t.tanggal}</td><td>${desc}</td><td>${t.kategori||'—'}</td><td style="text-align:right" class="mono">${keluar}</td><td style="text-align:right" class="mono">${masuk}</td><td style="text-align:right" class="mono">${saldo}</td><td>${foto}</td></tr>`;
+    });
+    html+='</tbody></table>';
+    el.innerHTML=html;
+  }
 }
 
 function renderChart(){
