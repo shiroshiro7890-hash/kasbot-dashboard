@@ -288,6 +288,8 @@ function exportCSV(){
 
 function loadAll(){loadSummary();loadTrxAll();loadPetty();}
 loadAll();
+// Auto-refresh setiap 5 menit
+setInterval(loadAll, 5 * 60 * 1000);
 </script>
 </body>
 </html>
