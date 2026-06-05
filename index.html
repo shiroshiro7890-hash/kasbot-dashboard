@@ -59,6 +59,12 @@ tr:hover td{background:#FAFAF8}
 .empty{text-align:center;padding:2.5rem;color:var(--hint);font-size:13px}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--muted);border-radius:50%;animation:spin .6s linear infinite;vertical-align:-2px;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
+.main-tabs{display:flex;gap:4px}
+.main-tab{font-family:'DM Sans',sans-serif;font-size:13px;padding:5px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;color:var(--muted);transition:.15s;font-weight:500}
+.main-tab.active{background:var(--green);border-color:var(--green);color:#fff}
+.main-tab:hover:not(.active){background:var(--bg)}
+.pos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:2rem}
+.capster-table th,.capster-table td{padding:8px 12px;font-size:12px}
 @media(max-width:600px){main{padding:1rem}header{padding:0 1rem}.metrics-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -75,7 +81,12 @@ tr:hover td{background:#FAFAF8}
 </header>
 <main>
   <div class="controls">
-    <div class="controls-left">Dashboard kas real-time dari Google Sheets</div>
+    <div class="controls-left">
+      <div class="main-tabs">
+        <button class="main-tab active" id="maintab-kas" onclick="switchMainTab('kas')">📊 Kas</button>
+        <button class="main-tab" id="maintab-pos" onclick="switchMainTab('pos')">🏪 Penjualan</button>
+      </div>
+    </div>
     <select id="filter-bulan" onchange="applyFilter()"><option value="">Semua bulan</option></select>
     <button class="btn" onclick="exportCSV()">
       <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -117,6 +128,55 @@ tr:hover td{background:#FAFAF8}
       <div id="petty-summary" style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace"></div>
     </div>
     <div style="overflow-x:auto"><div id="petty-content"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+  </div>
+</main>
+
+<!-- ═══ SECTION POS ═══ -->
+<main id="section-pos" style="display:none;max-width:1100px;margin:0 auto;padding:2rem 1.5rem">
+  <div class="section-label">Ringkasan Penjualan Bulan Ini</div>
+  <div class="pos-grid">
+    <div class="metric"><div class="metric-label">Total Omzet</div><div class="metric-value green" id="pos-omzet">—</div></div>
+    <div class="metric"><div class="metric-label">Total Transaksi</div><div class="metric-value" id="pos-trx">—</div></div>
+    <div class="metric"><div class="metric-label">Rata-rata per Transaksi</div><div class="metric-value" id="pos-avg">—</div></div>
+  </div>
+
+  <!-- Grafik omzet per hari -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Grafik Omzet Harian</div>
+    </div>
+    <div class="card-body">
+      <div class="chart-wrap" id="pos-chart"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
+    </div>
+  </div>
+
+  <!-- Per Metode Bayar & Per Produk -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
+    <div class="card">
+      <div class="card-head"><div class="card-title">Per Metode Bayar</div></div>
+      <div id="pos-metode"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Per Produk</div></div>
+      <div id="pos-produk"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
+    </div>
+  </div>
+
+  <!-- Per Capster -->
+  <div class="card">
+    <div class="card-head"><div class="card-title">Rekap per Capster</div></div>
+    <div style="overflow-x:auto"><div id="pos-capster"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+  </div>
+
+  <!-- Tabel Transaksi Penjualan -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Transaksi Penjualan</div>
+      <div style="font-size:12px;color:var(--muted)">
+        <input id="pos-search" placeholder="Cari customer / HP..." style="font-family:'DM Sans',sans-serif;font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);outline:none" oninput="filterPosTrx()">
+      </div>
+    </div>
+    <div style="overflow-x:auto"><div id="pos-trx-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
   </div>
 </main>
 <script>
@@ -230,6 +290,125 @@ function exportCSV(){
 function loadAll(){loadSummary();loadTrxAll();loadPetty();}
 loadAll();
 setInterval(loadAll,5*60*1000);
+
+// ═══════════════════════════════
+// POS Module
+// ═══════════════════════════════
+let posData = null;
+
+function switchMainTab(tab) {
+  const isPos = tab === 'pos';
+  document.getElementById('section-pos').style.display = isPos ? 'block' : 'none';
+  // Sembunyikan/tampilkan section kas
+  document.querySelectorAll('main:not(#section-pos)').forEach(el => {
+    el.style.display = isPos ? 'none' : 'block';
+  });
+  document.getElementById('maintab-kas').className = 'main-tab' + (isPos ? '' : ' active');
+  document.getElementById('maintab-pos').className = 'main-tab' + (isPos ? ' active' : '');
+  if (isPos && !posData) loadPOS();
+}
+
+async function loadPOS() {
+  try {
+    const d = await fetch(BASE + '/api/penjualan').then(r => r.json());
+    if (!d.success) throw new Error(d.error);
+    posData = d;
+
+    // Summary
+    document.getElementById('pos-omzet').textContent = fmt(d.summary.total_omzet);
+    document.getElementById('pos-trx').textContent = d.summary.total_transaksi + ' transaksi';
+    document.getElementById('pos-avg').textContent = fmt(d.summary.rata_rata);
+
+    renderPOSChart(d.by_hari);
+    renderPOSMetode(d.by_metode);
+    renderPOSProduk(d.by_produk);
+    renderPOSCapster(d.by_capster);
+    renderPOSTrxTable(d.data);
+  } catch(e) {
+    document.getElementById('pos-omzet').textContent = 'Error';
+    console.error('[POS]', e);
+  }
+}
+
+function renderPOSChart(by_hari) {
+  const el = document.getElementById('pos-chart');
+  const keys = Object.keys(by_hari).sort();
+  if (!keys.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
+  const maxVal = Math.max(...keys.map(k => by_hari[k]), 1);
+  let html = '';
+  keys.forEach(k => {
+    const h = Math.max(Math.round((by_hari[k] / maxVal) * 140), 2);
+    const lbl = k.split('/')[0]; // ambil tanggal saja
+    html += `<div class="bar-group"><div class="bars"><div class="bar" style="height:${h}px;background:var(--green)" title="${fmt(by_hari[k])}"></div></div><div class="bar-lbl">${lbl}</div></div>`;
+  });
+  el.innerHTML = html;
+}
+
+function renderPOSMetode(by_metode) {
+  const el = document.getElementById('pos-metode');
+  const entries = Object.entries(by_metode).sort((a,b) => b[1]-a[1]);
+  if (!entries.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
+  let html = '<table><thead><tr><th>Metode</th><th style="text-align:right">Total</th></tr></thead><tbody>';
+  entries.forEach(([m, v]) => {
+    html += `<tr><td>${m}</td><td style="text-align:right" class="mono green">${fmt(v)}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function renderPOSProduk(by_produk) {
+  const el = document.getElementById('pos-produk');
+  const entries = Object.entries(by_produk).sort((a,b) => b[1].total - a[1].total);
+  if (!entries.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
+  let html = '<table><thead><tr><th>Produk</th><th style="text-align:right">Qty</th><th style="text-align:right">Total</th></tr></thead><tbody>';
+  entries.forEach(([p, v]) => {
+    html += `<tr><td>${p}</td><td style="text-align:right" class="mono">${v.qty}</td><td style="text-align:right" class="mono green">${fmt(v.total)}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function renderPOSCapster(by_capster) {
+  const el = document.getElementById('pos-capster');
+  const entries = Object.entries(by_capster).sort((a,b) => b[1].total - a[1].total);
+  if (!entries.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
+  let html = '<table class="capster-table"><thead><tr><th>Capster</th><th style="text-align:right">Transaksi</th><th style="text-align:right">Total Omzet</th><th style="text-align:right">Rata-rata</th></tr></thead><tbody>';
+  entries.forEach(([c, v]) => {
+    const avg = v.transaksi > 0 ? Math.round(v.total / v.transaksi) : 0;
+    html += `<tr><td><b>${c}</b></td><td style="text-align:right" class="mono">${v.transaksi}</td><td style="text-align:right" class="mono green">${fmt(v.total)}</td><td style="text-align:right" class="mono">${fmt(avg)}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function renderPOSTrxTable(data, filter='') {
+  const el = document.getElementById('pos-trx-table');
+  const filtered = filter
+    ? data.filter(r => r.nama_customer.toLowerCase().includes(filter) || r.hp_customer.includes(filter))
+    : data;
+  if (!filtered.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
+  let html = '<table><thead><tr><th>No Nota</th><th>Waktu</th><th>Capster</th><th>Customer</th><th>HP</th><th>Produk</th><th style="text-align:right">Qty</th><th style="text-align:right">Total</th><th>Metode</th></tr></thead><tbody>';
+  filtered.slice().reverse().forEach(r => {
+    html += `<tr>
+      <td class="mono" style="font-size:11px">${r.no_nota}</td>
+      <td class="mono" style="font-size:11px">${r.waktu}</td>
+      <td>${r.capster||'—'}</td>
+      <td>${r.nama_customer||'—'}</td>
+      <td class="mono">${r.hp_customer||'—'}</td>
+      <td>${r.produk}</td>
+      <td style="text-align:right" class="mono">${r.qty}</td>
+      <td style="text-align:right" class="mono green">${fmt(r.total)}</td>
+      <td><span class="tag">${r.metode_bayar}</span></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function filterPosTrx() {
+  const q = document.getElementById('pos-search').value.toLowerCase().trim();
+  if (posData) renderPOSTrxTable(posData.data, q);
+}
 </script>
 </body>
 </html>
