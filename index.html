@@ -62,14 +62,37 @@ tr:hover td{background:#FAFAF8}
 .main-tab{font-family:'DM Sans',sans-serif;font-size:13px;padding:5px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;color:var(--muted);transition:.15s;font-weight:500}
 .main-tab.active{background:var(--green);border-color:var(--green);color:#fff}
 .main-tab:hover:not(.active){background:var(--bg)}
-.pos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:2rem}
+.pos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:2rem}
 .capster-table th,.capster-table td{padding:8px 12px;font-size:12px}
-@media(max-width:600px){
-  main{padding:1rem}
-  header{padding:0 1rem}
+/* Tablet */
+@media(max-width:768px){
+  main{padding:1.25rem 1rem}
+  header{padding:0 1rem;height:52px}
+  #last-update{display:none}
   .metrics-grid{grid-template-columns:1fr 1fr}
-  .header-center{gap:2px}
-  .main-tab{font-size:11px;padding:4px 8px}
+  .pos-grid{grid-template-columns:1fr 1fr}
+}
+/* Mobile */
+@media(max-width:480px){
+  main{padding:1rem .75rem}
+  header{padding:0 .75rem;height:50px;gap:.5rem}
+  .logo{font-size:13px}
+  .main-tab{font-size:10px;padding:3px 8px}
+  .btn svg + *{display:none}
+  .metrics-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .pos-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .metric{padding:.75rem .875rem}
+  .metric-value{font-size:16px}
+  table{font-size:12px}
+  th,td{padding:7px 8px}
+  .chart-wrap{height:110px}
+  .card-head{flex-wrap:wrap;gap:6px}
+}
+
+@media(max-width:600px){
+  .pos-two-col{grid-template-columns:1fr !important}
+  .pos-two-col > .card{margin-bottom:0}
+  #pos-search{width:100%;margin-top:6px}
 }
 </style>
 </head>
@@ -151,7 +174,7 @@ tr:hover td{background:#FAFAF8}
       <div class="card-head"><div class="card-title">Grafik Omzet Harian</div></div>
       <div class="card-body"><div class="chart-wrap" id="pos-chart"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
+    <div class="pos-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
       <div class="card" style="margin-bottom:0">
         <div class="card-head"><div class="card-title">Per Metode Bayar</div></div>
         <div id="pos-metode"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
