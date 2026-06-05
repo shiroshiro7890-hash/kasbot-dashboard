@@ -105,6 +105,9 @@ tr:hover td{background:#FAFAF8}
     <button class="main-tab" id="maintab-komisi" onclick="switchMainTab('komisi')">💰 Komisi</button>
   </div>
   <div class="header-right">
+    <select id="outlet-selector" onchange="switchOutlet()" style="font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);max-width:150px">
+      <option value="">Semua Outlet</option>
+    </select>
     <span id="last-update">—</span>
     <button class="btn" onclick="loadAll()">
       <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
@@ -201,6 +204,31 @@ tr:hover td{background:#FAFAF8}
 
 <script>
 const BASE='https://kasbot-backend-production.up.railway.app';
+let currentOutlet = '';
+
+async function loadOutlets() {
+  try {
+    const d = await fetch(BASE + '/api/outlets').then(r => r.json());
+    if (!d.success) return;
+    const sel = document.getElementById('outlet-selector');
+    d.outlets.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o.name;
+      opt.textContent = o.name.replace(/_/g, ' ');
+      sel.appendChild(opt);
+    });
+  } catch(e) { console.error('Gagal load outlets:', e); }
+}
+
+function switchOutlet() {
+  currentOutlet = document.getElementById('outlet-selector').value;
+  posData = null;
+  komisiData = null;
+  loadAll();
+  const activeTab = document.querySelector('.main-tab.active');
+  if (activeTab && activeTab.id === 'maintab-pos') loadPOS();
+  if (activeTab && activeTab.id === 'maintab-komisi') loadKomisi(komisiMode);
+}
 let allTrx=[],currentTab='besar',currentBulan='';
 function fmt(n){return'Rp '+Math.round(Number(n)||0).toLocaleString('id-ID')}
 function parseTgl(s){if(!s||s.includes('TOTAL')||s.includes('SALDO'))return null;const p=s.split('/');if(p.length===3)return new Date(p[2],p[1]-1,p[0]);return null;}
@@ -313,6 +341,9 @@ function exportCSV(){
   a.click();
 }
 function loadAll(){loadSummary();loadTrxAll();loadPetty();}
+
+// Load outlets on startup
+loadOutlets();
 loadAll();
 setInterval(loadAll,5*60*1000);
 
@@ -334,7 +365,8 @@ function switchMainTab(tab) {
 
 async function loadPOS() {
   try {
-    const d = await fetch(BASE + '/api/penjualan').then(r => r.json());
+    const outletParam = currentOutlet ? `?outlet=${encodeURIComponent(currentOutlet)}` : '';
+    const d = await fetch(BASE + '/api/penjualan' + outletParam).then(r => r.json());
     if (!d.success) throw new Error(d.error);
     posData = d;
     document.getElementById('pos-omzet').textContent = fmt(d.summary.total_omzet);
@@ -440,7 +472,8 @@ let komisiMode = 'bulanan';
 async function loadKomisi(mode) {
   komisiMode = mode || 'bulanan';
   try {
-    const d = await fetch(BASE + '/api/penjualan/komisi?mode=' + komisiMode).then(r => r.json());
+    const outletParam = currentOutlet ? `&outlet=${encodeURIComponent(currentOutlet)}` : '';
+    const d = await fetch(BASE + '/api/penjualan/komisi?mode=' + komisiMode + outletParam).then(r => r.json());
     if (!d.success) throw new Error(d.error);
     komisiData = d;
 
