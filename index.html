@@ -64,6 +64,15 @@ tr:hover td{background:#FAFAF8}
 .main-tab:hover:not(.active){background:var(--bg)}
 .pos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:2rem}
 .capster-table th,.capster-table td{padding:8px 12px;font-size:12px}
+/* Login overlay */
+#login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;width:320px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+.login-box .logo{justify-content:center;margin-bottom:1.5rem;font-size:17px}
+.login-box input{width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);outline:none;margin-bottom:10px}
+.login-box input:focus{border-color:var(--green)}
+.login-box button{width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:9px;border-radius:var(--radius-sm);border:none;background:var(--green);color:#fff;cursor:pointer;font-weight:600}
+.login-box button:hover{opacity:.9}
+.login-error{font-size:12px;color:var(--red);margin-bottom:8px;display:none}
 /* Tablet */
 @media(max-width:768px){
   main{padding:1.25rem 1rem}
@@ -88,7 +97,6 @@ tr:hover td{background:#FAFAF8}
   .chart-wrap{height:110px}
   .card-head{flex-wrap:wrap;gap:6px}
 }
-
 @media(max-width:600px){
   .pos-two-col{grid-template-columns:1fr !important}
   .pos-two-col > .card{margin-bottom:0}
@@ -97,6 +105,17 @@ tr:hover td{background:#FAFAF8}
 </style>
 </head>
 <body>
+
+<!-- ═══ LOGIN OVERLAY ═══ -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="logo"><div class="logo-dot"></div>KasBot</div>
+    <div class="login-error" id="login-error">Password salah. Coba lagi.</div>
+    <input type="password" id="login-input" placeholder="Masukkan password..." onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button onclick="doLogin()">Masuk</button>
+  </div>
+</div>
+
 <header>
   <div class="logo"><div class="logo-dot"></div>KasBot</div>
   <div class="header-center">
@@ -203,12 +222,69 @@ tr:hover td{background:#FAFAF8}
 </div>
 
 <script>
-const BASE='https://kasbot-backend-production.up.railway.app';
+// ═══════════════════════════════════════════════════════
+// CONFIG — sesuaikan 2 nilai ini
+// ═══════════════════════════════════════════════════════
+const BASE = 'https://kasbot-backend-production.up.railway.app';
+const API_KEY = 'GANTI_DENGAN_KASBOT_API_KEY_DI_RAILWAY';   // ← sama dengan KASBOT_API_KEY di Railway
+const DASHBOARD_PASSWORD = 'GANTI_PASSWORD_DASHBOARD';       // ← bebas, terserah kamu
+
+// ═══════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════
+function doLogin() {
+  const input = document.getElementById('login-input').value;
+  const err   = document.getElementById('login-error');
+  if (input === DASHBOARD_PASSWORD) {
+    sessionStorage.setItem('kasbot_auth', DASHBOARD_PASSWORD);
+    document.getElementById('login-overlay').style.display = 'none';
+    initApp();
+  } else {
+    err.style.display = 'block';
+    document.getElementById('login-input').value = '';
+    document.getElementById('login-input').focus();
+  }
+}
+
+function checkAuth() {
+  return sessionStorage.getItem('kasbot_auth') === DASHBOARD_PASSWORD;
+}
+
+// ═══════════════════════════════════════════════════════
+// API FETCH — otomatis kirim API key
+// ═══════════════════════════════════════════════════════
+async function apiFetch(url) {
+  const sep = url.includes('?') ? '&' : '?';
+  const res = await fetch(url + sep + 'api_key=' + API_KEY);
+  return res.json();
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
 let currentOutlet = '';
 
+function initApp() {
+  loadOutlets();
+  loadAll();
+  setInterval(loadAll, 5 * 60 * 1000);
+}
+
+// Cek auth saat halaman load
+if (checkAuth()) {
+  document.getElementById('login-overlay').style.display = 'none';
+  initApp();
+} else {
+  // Tampilkan login overlay, fokus ke input
+  setTimeout(() => document.getElementById('login-input').focus(), 100);
+}
+
+// ═══════════════════════════════════════════════════════
+// OUTLETS
+// ═══════════════════════════════════════════════════════
 async function loadOutlets() {
   try {
-    const d = await fetch(BASE + '/api/outlets').then(r => r.json());
+    const d = await apiFetch(BASE + '/api/outlets');
     if (!d.success) return;
     const sel = document.getElementById('outlet-selector');
     d.outlets.forEach(o => {
@@ -229,11 +305,17 @@ function switchOutlet() {
   if (activeTab && activeTab.id === 'maintab-pos') loadPOS();
   if (activeTab && activeTab.id === 'maintab-komisi') loadKomisi(komisiMode);
 }
-let allTrx=[],currentTab='besar',currentBulan='';
-function fmt(n){return'Rp '+Math.round(Number(n)||0).toLocaleString('id-ID')}
+
+// ═══════════════════════════════════════════════════════
+// KAS MODULE
+// ═══════════════════════════════════════════════════════
+let allTrx=[], currentTab='besar', currentBulan='';
+
+function fmt(n){return 'Rp '+Math.round(Number(n)||0).toLocaleString('id-ID')}
 function parseTgl(s){if(!s||s.includes('TOTAL')||s.includes('SALDO'))return null;const p=s.split('/');if(p.length===3)return new Date(p[2],p[1]-1,p[0]);return null;}
 function getBulanKey(d){return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')}
 function getBulanLabel(d){return d.toLocaleString('id-ID',{month:'long',year:'numeric'})}
+
 function populateFilter(data){
   const keys=new Map();
   data.forEach(t=>{const d=parseTgl(t.tanggal);if(d)keys.set(getBulanKey(d),getBulanLabel(d));});
@@ -241,11 +323,13 @@ function populateFilter(data){
   while(sel.options.length>1)sel.remove(1);
   [...keys.entries()].sort((a,b)=>b[0].localeCompare(a[0])).forEach(([k,v])=>{const o=document.createElement('option');o.value=k;o.textContent=v;sel.appendChild(o);});
 }
+
 function filterData(data){if(!currentBulan)return data;return data.filter(t=>{const d=parseTgl(t.tanggal);return d&&getBulanKey(d)===currentBulan;});}
 function applyFilter(){currentBulan=document.getElementById('filter-bulan').value;renderTrx(currentTab);renderChart();}
+
 async function loadSummary(){
   try{
-    const d=await fetch(BASE+'/api/summary').then(r=>r.json());
+    const d = await apiFetch(BASE+'/api/summary');
     if(!d.success)throw 0;
     document.getElementById('kb-masuk').textContent=fmt(d.kas_besar.masuk);
     document.getElementById('kb-keluar').textContent=fmt(d.kas_besar.keluar);
@@ -258,14 +342,16 @@ async function loadSummary(){
     document.getElementById('last-update').textContent=new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit'});
   }catch(e){document.getElementById('kb-masuk').textContent='Error'}
 }
+
 async function loadTrxAll(){
   try{
-    const d=await fetch(BASE+'/api/transaksi').then(r=>r.json());
+    const d = await apiFetch(BASE+'/api/transaksi');
     if(!d.success)throw 0;
     allTrx=d.data.filter(t=>t.jenis&&t.tanggal&&!t.tanggal.includes('TOTAL')&&!t.tanggal.includes('SALDO'));
     populateFilter(allTrx);renderTrx(currentTab);renderChart();
   }catch(e){document.getElementById('trx-content').innerHTML='<div class="empty">Gagal memuat transaksi</div>';}
 }
+
 function renderTrx(group){
   const el=document.getElementById('trx-content');
   const grp=group==='besar'?'KAS BESAR':'KAS KECIL';
@@ -283,6 +369,7 @@ function renderTrx(group){
   html+='</tbody></table>';
   el.innerHTML=html;
 }
+
 function renderChart(){
   const el=document.getElementById('chart-area');
   const data=filterData(allTrx).filter(t=>t.group==='KAS BESAR');
@@ -307,11 +394,12 @@ function renderChart(){
   });
   el.innerHTML=html;
 }
+
 async function loadPetty(){
   const el=document.getElementById('petty-content');
   const elSum=document.getElementById('petty-summary');
   try{
-    const d=await fetch(BASE+'/api/petty').then(r=>r.json());
+    const d = await apiFetch(BASE+'/api/petty');
     if(!d.success||!d.data||!d.data.length){el.innerHTML='<div class="empty">Tidak ada data petty cash</div>';return;}
     elSum.textContent='Saldo: '+fmt(d.saldo_sekarang);
     let html='<table><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th><th style="text-align:right">Saldo</th></tr></thead><tbody>';
@@ -324,12 +412,14 @@ async function loadPetty(){
     el.innerHTML=html;
   }catch(e){el.innerHTML='<div class="empty">Gagal memuat petty cash</div>';}
 }
+
 function switchTab(group){
   currentTab=group;
   document.getElementById('tab-besar').className='tab'+(group==='besar'?' active':'');
   document.getElementById('tab-kecil').className='tab'+(group==='kecil'?' active':'');
   renderTrx(group);
 }
+
 function exportCSV(){
   const data=filterData(allTrx);
   if(!data.length){alert('Tidak ada data untuk di-export');return;}
@@ -340,15 +430,11 @@ function exportCSV(){
   a.download=`kasbot-${currentBulan||'semua'}.csv`;
   a.click();
 }
+
 function loadAll(){loadSummary();loadTrxAll();loadPetty();}
 
-// Load outlets on startup
-loadOutlets();
-loadAll();
-setInterval(loadAll,5*60*1000);
-
 // ═══════════════════════════════
-// POS Module
+// POS MODULE
 // ═══════════════════════════════
 let posData = null;
 
@@ -366,7 +452,7 @@ function switchMainTab(tab) {
 async function loadPOS() {
   try {
     const outletParam = currentOutlet ? `?outlet=${encodeURIComponent(currentOutlet)}` : '';
-    const d = await fetch(BASE + '/api/penjualan' + outletParam).then(r => r.json());
+    const d = await apiFetch(BASE + '/api/penjualan' + outletParam);
     if (!d.success) throw new Error(d.error);
     posData = d;
     document.getElementById('pos-omzet').textContent = fmt(d.summary.total_omzet);
@@ -473,17 +559,14 @@ async function loadKomisi(mode) {
   komisiMode = mode || 'bulanan';
   try {
     const outletParam = currentOutlet ? `&outlet=${encodeURIComponent(currentOutlet)}` : '';
-    const d = await fetch(BASE + '/api/penjualan/komisi?mode=' + komisiMode + outletParam).then(r => r.json());
+    const d = await apiFetch(BASE + '/api/penjualan/komisi?mode=' + komisiMode + outletParam);
     if (!d.success) throw new Error(d.error);
     komisiData = d;
-
     document.getElementById('komisi-total-omzet').textContent   = fmt(d.summary.total_omzet);
     document.getElementById('komisi-total-komisi').textContent  = fmt(d.summary.total_komisi);
     document.getElementById('komisi-total-capster').textContent = d.summary.total_capster + ' capster';
     document.getElementById('komisi-periode-label').textContent =
       komisiMode === 'harian' ? 'Komisi Hari Ini (' + d.today + ')' : 'Komisi Bulan Ini';
-
-    // Isi filter capster
     const sel = document.getElementById('komisi-filter-capster');
     sel.innerHTML = '<option value="">Semua Capster</option>';
     d.data.forEach(c => {
@@ -491,7 +574,6 @@ async function loadKomisi(mode) {
       o.value = c.nama; o.textContent = c.nama;
       sel.appendChild(o);
     });
-
     renderKomisiTable(d.data);
     renderKomisiDetail();
   } catch(e) {
@@ -537,8 +619,6 @@ function renderKomisiTable(data) {
       <td style="text-align:right;background:#f0faf6" class="mono"><b>${fmt(c.total_komisi)}</b></td>
     </tr>`;
   });
-  // Baris total
-  const totalOmzet  = filtered.reduce((s,c) => s + c.total_omzet, 0);
   const totalKomisi = filtered.reduce((s,c) => s + c.total_komisi, 0);
   html += `<tr style="background:var(--bg);font-weight:600">
     <td>TOTAL</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
@@ -555,20 +635,15 @@ function renderKomisiDetail() {
   const capsters = filterCapster
     ? komisiData.data.filter(c => c.nama === filterCapster)
     : komisiData.data.filter(c => c.nama !== '-');
-
-  // Kumpulkan semua tanggal
   const allDates = new Set();
   capsters.forEach(c => Object.keys(c.detail_hari).forEach(d => allDates.add(d)));
   const dates = [...allDates].sort();
-
   if (!dates.length) { el.innerHTML = '<div class="empty">Tidak ada data harian</div>'; return; }
-
   let html = '<table><thead><tr><th>Tanggal</th><th>Capster</th>' +
     '<th style="text-align:right">Transaksi</th>' +
     '<th style="text-align:right">Omzet</th>' +
     '<th style="text-align:right">Komisi</th>' +
     '</tr></thead><tbody>';
-
   dates.forEach(tgl => {
     capsters.forEach(c => {
       const d = c.detail_hari[tgl];
@@ -597,7 +672,6 @@ function exportKomisiCSV() {
   a.download = 'komisi-' + komisiMode + '-' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
 }
-
 </script>
 
 <!-- ═══ SECTION KOMISI ═══ -->
@@ -614,21 +688,16 @@ function exportKomisiCSV() {
         Export CSV
       </button>
     </div>
-
     <div class="section-label" id="komisi-periode-label">Komisi Bulan Ini</div>
     <div class="metrics-grid" style="margin-bottom:2rem">
       <div class="metric"><div class="metric-label">Total Omzet</div><div class="metric-value green" id="komisi-total-omzet">—</div></div>
       <div class="metric"><div class="metric-label">Total Komisi</div><div class="metric-value" id="komisi-total-komisi" style="color:var(--green)">—</div></div>
       <div class="metric"><div class="metric-label">Jumlah Capster</div><div class="metric-value" id="komisi-total-capster">—</div></div>
     </div>
-
-    <!-- Tabel Komisi Per Capster -->
     <div class="card" style="margin-bottom:1.5rem">
       <div class="card-head"><div class="card-title">Rekap Komisi per Capster</div></div>
       <div style="overflow-x:auto"><div id="komisi-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
     </div>
-
-    <!-- Detail Harian Per Capster -->
     <div class="card">
       <div class="card-head">
         <div class="card-title">Detail Harian per Capster</div>
