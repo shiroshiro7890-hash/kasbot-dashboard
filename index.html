@@ -15,14 +15,14 @@
   --radius:10px;--radius-sm:6px;
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:10}
-.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;letter-spacing:-.3px}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:10;gap:1rem}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;letter-spacing:-.3px;white-space:nowrap}
 .logo-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
-.header-right{display:flex;align-items:center;gap:10px}
+.header-center{display:flex;align-items:center;gap:4px;flex:1;justify-content:center}
+.header-right{display:flex;align-items:center;gap:10px;white-space:nowrap}
 #last-update{font-size:12px;color:var(--hint);font-family:'DM Mono',monospace}
 main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem}
 .controls{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap}
-.controls-left{font-size:13px;color:var(--muted);flex:1}
 select{font-family:'DM Sans',sans-serif;font-size:13px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;outline:none}
 select:focus{border-color:#999}
 .btn{display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13px;padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:.15s}
@@ -59,18 +59,27 @@ tr:hover td{background:#FAFAF8}
 .empty{text-align:center;padding:2.5rem;color:var(--hint);font-size:13px}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--muted);border-radius:50%;animation:spin .6s linear infinite;vertical-align:-2px;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.main-tabs{display:flex;gap:4px}
 .main-tab{font-family:'DM Sans',sans-serif;font-size:13px;padding:5px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;color:var(--muted);transition:.15s;font-weight:500}
 .main-tab.active{background:var(--green);border-color:var(--green);color:#fff}
 .main-tab:hover:not(.active){background:var(--bg)}
 .pos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:2rem}
 .capster-table th,.capster-table td{padding:8px 12px;font-size:12px}
-@media(max-width:600px){main{padding:1rem}header{padding:0 1rem}.metrics-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){
+  main{padding:1rem}
+  header{padding:0 1rem}
+  .metrics-grid{grid-template-columns:1fr 1fr}
+  .header-center{gap:2px}
+  .main-tab{font-size:11px;padding:4px 8px}
+}
 </style>
 </head>
 <body>
 <header>
   <div class="logo"><div class="logo-dot"></div>KasBot</div>
+  <div class="header-center">
+    <button class="main-tab active" id="maintab-kas" onclick="switchMainTab('kas')">📊 Kas</button>
+    <button class="main-tab" id="maintab-pos" onclick="switchMainTab('pos')">🏪 Penjualan</button>
+  </div>
   <div class="header-right">
     <span id="last-update">—</span>
     <button class="btn" onclick="loadAll()">
@@ -79,106 +88,93 @@ tr:hover td{background:#FAFAF8}
     </button>
   </div>
 </header>
-<main>
-  <div class="controls">
-    <div class="controls-left">
-      <div class="main-tabs">
-        <button class="main-tab active" id="maintab-kas" onclick="switchMainTab('kas')">📊 Kas</button>
-        <button class="main-tab" id="maintab-pos" onclick="switchMainTab('pos')">🏪 Penjualan</button>
+
+<!-- ═══ SECTION KAS ═══ -->
+<div id="section-kas">
+  <main>
+    <div class="controls">
+      <select id="filter-bulan" onchange="applyFilter()"><option value="">Semua bulan</option></select>
+      <button class="btn" onclick="exportCSV()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+    <div class="section-label">Ringkasan kas</div>
+    <div class="metrics-grid">
+      <div class="metric"><div class="metric-label">Kas besar — masuk</div><div class="metric-value green" id="kb-masuk">—</div></div>
+      <div class="metric"><div class="metric-label">Kas besar — keluar</div><div class="metric-value red" id="kb-keluar">—</div></div>
+      <div class="metric"><div class="metric-label">Saldo kas besar</div><div class="metric-value" id="kb-saldo">—</div><div class="metric-sub" id="kb-trx">—</div></div>
+      <div class="metric"><div class="metric-label">Kas kecil — masuk</div><div class="metric-value green" id="kk-masuk">—</div></div>
+      <div class="metric"><div class="metric-label">Kas kecil — keluar</div><div class="metric-value red" id="kk-keluar">—</div></div>
+      <div class="metric"><div class="metric-label">Saldo kas kecil</div><div class="metric-value" id="kk-saldo">—</div><div class="metric-sub" id="kk-trx">—</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Grafik transaksi kas besar</div>
+        <div class="legend">
+          <span><div class="dot" style="background:var(--green)"></div>Masuk</span>
+          <span><div class="dot" style="background:var(--red)"></div>Keluar</span>
+        </div>
       </div>
+      <div class="card-body"><div class="chart-wrap" id="chart-area"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
     </div>
-    <select id="filter-bulan" onchange="applyFilter()"><option value="">Semua bulan</option></select>
-    <button class="btn" onclick="exportCSV()">
-      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Export CSV
-    </button>
-  </div>
-  <div class="section-label">Ringkasan kas</div>
-  <div class="metrics-grid">
-    <div class="metric"><div class="metric-label">Kas besar — masuk</div><div class="metric-value green" id="kb-masuk">—</div></div>
-    <div class="metric"><div class="metric-label">Kas besar — keluar</div><div class="metric-value red" id="kb-keluar">—</div></div>
-    <div class="metric"><div class="metric-label">Saldo kas besar</div><div class="metric-value" id="kb-saldo">—</div><div class="metric-sub" id="kb-trx">—</div></div>
-    <div class="metric"><div class="metric-label">Kas kecil — masuk</div><div class="metric-value green" id="kk-masuk">—</div></div>
-    <div class="metric"><div class="metric-label">Kas kecil — keluar</div><div class="metric-value red" id="kk-keluar">—</div></div>
-    <div class="metric"><div class="metric-label">Saldo kas kecil</div><div class="metric-value" id="kk-saldo">—</div><div class="metric-sub" id="kk-trx">—</div></div>
-  </div>
-  <div class="card">
-    <div class="card-head">
-      <div class="card-title">Grafik transaksi kas besar</div>
-      <div class="legend">
-        <span><div class="dot" style="background:var(--green)"></div>Masuk</span>
-        <span><div class="dot" style="background:var(--red)"></div>Keluar</span>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Transaksi</div>
+        <div class="tabs">
+          <button class="tab active" id="tab-besar" onclick="switchTab('besar')">Kas besar</button>
+          <button class="tab" id="tab-kecil" onclick="switchTab('kecil')">Kas kecil</button>
+        </div>
       </div>
+      <div style="overflow-x:auto"><div id="trx-content"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
     </div>
-    <div class="card-body"><div class="chart-wrap" id="chart-area"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-  </div>
-  <div class="card">
-    <div class="card-head">
-      <div class="card-title">Transaksi</div>
-      <div class="tabs">
-        <button class="tab active" id="tab-besar" onclick="switchTab('besar')">Kas besar</button>
-        <button class="tab" id="tab-kecil" onclick="switchTab('kecil')">Kas kecil</button>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Petty cash</div>
+        <div id="petty-summary" style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace"></div>
       </div>
+      <div style="overflow-x:auto"><div id="petty-content"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
     </div>
-    <div style="overflow-x:auto"><div id="trx-content"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-  </div>
-  <div class="card">
-    <div class="card-head">
-      <div class="card-title">Petty cash</div>
-      <div id="petty-summary" style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace"></div>
-    </div>
-    <div style="overflow-x:auto"><div id="petty-content"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-  </div>
-</main>
+  </main>
+</div>
 
 <!-- ═══ SECTION POS ═══ -->
-<main id="section-pos" style="display:none;max-width:1100px;margin:0 auto;padding:2rem 1.5rem">
-  <div class="section-label">Ringkasan Penjualan Bulan Ini</div>
-  <div class="pos-grid">
-    <div class="metric"><div class="metric-label">Total Omzet</div><div class="metric-value green" id="pos-omzet">—</div></div>
-    <div class="metric"><div class="metric-label">Total Transaksi</div><div class="metric-value" id="pos-trx">—</div></div>
-    <div class="metric"><div class="metric-label">Rata-rata per Transaksi</div><div class="metric-value" id="pos-avg">—</div></div>
-  </div>
-
-  <!-- Grafik omzet per hari -->
-  <div class="card">
-    <div class="card-head">
-      <div class="card-title">Grafik Omzet Harian</div>
-    </div>
-    <div class="card-body">
-      <div class="chart-wrap" id="pos-chart"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
-    </div>
-  </div>
-
-  <!-- Per Metode Bayar & Per Produk -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
-    <div class="card">
-      <div class="card-head"><div class="card-title">Per Metode Bayar</div></div>
-      <div id="pos-metode"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
+<div id="section-pos" style="display:none">
+  <main>
+    <div class="section-label">Ringkasan Penjualan Bulan Ini</div>
+    <div class="pos-grid">
+      <div class="metric"><div class="metric-label">Total Omzet</div><div class="metric-value green" id="pos-omzet">—</div></div>
+      <div class="metric"><div class="metric-label">Total Transaksi</div><div class="metric-value" id="pos-trx">—</div></div>
+      <div class="metric"><div class="metric-label">Rata-rata per Transaksi</div><div class="metric-value" id="pos-avg">—</div></div>
     </div>
     <div class="card">
-      <div class="card-head"><div class="card-title">Per Produk</div></div>
-      <div id="pos-produk"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
+      <div class="card-head"><div class="card-title">Grafik Omzet Harian</div></div>
+      <div class="card-body"><div class="chart-wrap" id="pos-chart"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
     </div>
-  </div>
-
-  <!-- Per Capster -->
-  <div class="card">
-    <div class="card-head"><div class="card-title">Rekap per Capster</div></div>
-    <div style="overflow-x:auto"><div id="pos-capster"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-  </div>
-
-  <!-- Tabel Transaksi Penjualan -->
-  <div class="card">
-    <div class="card-head">
-      <div class="card-title">Transaksi Penjualan</div>
-      <div style="font-size:12px;color:var(--muted)">
-        <input id="pos-search" placeholder="Cari customer / HP..." style="font-family:'DM Sans',sans-serif;font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);outline:none" oninput="filterPosTrx()">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head"><div class="card-title">Per Metode Bayar</div></div>
+        <div id="pos-metode"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="card-head"><div class="card-title">Per Produk</div></div>
+        <div id="pos-produk"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
       </div>
     </div>
-    <div style="overflow-x:auto"><div id="pos-trx-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-  </div>
-</main>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Rekap per Capster</div></div>
+      <div style="overflow-x:auto"><div id="pos-capster"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Transaksi Penjualan</div>
+        <input id="pos-search" placeholder="Cari customer / HP..." style="font-family:'DM Sans',sans-serif;font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);outline:none" oninput="filterPosTrx()">
+      </div>
+      <div style="overflow-x:auto"><div id="pos-trx-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+    </div>
+  </main>
+</div>
+
 <script>
 const BASE='https://kasbot-backend-production.up.railway.app';
 let allTrx=[],currentTab='besar',currentBulan='';
@@ -276,7 +272,12 @@ async function loadPetty(){
     el.innerHTML=html;
   }catch(e){el.innerHTML='<div class="empty">Gagal memuat petty cash</div>';}
 }
-function switchTab(group){currentTab=group;document.getElementById('tab-besar').className='tab'+(group==='besar'?' active':'');document.getElementById('tab-kecil').className='tab'+(group==='kecil'?' active':'');renderTrx(group);}
+function switchTab(group){
+  currentTab=group;
+  document.getElementById('tab-besar').className='tab'+(group==='besar'?' active':'');
+  document.getElementById('tab-kecil').className='tab'+(group==='kecil'?' active':'');
+  renderTrx(group);
+}
 function exportCSV(){
   const data=filterData(allTrx);
   if(!data.length){alert('Tidak ada data untuk di-export');return;}
@@ -299,10 +300,7 @@ let posData = null;
 function switchMainTab(tab) {
   const isPos = tab === 'pos';
   document.getElementById('section-pos').style.display = isPos ? 'block' : 'none';
-  // Sembunyikan/tampilkan section kas
-  document.querySelectorAll('main:not(#section-pos)').forEach(el => {
-    el.style.display = isPos ? 'none' : 'block';
-  });
+  document.getElementById('section-kas').style.display = isPos ? 'none' : 'block';
   document.getElementById('maintab-kas').className = 'main-tab' + (isPos ? '' : ' active');
   document.getElementById('maintab-pos').className = 'main-tab' + (isPos ? ' active' : '');
   if (isPos && !posData) loadPOS();
@@ -313,12 +311,9 @@ async function loadPOS() {
     const d = await fetch(BASE + '/api/penjualan').then(r => r.json());
     if (!d.success) throw new Error(d.error);
     posData = d;
-
-    // Summary
     document.getElementById('pos-omzet').textContent = fmt(d.summary.total_omzet);
     document.getElementById('pos-trx').textContent = d.summary.total_transaksi + ' transaksi';
     document.getElementById('pos-avg').textContent = fmt(d.summary.rata_rata);
-
     renderPOSChart(d.by_hari);
     renderPOSMetode(d.by_metode);
     renderPOSProduk(d.by_produk);
@@ -338,7 +333,7 @@ function renderPOSChart(by_hari) {
   let html = '';
   keys.forEach(k => {
     const h = Math.max(Math.round((by_hari[k] / maxVal) * 140), 2);
-    const lbl = k.split('/')[0]; // ambil tanggal saja
+    const lbl = k.split('/')[0];
     html += `<div class="bar-group"><div class="bars"><div class="bar" style="height:${h}px;background:var(--green)" title="${fmt(by_hari[k])}"></div></div><div class="bar-lbl">${lbl}</div></div>`;
   });
   el.innerHTML = html;
@@ -398,7 +393,7 @@ function renderPOSTrxTable(data, filter='') {
       <td>${r.produk}</td>
       <td style="text-align:right" class="mono">${r.qty}</td>
       <td style="text-align:right" class="mono green">${fmt(r.total)}</td>
-      <td><span class="tag">${r.metode_bayar}</span></td>
+      <td>${r.metode_bayar}</td>
     </tr>`;
   });
   html += '</tbody></table>';
