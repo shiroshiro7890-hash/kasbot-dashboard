@@ -102,6 +102,7 @@ tr:hover td{background:#FAFAF8}
   <div class="header-center">
     <button class="main-tab active" id="maintab-kas" onclick="switchMainTab('kas')">📊 Kas</button>
     <button class="main-tab" id="maintab-pos" onclick="switchMainTab('pos')">🏪 Penjualan</button>
+    <button class="main-tab" id="maintab-komisi" onclick="switchMainTab('komisi')">💰 Komisi</button>
   </div>
   <div class="header-right">
     <span id="last-update">—</span>
@@ -321,12 +322,14 @@ setInterval(loadAll,5*60*1000);
 let posData = null;
 
 function switchMainTab(tab) {
-  const isPos = tab === 'pos';
-  document.getElementById('section-pos').style.display = isPos ? 'block' : 'none';
-  document.getElementById('section-kas').style.display = isPos ? 'none' : 'block';
-  document.getElementById('maintab-kas').className = 'main-tab' + (isPos ? '' : ' active');
-  document.getElementById('maintab-pos').className = 'main-tab' + (isPos ? ' active' : '');
-  if (isPos && !posData) loadPOS();
+  document.getElementById('section-kas').style.display    = tab === 'kas'    ? 'block' : 'none';
+  document.getElementById('section-pos').style.display    = tab === 'pos'    ? 'block' : 'none';
+  document.getElementById('section-komisi').style.display = tab === 'komisi' ? 'block' : 'none';
+  document.getElementById('maintab-kas').className    = 'main-tab' + (tab === 'kas'    ? ' active' : '');
+  document.getElementById('maintab-pos').className    = 'main-tab' + (tab === 'pos'    ? ' active' : '');
+  document.getElementById('maintab-komisi').className = 'main-tab' + (tab === 'komisi' ? ' active' : '');
+  if (tab === 'pos' && !posData) loadPOS();
+  if (tab === 'komisi' && !komisiData) loadKomisi('bulanan');
 }
 
 async function loadPOS() {
@@ -427,6 +430,183 @@ function filterPosTrx() {
   const q = document.getElementById('pos-search').value.toLowerCase().trim();
   if (posData) renderPOSTrxTable(posData.data, q);
 }
+
+// ═══════════════════════════════
+// KOMISI MODULE
+// ═══════════════════════════════
+let komisiData = null;
+let komisiMode = 'bulanan';
+
+async function loadKomisi(mode) {
+  komisiMode = mode || 'bulanan';
+  try {
+    const d = await fetch(BASE + '/api/penjualan/komisi?mode=' + komisiMode).then(r => r.json());
+    if (!d.success) throw new Error(d.error);
+    komisiData = d;
+
+    document.getElementById('komisi-total-omzet').textContent   = fmt(d.summary.total_omzet);
+    document.getElementById('komisi-total-komisi').textContent  = fmt(d.summary.total_komisi);
+    document.getElementById('komisi-total-capster').textContent = d.summary.total_capster + ' capster';
+    document.getElementById('komisi-periode-label').textContent =
+      komisiMode === 'harian' ? 'Komisi Hari Ini (' + d.today + ')' : 'Komisi Bulan Ini';
+
+    // Isi filter capster
+    const sel = document.getElementById('komisi-filter-capster');
+    sel.innerHTML = '<option value="">Semua Capster</option>';
+    d.data.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.nama; o.textContent = c.nama;
+      sel.appendChild(o);
+    });
+
+    renderKomisiTable(d.data);
+    renderKomisiDetail();
+  } catch(e) {
+    document.getElementById('komisi-total-omzet').textContent = 'Error';
+    console.error('[KOMISI]', e);
+  }
+}
+
+function switchKomisiMode(mode) {
+  document.getElementById('komisi-btn-bulanan').style.cssText =
+    mode === 'bulanan' ? 'background:var(--green);color:#fff;border-color:var(--green)' : '';
+  document.getElementById('komisi-btn-harian').style.cssText =
+    mode === 'harian' ? 'background:var(--green);color:#fff;border-color:var(--green)' : '';
+  komisiData = null;
+  loadKomisi(mode);
+}
+
+function renderKomisiTable(data) {
+  const el = document.getElementById('komisi-table');
+  const filtered = data.filter(c => c.nama !== '-');
+  if (!filtered.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
+  let html = '<table><thead><tr>' +
+    '<th>Capster</th>' +
+    '<th style="text-align:right">Transaksi</th>' +
+    '<th style="text-align:right">Omzet Layanan</th>' +
+    '<th style="text-align:right">Komisi Layanan</th>' +
+    '<th style="text-align:right">Omzet Produk</th>' +
+    '<th style="text-align:right">Komisi Produk</th>' +
+    '<th style="text-align:right">Omzet Paket</th>' +
+    '<th style="text-align:right">Komisi Paket</th>' +
+    '<th style="text-align:right;background:#f0faf6">Total Komisi</th>' +
+    '</tr></thead><tbody>';
+  filtered.forEach(c => {
+    html += `<tr>
+      <td><b>${c.nama}</b><br><span class="mono" style="font-size:10px;color:var(--hint)">L:${c.komisi_layanan_pct}% P:${c.komisi_produk_pct}% Pkt:${c.komisi_paket_pct}%</span></td>
+      <td style="text-align:right" class="mono">${c.transaksi}</td>
+      <td style="text-align:right" class="mono">${fmt(c.omzet_layanan)}</td>
+      <td style="text-align:right" class="mono green">${fmt(c.komisi_dari_layanan)}</td>
+      <td style="text-align:right" class="mono">${fmt(c.omzet_produk)}</td>
+      <td style="text-align:right" class="mono green">${fmt(c.komisi_dari_produk)}</td>
+      <td style="text-align:right" class="mono">${fmt(c.omzet_paket)}</td>
+      <td style="text-align:right" class="mono green">${fmt(c.komisi_dari_paket)}</td>
+      <td style="text-align:right;background:#f0faf6" class="mono"><b>${fmt(c.total_komisi)}</b></td>
+    </tr>`;
+  });
+  // Baris total
+  const totalOmzet  = filtered.reduce((s,c) => s + c.total_omzet, 0);
+  const totalKomisi = filtered.reduce((s,c) => s + c.total_komisi, 0);
+  html += `<tr style="background:var(--bg);font-weight:600">
+    <td>TOTAL</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+    <td style="text-align:right;background:#e6f7f0" class="mono green"><b>${fmt(totalKomisi)}</b></td>
+  </tr>`;
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function renderKomisiDetail() {
+  if (!komisiData) return;
+  const el = document.getElementById('komisi-detail');
+  const filterCapster = document.getElementById('komisi-filter-capster').value;
+  const capsters = filterCapster
+    ? komisiData.data.filter(c => c.nama === filterCapster)
+    : komisiData.data.filter(c => c.nama !== '-');
+
+  // Kumpulkan semua tanggal
+  const allDates = new Set();
+  capsters.forEach(c => Object.keys(c.detail_hari).forEach(d => allDates.add(d)));
+  const dates = [...allDates].sort();
+
+  if (!dates.length) { el.innerHTML = '<div class="empty">Tidak ada data harian</div>'; return; }
+
+  let html = '<table><thead><tr><th>Tanggal</th><th>Capster</th>' +
+    '<th style="text-align:right">Transaksi</th>' +
+    '<th style="text-align:right">Omzet</th>' +
+    '<th style="text-align:right">Komisi</th>' +
+    '</tr></thead><tbody>';
+
+  dates.forEach(tgl => {
+    capsters.forEach(c => {
+      const d = c.detail_hari[tgl];
+      if (!d) return;
+      html += `<tr>
+        <td class="mono" style="font-size:11px">${tgl}</td>
+        <td><b>${c.nama}</b></td>
+        <td style="text-align:right" class="mono">${d.transaksi}</td>
+        <td style="text-align:right" class="mono">${fmt(d.omzet)}</td>
+        <td style="text-align:right" class="mono green"><b>${fmt(d.komisi)}</b></td>
+      </tr>`;
+    });
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function exportKomisiCSV() {
+  if (!komisiData) return;
+  let csv = 'Capster,Transaksi,Omzet Layanan,Komisi Layanan,Omzet Produk,Komisi Produk,Omzet Paket,Komisi Paket,Total Komisi\n';
+  komisiData.data.filter(c => c.nama !== '-').forEach(c => {
+    csv += `${c.nama},${c.transaksi},${c.omzet_layanan},${c.komisi_dari_layanan},${c.omzet_produk},${c.komisi_dari_produk},${c.omzet_paket},${c.komisi_dari_paket},${c.total_komisi}\n`;
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = 'komisi-' + komisiMode + '-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
 </script>
+
+<!-- ═══ SECTION KOMISI ═══ -->
+<div id="section-komisi" style="display:none">
+  <main>
+    <div class="controls" style="margin-bottom:1.5rem">
+      <div style="display:flex;gap:6px">
+        <button class="btn" id="komisi-btn-bulanan" onclick="switchKomisiMode('bulanan')" style="background:var(--green);color:#fff;border-color:var(--green)">Bulanan</button>
+        <button class="btn" id="komisi-btn-harian" onclick="switchKomisiMode('harian')">Harian</button>
+      </div>
+      <div style="flex:1"></div>
+      <button class="btn" onclick="exportKomisiCSV()">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+
+    <div class="section-label" id="komisi-periode-label">Komisi Bulan Ini</div>
+    <div class="metrics-grid" style="margin-bottom:2rem">
+      <div class="metric"><div class="metric-label">Total Omzet</div><div class="metric-value green" id="komisi-total-omzet">—</div></div>
+      <div class="metric"><div class="metric-label">Total Komisi</div><div class="metric-value" id="komisi-total-komisi" style="color:var(--green)">—</div></div>
+      <div class="metric"><div class="metric-label">Jumlah Capster</div><div class="metric-value" id="komisi-total-capster">—</div></div>
+    </div>
+
+    <!-- Tabel Komisi Per Capster -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-head"><div class="card-title">Rekap Komisi per Capster</div></div>
+      <div style="overflow-x:auto"><div id="komisi-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+    </div>
+
+    <!-- Detail Harian Per Capster -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Detail Harian per Capster</div>
+        <select id="komisi-filter-capster" onchange="renderKomisiDetail()" style="font-size:12px;padding:4px 8px">
+          <option value="">Semua Capster</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto"><div id="komisi-detail"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+    </div>
+  </main>
+</div>
+
 </body>
 </html>
