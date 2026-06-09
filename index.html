@@ -6,13 +6,13 @@
 <title>KasBot Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --green:#1D9E75;--red:#D85A30;--bg:#F7F7F5;--surface:#FFFFFF;
   --border:#E8E8E4;--text:#1A1A1A;--muted:#6B6B65;--hint:#A8A89F;
-  --radius:10px;--radius-sm:6px;
+  --radius:10px;--radius-sm:6px;--orange:#E67E22;
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:10;gap:1rem}
@@ -34,9 +34,9 @@ select:focus{border-color:#999}
 .metric-label{font-size:11px;color:var(--muted);margin-bottom:6px}
 .metric-value{font-size:20px;font-weight:600;letter-spacing:-.5px;line-height:1}
 .metric-sub{font-size:11px;color:var(--hint);margin-top:4px;font-family:'DM Mono',monospace}
-.green{color:var(--green)}.red{color:var(--red)}
+.green{color:var(--green)}.red{color:var(--red)}.orange{color:var(--orange)}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem}
-.card-head{padding:.75rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-head{padding:.75rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .card-title{font-size:13px;font-weight:500}
 .card-body{padding:1.25rem}
 .chart-wrap{display:flex;align-items:flex-end;gap:6px;height:150px}
@@ -44,10 +44,10 @@ select:focus{border-color:#999}
 .bars{display:flex;align-items:flex-end;gap:2px;width:100%;flex:1}
 .bar{flex:1;border-radius:3px 3px 0 0;min-height:2px;transition:height .4s ease}
 .bar-lbl{font-size:10px;color:var(--hint);font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50px;text-align:center}
-.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-bottom:10px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-bottom:10px;flex-wrap:wrap}
 .legend span{display:flex;align-items:center;gap:5px}
 .dot{width:8px;height:8px;border-radius:2px}
-.tabs{display:flex;gap:4px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
 .tab{font-family:'DM Sans',sans-serif;font-size:12px;padding:4px 10px;border-radius:var(--radius-sm);border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted);transition:.15s}
 .tab.active{background:var(--bg);border-color:var(--border);color:var(--text);font-weight:500}
 table{width:100%;border-collapse:collapse}
@@ -59,12 +59,20 @@ tr:hover td{background:#FAFAF8}
 .empty{text-align:center;padding:2.5rem;color:var(--hint);font-size:13px}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--muted);border-radius:50%;animation:spin .6s linear infinite;vertical-align:-2px;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* Main nav tabs */
 .main-tab{font-family:'DM Sans',sans-serif;font-size:13px;padding:5px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;color:var(--muted);transition:.15s;font-weight:500}
 .main-tab.active{background:var(--green);border-color:var(--green);color:#fff}
 .main-tab:hover:not(.active){background:var(--bg)}
+/* Sub nav (within POS section) */
+.sub-nav{display:flex;gap:6px;margin-bottom:1.5rem;padding:0;flex-wrap:wrap}
+.sub-tab{font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;color:var(--muted);transition:.15s;font-weight:500}
+.sub-tab.active{background:var(--text);border-color:var(--text);color:#fff}
+.sub-tab:hover:not(.active){background:var(--bg);color:var(--text)}
+/* expense specific */
+.expense-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.5rem}
 .pos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:2rem}
 .capster-table th,.capster-table td{padding:8px 12px;font-size:12px}
-/* Login overlay */
+/* Login */
 #login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
 .login-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;width:320px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
 .login-box .logo{justify-content:center;margin-bottom:1.5rem;font-size:17px}
@@ -73,40 +81,35 @@ tr:hover td{background:#FAFAF8}
 .login-box button{width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:9px;border-radius:var(--radius-sm);border:none;background:var(--green);color:#fff;cursor:pointer;font-weight:600}
 .login-box button:hover{opacity:.9}
 .login-error{font-size:12px;color:var(--red);margin-bottom:8px;display:none}
-/* Tablet */
 @media(max-width:768px){
   main{padding:1.25rem 1rem}
   header{padding:0 1rem;height:52px}
   #last-update{display:none}
-  .metrics-grid{grid-template-columns:1fr 1fr}
-  .pos-grid{grid-template-columns:1fr 1fr}
+  .metrics-grid,.pos-grid,.expense-summary{grid-template-columns:1fr 1fr}
+  .main-tab{font-size:11px;padding:4px 9px}
 }
-/* Mobile */
 @media(max-width:480px){
   main{padding:1rem .75rem}
   header{padding:0 .75rem;height:50px;gap:.5rem}
   .logo{font-size:13px}
-  .main-tab{font-size:10px;padding:3px 8px}
-  .btn svg + *{display:none}
-  .metrics-grid{grid-template-columns:1fr 1fr;gap:8px}
-  .pos-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .main-tab{font-size:10px;padding:3px 7px}
+  .btn svg+*{display:none}
+  .metrics-grid,.pos-grid,.expense-summary{grid-template-columns:1fr 1fr;gap:8px}
   .metric{padding:.75rem .875rem}
   .metric-value{font-size:16px}
   table{font-size:12px}
   th,td{padding:7px 8px}
   .chart-wrap{height:110px}
-  .card-head{flex-wrap:wrap;gap:6px}
 }
 @media(max-width:600px){
   .pos-two-col{grid-template-columns:1fr !important}
-  .pos-two-col > .card{margin-bottom:0}
   #pos-search{width:100%;margin-top:6px}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══ LOGIN OVERLAY ═══ -->
+<!-- LOGIN -->
 <div id="login-overlay">
   <div class="login-box">
     <div class="logo"><div class="logo-dot"></div>KasBot</div>
@@ -119,12 +122,12 @@ tr:hover td{background:#FAFAF8}
 <header>
   <div class="logo"><div class="logo-dot"></div>KasBot</div>
   <div class="header-center">
-    <button class="main-tab active" id="maintab-kas" onclick="switchMainTab('kas')">📊 Kas</button>
-    <button class="main-tab" id="maintab-pos" onclick="switchMainTab('pos')">🏪 Penjualan</button>
-    <button class="main-tab" id="maintab-komisi" onclick="switchMainTab('komisi')">💰 Komisi</button>
+    <button class="main-tab active" id="maintab-pos" onclick="switchMainTab('pos')">🏪 Penjualan</button>
+    <button class="main-tab" id="maintab-komisi" onclick="switchMainTab('komisi')">💈 Komisi</button>
+    <button class="main-tab" id="maintab-expense" onclick="switchMainTab('expense')">💰 Cost/Expense</button>
   </div>
   <div class="header-right">
-    <select id="outlet-selector" onchange="switchOutlet()" style="font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);max-width:150px">
+    <select id="outlet-selector" onchange="switchOutlet()" style="font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);max-width:160px">
       <option value="">Semua Outlet</option>
     </select>
     <span id="last-update">—</span>
@@ -135,63 +138,14 @@ tr:hover td{background:#FAFAF8}
   </div>
 </header>
 
-<!-- ═══ SECTION KAS ═══ -->
-<div id="section-kas">
-  <main>
-    <div class="controls">
-      <select id="filter-bulan" onchange="applyFilter()"><option value="">Semua bulan</option></select>
-      <button class="btn" onclick="exportCSV()">
-        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export CSV
-      </button>
-    </div>
-    <div class="section-label">Ringkasan kas</div>
-    <div class="metrics-grid">
-      <div class="metric"><div class="metric-label">Kas besar — masuk</div><div class="metric-value green" id="kb-masuk">—</div></div>
-      <div class="metric"><div class="metric-label">Kas besar — keluar</div><div class="metric-value red" id="kb-keluar">—</div></div>
-      <div class="metric"><div class="metric-label">Saldo kas besar</div><div class="metric-value" id="kb-saldo">—</div><div class="metric-sub" id="kb-trx">—</div></div>
-      <div class="metric"><div class="metric-label">Kas kecil — masuk</div><div class="metric-value green" id="kk-masuk">—</div></div>
-      <div class="metric"><div class="metric-label">Kas kecil — keluar</div><div class="metric-value red" id="kk-keluar">—</div></div>
-      <div class="metric"><div class="metric-label">Saldo kas kecil</div><div class="metric-value" id="kk-saldo">—</div><div class="metric-sub" id="kk-trx">—</div></div>
-    </div>
-    <div class="card">
-      <div class="card-head">
-        <div class="card-title">Grafik transaksi kas besar</div>
-        <div class="legend">
-          <span><div class="dot" style="background:var(--green)"></div>Masuk</span>
-          <span><div class="dot" style="background:var(--red)"></div>Keluar</span>
-        </div>
-      </div>
-      <div class="card-body"><div class="chart-wrap" id="chart-area"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-    </div>
-    <div class="card">
-      <div class="card-head">
-        <div class="card-title">Transaksi</div>
-        <div class="tabs">
-          <button class="tab active" id="tab-besar" onclick="switchTab('besar')">Kas besar</button>
-          <button class="tab" id="tab-kecil" onclick="switchTab('kecil')">Kas kecil</button>
-        </div>
-      </div>
-      <div style="overflow-x:auto"><div id="trx-content"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-    </div>
-    <div class="card">
-      <div class="card-head">
-        <div class="card-title">Petty cash</div>
-        <div id="petty-summary" style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace"></div>
-      </div>
-      <div style="overflow-x:auto"><div id="petty-content"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-    </div>
-  </main>
-</div>
-
 <!-- ═══ SECTION POS ═══ -->
-<div id="section-pos" style="display:none">
+<div id="section-pos">
   <main>
     <div class="section-label">Ringkasan Penjualan Bulan Ini</div>
     <div class="pos-grid">
       <div class="metric"><div class="metric-label">Total Omzet</div><div class="metric-value green" id="pos-omzet">—</div></div>
       <div class="metric"><div class="metric-label">Total Transaksi</div><div class="metric-value" id="pos-trx">—</div></div>
-      <div class="metric"><div class="metric-label">Rata-rata per Transaksi</div><div class="metric-value" id="pos-avg">—</div></div>
+      <div class="metric"><div class="metric-label">Rata-rata / Transaksi</div><div class="metric-value" id="pos-avg">—</div></div>
     </div>
     <div class="card">
       <div class="card-head"><div class="card-title">Grafik Omzet Harian</div></div>
@@ -221,21 +175,118 @@ tr:hover td{background:#FAFAF8}
   </main>
 </div>
 
+<!-- ═══ SECTION KOMISI ═══ -->
+<div id="section-komisi" style="display:none">
+  <main>
+    <div class="controls" style="margin-bottom:1.5rem">
+      <div style="display:flex;gap:6px">
+        <button class="btn" id="komisi-btn-bulanan" onclick="switchKomisiMode('bulanan')" style="background:var(--green);color:#fff;border-color:var(--green)">Bulanan</button>
+        <button class="btn" id="komisi-btn-harian" onclick="switchKomisiMode('harian')">Harian</button>
+      </div>
+      <div style="flex:1"></div>
+      <button class="btn" onclick="exportKomisiCSV()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+    <div class="section-label" id="komisi-periode-label">Komisi Bulan Ini</div>
+    <div class="metrics-grid" style="margin-bottom:2rem">
+      <div class="metric"><div class="metric-label">Total Omzet</div><div class="metric-value green" id="komisi-total-omzet">—</div></div>
+      <div class="metric"><div class="metric-label">Total Komisi</div><div class="metric-value green" id="komisi-total-komisi">—</div></div>
+      <div class="metric"><div class="metric-label">Jumlah Capster</div><div class="metric-value" id="komisi-total-capster">—</div></div>
+    </div>
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-head"><div class="card-title">Rekap Komisi per Capster</div></div>
+      <div style="overflow-x:auto"><div id="komisi-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Detail Harian per Capster</div>
+        <select id="komisi-filter-capster" onchange="renderKomisiDetail()" style="font-size:12px;padding:4px 8px">
+          <option value="">Semua Capster</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto"><div id="komisi-detail"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══ SECTION COST / EXPENSE ═══ -->
+<div id="section-expense" style="display:none">
+  <main>
+    <!-- Sub tabs: Kas Besar | Petty Cash -->
+    <div class="sub-nav">
+      <button class="sub-tab active" id="subtab-kasbesar" onclick="switchExpenseTab('kasbesar')">🏦 Kas Besar</button>
+      <button class="sub-tab" id="subtab-petty" onclick="switchExpenseTab('petty')">💵 Petty Cash</button>
+    </div>
+
+    <!-- KAS BESAR -->
+    <div id="expense-kasbesar">
+      <div class="controls">
+        <select id="expense-filter-bulan" onchange="applyExpenseFilter()"><option value="">Semua bulan</option></select>
+        <button class="btn" onclick="exportExpenseCSV('kasbesar')">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+      <div class="section-label">Ringkasan Kas Besar</div>
+      <div class="expense-summary">
+        <div class="metric"><div class="metric-label">Total Masuk</div><div class="metric-value green" id="kb-masuk">—</div></div>
+        <div class="metric"><div class="metric-label">Total Keluar</div><div class="metric-value red" id="kb-keluar">—</div></div>
+        <div class="metric"><div class="metric-label">Saldo</div><div class="metric-value" id="kb-saldo">—</div><div class="metric-sub" id="kb-trx">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Grafik Kas Besar</div>
+          <div class="legend">
+            <span><div class="dot" style="background:var(--green)"></div>Masuk</span>
+            <span><div class="dot" style="background:var(--red)"></div>Keluar</span>
+          </div>
+        </div>
+        <div class="card-body"><div class="chart-wrap" id="kb-chart"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Transaksi Kas Besar</div></div>
+        <div style="overflow-x:auto"><div id="kb-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+      </div>
+    </div>
+
+    <!-- PETTY CASH -->
+    <div id="expense-petty" style="display:none">
+      <div class="section-label">Ringkasan Petty Cash</div>
+      <div class="expense-summary">
+        <div class="metric"><div class="metric-label">Total Masuk</div><div class="metric-value green" id="pc-masuk">—</div></div>
+        <div class="metric"><div class="metric-label">Total Keluar</div><div class="metric-value red" id="pc-keluar">—</div></div>
+        <div class="metric"><div class="metric-label">Saldo</div><div class="metric-value" id="pc-saldo">—</div><div class="metric-sub" id="pc-trx">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Transaksi Petty Cash</div>
+          <button class="btn" onclick="exportExpenseCSV('petty')" style="font-size:11px">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+        </div>
+        <div style="overflow-x:auto"><div id="pc-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
 <script>
-// ═══════════════════════════════════════════════════════
-// CONFIG — sesuaikan 2 nilai ini
-// ═══════════════════════════════════════════════════════
-const BASE = 'https://kasbot-backend-production.up.railway.app';
+// ═══════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════
+const BASE = 'https://kasbot-backend-java-production.up.railway.app';
 const API_KEY = 'kasbot_sk_2024_BOW_barber99';
 const DASHBOARD_PASSWORD = 'bow2024';
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // AUTH
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 function doLogin() {
-  const input = document.getElementById('login-input').value;
-  const err   = document.getElementById('login-error');
-  if (input === DASHBOARD_PASSWORD) {
+  const val = document.getElementById('login-input').value;
+  const err = document.getElementById('login-error');
+  if (val === DASHBOARD_PASSWORD) {
     sessionStorage.setItem('kasbot_auth', DASHBOARD_PASSWORD);
     document.getElementById('login-overlay').style.display = 'none';
     initApp();
@@ -245,24 +296,22 @@ function doLogin() {
     document.getElementById('login-input').focus();
   }
 }
+function checkAuth() { return sessionStorage.getItem('kasbot_auth') === DASHBOARD_PASSWORD; }
 
-function checkAuth() {
-  return sessionStorage.getItem('kasbot_auth') === DASHBOARD_PASSWORD;
-}
-
-// ═══════════════════════════════════════════════════════
-// API FETCH — otomatis kirim API key
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// API
+// ═══════════════════════════════════════════════════
 async function apiFetch(url) {
   const sep = url.includes('?') ? '&' : '?';
   const res = await fetch(url + sep + 'api_key=' + API_KEY);
   return res.json();
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 let currentOutlet = '';
+let currentMainTab = 'pos';
 
 function initApp() {
   loadOutlets();
@@ -270,18 +319,16 @@ function initApp() {
   setInterval(loadAll, 5 * 60 * 1000);
 }
 
-// Cek auth saat halaman load
 if (checkAuth()) {
   document.getElementById('login-overlay').style.display = 'none';
   initApp();
 } else {
-  // Tampilkan login overlay, fokus ke input
   setTimeout(() => document.getElementById('login-input').focus(), 100);
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // OUTLETS
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 async function loadOutlets() {
   try {
     const d = await apiFetch(BASE + '/api/outlets');
@@ -293,161 +340,53 @@ async function loadOutlets() {
       opt.textContent = o.name.replace(/_/g, ' ');
       sel.appendChild(opt);
     });
-  } catch(e) { console.error('Gagal load outlets:', e); }
+  } catch(e) { console.error('outlets:', e); }
 }
 
 function switchOutlet() {
   currentOutlet = document.getElementById('outlet-selector').value;
-  posData = null;
-  komisiData = null;
+  posData = null; komisiData = null;
   loadAll();
-  const activeTab = document.querySelector('.main-tab.active');
-  if (activeTab && activeTab.id === 'maintab-pos') loadPOS();
-  if (activeTab && activeTab.id === 'maintab-komisi') loadKomisi(komisiMode);
 }
 
-// ═══════════════════════════════════════════════════════
-// KAS MODULE
-// ═══════════════════════════════════════════════════════
-let allTrx=[], currentTab='besar', currentBulan='';
-
-function fmt(n){return 'Rp '+Math.round(Number(n)||0).toLocaleString('id-ID')}
-function parseTgl(s){if(!s||s.includes('TOTAL')||s.includes('SALDO'))return null;const p=s.split('/');if(p.length===3)return new Date(p[2],p[1]-1,p[0]);return null;}
-function getBulanKey(d){return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')}
-function getBulanLabel(d){return d.toLocaleString('id-ID',{month:'long',year:'numeric'})}
-
-function populateFilter(data){
-  const keys=new Map();
-  data.forEach(t=>{const d=parseTgl(t.tanggal);if(d)keys.set(getBulanKey(d),getBulanLabel(d));});
-  const sel=document.getElementById('filter-bulan');
-  while(sel.options.length>1)sel.remove(1);
-  [...keys.entries()].sort((a,b)=>b[0].localeCompare(a[0])).forEach(([k,v])=>{const o=document.createElement('option');o.value=k;o.textContent=v;sel.appendChild(o);});
-}
-
-function filterData(data){if(!currentBulan)return data;return data.filter(t=>{const d=parseTgl(t.tanggal);return d&&getBulanKey(d)===currentBulan;});}
-function applyFilter(){currentBulan=document.getElementById('filter-bulan').value;renderTrx(currentTab);renderChart();}
-
-async function loadSummary(){
-  try{
-    const d = await apiFetch(BASE+'/api/summary');
-    if(!d.success)throw 0;
-    document.getElementById('kb-masuk').textContent=fmt(d.kas_besar.masuk);
-    document.getElementById('kb-keluar').textContent=fmt(d.kas_besar.keluar);
-    document.getElementById('kb-saldo').textContent=fmt(d.kas_besar.saldo);
-    document.getElementById('kb-trx').textContent=d.kas_besar.total_transaksi+' transaksi';
-    document.getElementById('kk-masuk').textContent=fmt(d.kas_kecil.masuk);
-    document.getElementById('kk-keluar').textContent=fmt(d.kas_kecil.keluar);
-    document.getElementById('kk-saldo').textContent=fmt(d.kas_kecil.saldo);
-    document.getElementById('kk-trx').textContent=d.kas_kecil.total_transaksi+' transaksi';
-    document.getElementById('last-update').textContent=new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit'});
-  }catch(e){document.getElementById('kb-masuk').textContent='Error'}
-}
-
-async function loadTrxAll(){
-  try{
-    const d = await apiFetch(BASE+'/api/transaksi');
-    if(!d.success)throw 0;
-    allTrx=d.data.filter(t=>t.jenis&&t.tanggal&&!t.tanggal.includes('TOTAL')&&!t.tanggal.includes('SALDO'));
-    populateFilter(allTrx);renderTrx(currentTab);renderChart();
-  }catch(e){document.getElementById('trx-content').innerHTML='<div class="empty">Gagal memuat transaksi</div>';}
-}
-
-function renderTrx(group){
-  const el=document.getElementById('trx-content');
-  const grp=group==='besar'?'KAS BESAR':'KAS KECIL';
-  const data=filterData(allTrx).filter(t=>t.group===grp);
-  if(!data.length){el.innerHTML='<div class="empty">Tidak ada data</div>';return;}
-  let html='<table><thead><tr><th>Tanggal</th><th>'+(group==='besar'?'Keterangan':'Deskripsi')+'</th><th>Kategori</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th><th style="text-align:right">Saldo</th><th>Foto</th></tr></thead><tbody>';
-  data.forEach(t=>{
-    const desc=(t.deskripsi||t.vendor||'—').substring(0,40);
-    const keluar=t.jenis==='Dana Keluar'?`<span class="red">${fmt(t.nominal)}</span>`:'—';
-    const masuk=t.jenis==='Dana Masuk'?`<span class="green">${fmt(t.nominal)}</span>`:'—';
-    const saldo=t.saldo>0?fmt(t.saldo):'—';
-    const foto=t.foto?`<a href="${t.foto}" target="_blank" style="color:var(--green);font-size:11px">Lihat</a>`:'—';
-    html+=`<tr><td class="mono">${t.tanggal}</td><td>${desc}</td><td>${t.kategori||'—'}</td><td style="text-align:right" class="mono">${keluar}</td><td style="text-align:right" class="mono">${masuk}</td><td style="text-align:right" class="mono">${saldo}</td><td>${foto}</td></tr>`;
-  });
-  html+='</tbody></table>';
-  el.innerHTML=html;
-}
-
-function renderChart(){
-  const el=document.getElementById('chart-area');
-  const data=filterData(allTrx).filter(t=>t.group==='KAS BESAR');
-  if(!data.length){el.innerHTML='<div class="empty">Tidak ada data kas besar</div>';return;}
-  const byBulan={};
-  data.forEach(t=>{
-    const d=parseTgl(t.tanggal);if(!d)return;
-    const k=getBulanKey(d);
-    const lbl=d.toLocaleString('id-ID',{month:'short'})+" '"+String(d.getFullYear()).slice(2);
-    if(!byBulan[k])byBulan[k]={lbl,masuk:0,keluar:0};
-    if(t.jenis==='Dana Masuk')byBulan[k].masuk+=t.nominal;
-    else byBulan[k].keluar+=t.nominal;
-  });
-  const keys=Object.keys(byBulan).sort();
-  const maxVal=Math.max(...keys.map(k=>Math.max(byBulan[k].masuk,byBulan[k].keluar)),1);
-  let html='';
-  keys.forEach(k=>{
-    const b=byBulan[k];
-    const hM=Math.max(Math.round((b.masuk/maxVal)*140),2);
-    const hK=Math.max(Math.round((b.keluar/maxVal)*140),2);
-    html+=`<div class="bar-group"><div class="bars"><div class="bar" style="height:${hM}px;background:var(--green)" title="${fmt(b.masuk)}"></div><div class="bar" style="height:${hK}px;background:var(--red)" title="${fmt(b.keluar)}"></div></div><div class="bar-lbl">${b.lbl}</div></div>`;
-  });
-  el.innerHTML=html;
-}
-
-async function loadPetty(){
-  const el=document.getElementById('petty-content');
-  const elSum=document.getElementById('petty-summary');
-  try{
-    const d = await apiFetch(BASE+'/api/petty');
-    if(!d.success||!d.data||!d.data.length){el.innerHTML='<div class="empty">Tidak ada data petty cash</div>';return;}
-    elSum.textContent='Saldo: '+fmt(d.saldo_sekarang);
-    let html='<table><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th><th style="text-align:right">Saldo</th></tr></thead><tbody>';
-    d.data.forEach(t=>{
-      const debet=t.debet>0?`<span class="red">${fmt(t.debet)}</span>`:'—';
-      const kredit=t.kredit>0?`<span class="green">${fmt(t.kredit)}</span>`:'—';
-      html+=`<tr><td class="mono">${t.tanggal||'—'}</td><td>${t.deskripsi||'—'}</td><td>${t.kategori||'—'}</td><td style="text-align:right" class="mono">${debet}</td><td style="text-align:right" class="mono">${kredit}</td><td style="text-align:right" class="mono">${fmt(t.saldo||0)}</td></tr>`;
-    });
-    html+='</tbody></table>';
-    el.innerHTML=html;
-  }catch(e){el.innerHTML='<div class="empty">Gagal memuat petty cash</div>';}
-}
-
-function switchTab(group){
-  currentTab=group;
-  document.getElementById('tab-besar').className='tab'+(group==='besar'?' active':'');
-  document.getElementById('tab-kecil').className='tab'+(group==='kecil'?' active':'');
-  renderTrx(group);
-}
-
-function exportCSV(){
-  const data=filterData(allTrx);
-  if(!data.length){alert('Tidak ada data untuk di-export');return;}
-  let csv='Tanggal,Group,Jenis,Kategori,Vendor,Deskripsi,Nominal\n';
-  data.forEach(t=>{csv+=`${t.tanggal},${t.group},${t.jenis},${t.kategori||''},${(t.vendor||'').replace(/,/g,' ')},${(t.deskripsi||'').replace(/,/g,' ')},${t.nominal}\n`;});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download=`kasbot-${currentBulan||'semua'}.csv`;
-  a.click();
-}
-
-function loadAll(){loadSummary();loadTrxAll();loadPetty();}
-
-// ═══════════════════════════════
-// POS MODULE
-// ═══════════════════════════════
-let posData = null;
-
+// ═══════════════════════════════════════════════════
+// MAIN TAB SWITCH
+// ═══════════════════════════════════════════════════
 function switchMainTab(tab) {
-  document.getElementById('section-kas').style.display    = tab === 'kas'    ? 'block' : 'none';
-  document.getElementById('section-pos').style.display    = tab === 'pos'    ? 'block' : 'none';
-  document.getElementById('section-komisi').style.display = tab === 'komisi' ? 'block' : 'none';
-  document.getElementById('maintab-kas').className    = 'main-tab' + (tab === 'kas'    ? ' active' : '');
-  document.getElementById('maintab-pos').className    = 'main-tab' + (tab === 'pos'    ? ' active' : '');
-  document.getElementById('maintab-komisi').className = 'main-tab' + (tab === 'komisi' ? ' active' : '');
+  currentMainTab = tab;
+  ['pos','komisi','expense'].forEach(t => {
+    document.getElementById('section-' + t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('maintab-' + t).className = 'main-tab' + (t === tab ? ' active' : '');
+  });
   if (tab === 'pos' && !posData) loadPOS();
   if (tab === 'komisi' && !komisiData) loadKomisi('bulanan');
+  if (tab === 'expense') loadExpense();
 }
+
+function loadAll() {
+  loadPOS();
+  loadExpense();
+  document.getElementById('last-update').textContent =
+    new Date().toLocaleString('id-ID', {timeZone:'Asia/Jakarta', hour:'2-digit', minute:'2-digit'});
+}
+
+// ═══════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════
+function fmt(n){ return 'Rp ' + Math.round(Number(n)||0).toLocaleString('id-ID'); }
+function parseTgl(s){
+  if(!s||s.includes('TOTAL')||s.includes('SALDO')) return null;
+  const p = s.split('/');
+  if(p.length === 3) return new Date(p[2], p[1]-1, p[0]);
+  return null;
+}
+function getBulanKey(d){ return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0'); }
+function getBulanLabel(d){ return d.toLocaleString('id-ID',{month:'long',year:'numeric'}); }
+
+// ═══════════════════════════════════════════════════
+// POS MODULE
+// ═══════════════════════════════════════════════════
+let posData = null;
 
 async function loadPOS() {
   try {
@@ -471,7 +410,7 @@ async function loadPOS() {
 
 function renderPOSChart(by_hari) {
   const el = document.getElementById('pos-chart');
-  const keys = Object.keys(by_hari).sort();
+  const keys = Object.keys(by_hari||{}).sort();
   if (!keys.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
   const maxVal = Math.max(...keys.map(k => by_hari[k]), 1);
   let html = '';
@@ -485,46 +424,39 @@ function renderPOSChart(by_hari) {
 
 function renderPOSMetode(by_metode) {
   const el = document.getElementById('pos-metode');
-  const entries = Object.entries(by_metode).sort((a,b) => b[1]-a[1]);
+  const entries = Object.entries(by_metode||{}).sort((a,b) => b[1]-a[1]);
   if (!entries.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
   let html = '<table><thead><tr><th>Metode</th><th style="text-align:right">Total</th></tr></thead><tbody>';
-  entries.forEach(([m, v]) => {
-    html += `<tr><td>${m}</td><td style="text-align:right" class="mono green">${fmt(v)}</td></tr>`;
-  });
-  html += '</tbody></table>';
-  el.innerHTML = html;
+  entries.forEach(([m, v]) => { html += `<tr><td>${m}</td><td style="text-align:right" class="mono green">${fmt(v)}</td></tr>`; });
+  el.innerHTML = html + '</tbody></table>';
 }
 
 function renderPOSProduk(by_produk) {
   const el = document.getElementById('pos-produk');
-  const entries = Object.entries(by_produk).sort((a,b) => b[1].total - a[1].total);
+  const entries = Object.entries(by_produk||{}).sort((a,b) => b[1].total - a[1].total);
   if (!entries.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
   let html = '<table><thead><tr><th>Produk</th><th style="text-align:right">Qty</th><th style="text-align:right">Total</th></tr></thead><tbody>';
-  entries.forEach(([p, v]) => {
-    html += `<tr><td>${p}</td><td style="text-align:right" class="mono">${v.qty}</td><td style="text-align:right" class="mono green">${fmt(v.total)}</td></tr>`;
-  });
-  html += '</tbody></table>';
-  el.innerHTML = html;
+  entries.forEach(([p, v]) => { html += `<tr><td>${p}</td><td style="text-align:right" class="mono">${v.qty}</td><td style="text-align:right" class="mono green">${fmt(v.total)}</td></tr>`; });
+  el.innerHTML = html + '</tbody></table>';
 }
 
 function renderPOSCapster(by_capster) {
   const el = document.getElementById('pos-capster');
-  const entries = Object.entries(by_capster).sort((a,b) => b[1].total - a[1].total);
+  const entries = Object.entries(by_capster||{}).sort((a,b) => b[1].total - a[1].total);
   if (!entries.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
   let html = '<table class="capster-table"><thead><tr><th>Capster</th><th style="text-align:right">Transaksi</th><th style="text-align:right">Total Omzet</th><th style="text-align:right">Rata-rata</th></tr></thead><tbody>';
   entries.forEach(([c, v]) => {
     const avg = v.transaksi > 0 ? Math.round(v.total / v.transaksi) : 0;
     html += `<tr><td><b>${c}</b></td><td style="text-align:right" class="mono">${v.transaksi}</td><td style="text-align:right" class="mono green">${fmt(v.total)}</td><td style="text-align:right" class="mono">${fmt(avg)}</td></tr>`;
   });
-  html += '</tbody></table>';
-  el.innerHTML = html;
+  el.innerHTML = html + '</tbody></table>';
 }
 
 function renderPOSTrxTable(data, filter='') {
   const el = document.getElementById('pos-trx-table');
-  const filtered = filter
-    ? data.filter(r => r.nama_customer.toLowerCase().includes(filter) || r.hp_customer.includes(filter))
-    : data;
+  const filtered = filter ? data.filter(r =>
+    (r.nama_customer||'').toLowerCase().includes(filter) || (r.hp_customer||'').includes(filter)
+  ) : data;
   if (!filtered.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
   let html = '<table><thead><tr><th>No Nota</th><th>Waktu</th><th>Capster</th><th>Customer</th><th>HP</th><th>Produk</th><th style="text-align:right">Qty</th><th style="text-align:right">Total</th><th>Metode</th></tr></thead><tbody>';
   filtered.slice().reverse().forEach(r => {
@@ -540,8 +472,7 @@ function renderPOSTrxTable(data, filter='') {
       <td>${r.metode_bayar}</td>
     </tr>`;
   });
-  html += '</tbody></table>';
-  el.innerHTML = html;
+  el.innerHTML = html + '</tbody></table>';
 }
 
 function filterPosTrx() {
@@ -549,11 +480,10 @@ function filterPosTrx() {
   if (posData) renderPOSTrxTable(posData.data, q);
 }
 
-// ═══════════════════════════════
+// ═══════════════════════════════════════════════════
 // KOMISI MODULE
-// ═══════════════════════════════
-let komisiData = null;
-let komisiMode = 'bulanan';
+// ═══════════════════════════════════════════════════
+let komisiData = null, komisiMode = 'bulanan';
 
 async function loadKomisi(mode) {
   komisiMode = mode || 'bulanan';
@@ -562,17 +492,16 @@ async function loadKomisi(mode) {
     const d = await apiFetch(BASE + '/api/penjualan/komisi?mode=' + komisiMode + outletParam);
     if (!d.success) throw new Error(d.error);
     komisiData = d;
-    document.getElementById('komisi-total-omzet').textContent   = fmt(d.summary.total_omzet);
-    document.getElementById('komisi-total-komisi').textContent  = fmt(d.summary.total_komisi);
-    document.getElementById('komisi-total-capster').textContent = d.summary.total_capster + ' capster';
-    document.getElementById('komisi-periode-label').textContent =
+    document.getElementById('komisi-total-omzet').textContent  = fmt(d.summary.total_omzet);
+    document.getElementById('komisi-total-komisi').textContent = fmt(d.summary.total_komisi);
+    document.getElementById('komisi-total-capster').textContent= d.summary.total_capster + ' capster';
+    document.getElementById('komisi-periode-label').textContent=
       komisiMode === 'harian' ? 'Komisi Hari Ini (' + d.today + ')' : 'Komisi Bulan Ini';
     const sel = document.getElementById('komisi-filter-capster');
     sel.innerHTML = '<option value="">Semua Capster</option>';
     d.data.forEach(c => {
       const o = document.createElement('option');
-      o.value = c.nama; o.textContent = c.nama;
-      sel.appendChild(o);
+      o.value = c.nama; o.textContent = c.nama; sel.appendChild(o);
     });
     renderKomisiTable(d.data);
     renderKomisiDetail();
@@ -595,17 +524,7 @@ function renderKomisiTable(data) {
   const el = document.getElementById('komisi-table');
   const filtered = data.filter(c => c.nama !== '-');
   if (!filtered.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
-  let html = '<table><thead><tr>' +
-    '<th>Capster</th>' +
-    '<th style="text-align:right">Transaksi</th>' +
-    '<th style="text-align:right">Omzet Layanan</th>' +
-    '<th style="text-align:right">Komisi Layanan</th>' +
-    '<th style="text-align:right">Omzet Produk</th>' +
-    '<th style="text-align:right">Komisi Produk</th>' +
-    '<th style="text-align:right">Omzet Paket</th>' +
-    '<th style="text-align:right">Komisi Paket</th>' +
-    '<th style="text-align:right;background:#f0faf6">Total Komisi</th>' +
-    '</tr></thead><tbody>';
+  let html = '<table><thead><tr><th>Capster</th><th style="text-align:right">Transaksi</th><th style="text-align:right">Omzet Layanan</th><th style="text-align:right">Komisi Layanan</th><th style="text-align:right">Omzet Produk</th><th style="text-align:right">Komisi Produk</th><th style="text-align:right">Omzet Paket</th><th style="text-align:right">Komisi Paket</th><th style="text-align:right;background:#f0faf6">Total Komisi</th></tr></thead><tbody>';
   filtered.forEach(c => {
     html += `<tr>
       <td><b>${c.nama}</b><br><span class="mono" style="font-size:10px;color:var(--hint)">L:${c.komisi_layanan_pct}% P:${c.komisi_produk_pct}% Pkt:${c.komisi_paket_pct}%</span></td>
@@ -620,45 +539,27 @@ function renderKomisiTable(data) {
     </tr>`;
   });
   const totalKomisi = filtered.reduce((s,c) => s + c.total_komisi, 0);
-  html += `<tr style="background:var(--bg);font-weight:600">
-    <td>TOTAL</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-    <td style="text-align:right;background:#e6f7f0" class="mono green"><b>${fmt(totalKomisi)}</b></td>
-  </tr>`;
-  html += '</tbody></table>';
-  el.innerHTML = html;
+  html += `<tr style="background:var(--bg);font-weight:600"><td>TOTAL</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td style="text-align:right;background:#e6f7f0" class="mono green"><b>${fmt(totalKomisi)}</b></td></tr>`;
+  el.innerHTML = html + '</tbody></table>';
 }
 
 function renderKomisiDetail() {
   if (!komisiData) return;
   const el = document.getElementById('komisi-detail');
-  const filterCapster = document.getElementById('komisi-filter-capster').value;
-  const capsters = filterCapster
-    ? komisiData.data.filter(c => c.nama === filterCapster)
-    : komisiData.data.filter(c => c.nama !== '-');
+  const fc = document.getElementById('komisi-filter-capster').value;
+  const capsters = fc ? komisiData.data.filter(c => c.nama === fc) : komisiData.data.filter(c => c.nama !== '-');
   const allDates = new Set();
-  capsters.forEach(c => Object.keys(c.detail_hari).forEach(d => allDates.add(d)));
+  capsters.forEach(c => Object.keys(c.detail_hari||{}).forEach(d => allDates.add(d)));
   const dates = [...allDates].sort();
   if (!dates.length) { el.innerHTML = '<div class="empty">Tidak ada data harian</div>'; return; }
-  let html = '<table><thead><tr><th>Tanggal</th><th>Capster</th>' +
-    '<th style="text-align:right">Transaksi</th>' +
-    '<th style="text-align:right">Omzet</th>' +
-    '<th style="text-align:right">Komisi</th>' +
-    '</tr></thead><tbody>';
+  let html = '<table><thead><tr><th>Tanggal</th><th>Capster</th><th style="text-align:right">Transaksi</th><th style="text-align:right">Omzet</th><th style="text-align:right">Komisi</th></tr></thead><tbody>';
   dates.forEach(tgl => {
     capsters.forEach(c => {
-      const d = c.detail_hari[tgl];
-      if (!d) return;
-      html += `<tr>
-        <td class="mono" style="font-size:11px">${tgl}</td>
-        <td><b>${c.nama}</b></td>
-        <td style="text-align:right" class="mono">${d.transaksi}</td>
-        <td style="text-align:right" class="mono">${fmt(d.omzet)}</td>
-        <td style="text-align:right" class="mono green"><b>${fmt(d.komisi)}</b></td>
-      </tr>`;
+      const d = (c.detail_hari||{})[tgl]; if (!d) return;
+      html += `<tr><td class="mono" style="font-size:11px">${tgl}</td><td><b>${c.nama}</b></td><td style="text-align:right" class="mono">${d.transaksi}</td><td style="text-align:right" class="mono">${fmt(d.omzet)}</td><td style="text-align:right" class="mono green"><b>${fmt(d.komisi)}</b></td></tr>`;
     });
   });
-  html += '</tbody></table>';
-  el.innerHTML = html;
+  el.innerHTML = html + '</tbody></table>';
 }
 
 function exportKomisiCSV() {
@@ -668,47 +569,178 @@ function exportKomisiCSV() {
     csv += `${c.nama},${c.transaksi},${c.omzet_layanan},${c.komisi_dari_layanan},${c.omzet_produk},${c.komisi_dari_produk},${c.omzet_paket},${c.komisi_dari_paket},${c.total_komisi}\n`;
   });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
   a.download = 'komisi-' + komisiMode + '-' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
 }
+
+// ═══════════════════════════════════════════════════
+// EXPENSE MODULE (Kas Besar + Petty Cash)
+// ═══════════════════════════════════════════════════
+let expenseTab = 'kasbesar';
+let kbData = [], pcData = [];
+let kbFilterBulan = '';
+
+function switchExpenseTab(tab) {
+  expenseTab = tab;
+  document.getElementById('expense-kasbesar').style.display = tab === 'kasbesar' ? 'block' : 'none';
+  document.getElementById('expense-petty').style.display    = tab === 'petty'    ? 'block' : 'none';
+  document.getElementById('subtab-kasbesar').className = 'sub-tab' + (tab === 'kasbesar' ? ' active' : '');
+  document.getElementById('subtab-petty').className    = 'sub-tab' + (tab === 'petty'    ? ' active' : '');
+}
+
+async function loadExpense() {
+  await Promise.all([loadKasBesar(), loadPettyCash()]);
+}
+
+async function loadKasBesar() {
+  try {
+    const d = await apiFetch(BASE + '/api/summary');
+    if (!d.success) throw 0;
+    // Summary
+    document.getElementById('kb-masuk').textContent  = fmt(d.kas_besar.masuk);
+    document.getElementById('kb-keluar').textContent = fmt(d.kas_besar.keluar);
+    document.getElementById('kb-saldo').textContent  = fmt(d.kas_besar.saldo);
+    document.getElementById('kb-trx').textContent    = (d.kas_besar.total_transaksi || '—') + ' transaksi';
+    // Transaksi detail
+    const trx = await apiFetch(BASE + '/api/transaksi');
+    if (trx.success) {
+      kbData = trx.data.filter(t => t.group === 'KAS BESAR' && t.tanggal && !t.tanggal.includes('TOTAL'));
+      populateKbFilter();
+      renderKbTable();
+      renderKbChart();
+    }
+  } catch(e) { console.error('[KB]', e); }
+}
+
+function populateKbFilter() {
+  const keys = new Map();
+  kbData.forEach(t => {
+    const d = parseTgl(t.tanggal);
+    if (d) keys.set(getBulanKey(d), getBulanLabel(d));
+  });
+  const sel = document.getElementById('expense-filter-bulan');
+  while (sel.options.length > 1) sel.remove(1);
+  [...keys.entries()].sort((a,b) => b[0].localeCompare(a[0])).forEach(([k,v]) => {
+    const o = document.createElement('option'); o.value = k; o.textContent = v; sel.appendChild(o);
+  });
+}
+
+function applyExpenseFilter() {
+  kbFilterBulan = document.getElementById('expense-filter-bulan').value;
+  renderKbTable(); renderKbChart();
+}
+
+function filterKb(data) {
+  if (!kbFilterBulan) return data;
+  return data.filter(t => { const d = parseTgl(t.tanggal); return d && getBulanKey(d) === kbFilterBulan; });
+}
+
+function renderKbTable() {
+  const el = document.getElementById('kb-table');
+  const data = filterKb(kbData);
+  if (!data.length) { el.innerHTML = '<div class="empty">Tidak ada data kas besar</div>'; return; }
+  let html = '<table><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th>Penerima</th><th>Rekening</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th><th style="text-align:right">Saldo</th><th>Foto</th></tr></thead><tbody>';
+  data.forEach(t => {
+    const isMasuk = t.jenis === 'Dana Masuk' || (t.kredit && t.kredit > 0);
+    const nominal = t.nominal || t.kredit || t.debet || 0;
+    const keluar  = !isMasuk ? `<span class="red">${fmt(nominal)}</span>` : '—';
+    const masuk   = isMasuk  ? `<span class="green">${fmt(nominal)}</span>` : '—';
+    const foto    = t.foto ? `<a href="${t.foto}" target="_blank" style="color:var(--green);font-size:11px">Lihat</a>` : '—';
+    html += `<tr>
+      <td class="mono">${t.tanggal||'—'}</td>
+      <td>${(t.deskripsi||t.vendor||'—').substring(0,40)}</td>
+      <td>${t.kategori||'—'}</td>
+      <td style="font-size:12px">${t.nama_penerima||'—'}</td>
+      <td class="mono" style="font-size:11px">${t.rekening||'—'}</td>
+      <td style="text-align:right" class="mono">${keluar}</td>
+      <td style="text-align:right" class="mono">${masuk}</td>
+      <td style="text-align:right" class="mono">${t.saldo > 0 ? fmt(t.saldo) : '—'}</td>
+      <td>${foto}</td>
+    </tr>`;
+  });
+  el.innerHTML = html + '</tbody></table>';
+}
+
+function renderKbChart() {
+  const el = document.getElementById('kb-chart');
+  const data = filterKb(kbData);
+  if (!data.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
+  const byBulan = {};
+  data.forEach(t => {
+    const d = parseTgl(t.tanggal); if (!d) return;
+    const k = getBulanKey(d);
+    const lbl = d.toLocaleString('id-ID',{month:'short'}) + " '" + String(d.getFullYear()).slice(2);
+    if (!byBulan[k]) byBulan[k] = {lbl, masuk:0, keluar:0};
+    const isMasuk = t.jenis === 'Dana Masuk' || (t.kredit && t.kredit > 0);
+    const val = t.nominal || t.kredit || t.debet || 0;
+    if (isMasuk) byBulan[k].masuk += val; else byBulan[k].keluar += val;
+  });
+  const keys = Object.keys(byBulan).sort();
+  const maxVal = Math.max(...keys.map(k => Math.max(byBulan[k].masuk, byBulan[k].keluar)), 1);
+  let html = '';
+  keys.forEach(k => {
+    const b = byBulan[k];
+    const hM = Math.max(Math.round((b.masuk / maxVal) * 140), 2);
+    const hK = Math.max(Math.round((b.keluar / maxVal) * 140), 2);
+    html += `<div class="bar-group"><div class="bars"><div class="bar" style="height:${hM}px;background:var(--green)" title="${fmt(b.masuk)}"></div><div class="bar" style="height:${hK}px;background:var(--red)" title="${fmt(b.keluar)}"></div></div><div class="bar-lbl">${b.lbl}</div></div>`;
+  });
+  el.innerHTML = html;
+}
+
+async function loadPettyCash() {
+  try {
+    const d = await apiFetch(BASE + '/api/petty');
+    if (!d.success || !d.data) throw 0;
+    pcData = d.data;
+    // Hitung summary
+    let masuk = 0, keluar = 0;
+    d.data.forEach(t => { masuk += (t.kredit||0); keluar += (t.debet||0); });
+    document.getElementById('pc-masuk').textContent  = fmt(masuk);
+    document.getElementById('pc-keluar').textContent = fmt(keluar);
+    document.getElementById('pc-saldo').textContent  = fmt(d.saldo_sekarang || (masuk - keluar));
+    document.getElementById('pc-trx').textContent    = d.data.length + ' transaksi';
+    renderPcTable();
+  } catch(e) { console.error('[PC]', e); }
+}
+
+function renderPcTable() {
+  const el = document.getElementById('pc-table');
+  if (!pcData.length) { el.innerHTML = '<div class="empty">Tidak ada data petty cash</div>'; return; }
+  let html = '<table><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th>Penerima</th><th>Rekening</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th><th style="text-align:right">Saldo</th><th>Foto</th></tr></thead><tbody>';
+  pcData.forEach(t => {
+    const keluar = t.debet > 0  ? `<span class="red">${fmt(t.debet)}</span>` : '—';
+    const masuk  = t.kredit > 0 ? `<span class="green">${fmt(t.kredit)}</span>` : '—';
+    const foto   = t.foto ? `<a href="${t.foto}" target="_blank" style="color:var(--green);font-size:11px">Lihat</a>` : '—';
+    html += `<tr>
+      <td class="mono">${t.tanggal||'—'}</td>
+      <td>${(t.deskripsi||'—').substring(0,40)}</td>
+      <td>${t.kategori||'—'}</td>
+      <td style="font-size:12px">${t.nama_penerima||'—'}</td>
+      <td class="mono" style="font-size:11px">${t.rekening||'—'}</td>
+      <td style="text-align:right" class="mono">${keluar}</td>
+      <td style="text-align:right" class="mono">${masuk}</td>
+      <td style="text-align:right" class="mono">${fmt(t.saldo||0)}</td>
+      <td>${foto}</td>
+    </tr>`;
+  });
+  el.innerHTML = html + '</tbody></table>';
+}
+
+function exportExpenseCSV(type) {
+  const data = type === 'kasbesar' ? filterKb(kbData) : pcData;
+  if (!data.length) { alert('Tidak ada data'); return; }
+  let csv = 'Tanggal,Deskripsi,Kategori,Penerima,Rekening,Keluar,Masuk,Saldo\n';
+  data.forEach(t => {
+    const isMasuk = t.jenis === 'Dana Masuk' || (t.kredit && t.kredit > 0);
+    const nominal = t.nominal || t.kredit || t.debet || 0;
+    csv += `${t.tanggal||''},${(t.deskripsi||t.vendor||'').replace(/,/g,' ')},${t.kategori||''},${t.nama_penerima||''},${t.rekening||''},${isMasuk ? 0 : nominal},${isMasuk ? nominal : 0},${t.saldo||0}\n`;
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = type + '-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
 </script>
-
-<!-- ═══ SECTION KOMISI ═══ -->
-<div id="section-komisi" style="display:none">
-  <main>
-    <div class="controls" style="margin-bottom:1.5rem">
-      <div style="display:flex;gap:6px">
-        <button class="btn" id="komisi-btn-bulanan" onclick="switchKomisiMode('bulanan')" style="background:var(--green);color:#fff;border-color:var(--green)">Bulanan</button>
-        <button class="btn" id="komisi-btn-harian" onclick="switchKomisiMode('harian')">Harian</button>
-      </div>
-      <div style="flex:1"></div>
-      <button class="btn" onclick="exportKomisiCSV()">
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export CSV
-      </button>
-    </div>
-    <div class="section-label" id="komisi-periode-label">Komisi Bulan Ini</div>
-    <div class="metrics-grid" style="margin-bottom:2rem">
-      <div class="metric"><div class="metric-label">Total Omzet</div><div class="metric-value green" id="komisi-total-omzet">—</div></div>
-      <div class="metric"><div class="metric-label">Total Komisi</div><div class="metric-value" id="komisi-total-komisi" style="color:var(--green)">—</div></div>
-      <div class="metric"><div class="metric-label">Jumlah Capster</div><div class="metric-value" id="komisi-total-capster">—</div></div>
-    </div>
-    <div class="card" style="margin-bottom:1.5rem">
-      <div class="card-head"><div class="card-title">Rekap Komisi per Capster</div></div>
-      <div style="overflow-x:auto"><div id="komisi-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-    </div>
-    <div class="card">
-      <div class="card-head">
-        <div class="card-title">Detail Harian per Capster</div>
-        <select id="komisi-filter-capster" onchange="renderKomisiDetail()" style="font-size:12px;padding:4px 8px">
-          <option value="">Semua Capster</option>
-        </select>
-      </div>
-      <div style="overflow-x:auto"><div id="komisi-detail"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-    </div>
-  </main>
-</div>
-
 </body>
 </html>
