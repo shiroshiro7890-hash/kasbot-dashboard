@@ -27,6 +27,10 @@ select{font-family:'DM Sans',sans-serif;font-size:13px;padding:6px 10px;border-r
 select:focus{border-color:#999}
 .btn{display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13px;padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:.15s}
 .btn:hover{background:var(--bg);color:var(--text)}
+.btn-primary{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-primary:hover{opacity:.9;color:#fff;background:var(--green)}
+.btn-danger{background:var(--red);color:#fff;border-color:var(--red)}
+.btn-danger:hover{opacity:.9;color:#fff;background:var(--red)}
 .btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .section-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--hint);margin-bottom:10px}
 .metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:2rem}
@@ -47,9 +51,6 @@ select:focus{border-color:#999}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-bottom:10px;flex-wrap:wrap}
 .legend span{display:flex;align-items:center;gap:5px}
 .dot{width:8px;height:8px;border-radius:2px}
-.tabs{display:flex;gap:4px;flex-wrap:wrap}
-.tab{font-family:'DM Sans',sans-serif;font-size:12px;padding:4px 10px;border-radius:var(--radius-sm);border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted);transition:.15s}
-.tab.active{background:var(--bg);border-color:var(--border);color:var(--text);font-weight:500}
 table{width:100%;border-collapse:collapse}
 th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--hint);padding:10px 12px;border-bottom:1px solid var(--border)}
 td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text)}
@@ -62,14 +63,22 @@ tr:hover td{background:#FAFAF8}
 .main-tab{font-family:'DM Sans',sans-serif;font-size:13px;padding:5px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;color:var(--muted);transition:.15s;font-weight:500}
 .main-tab.active{background:var(--green);border-color:var(--green);color:#fff}
 .main-tab:hover:not(.active){background:var(--bg)}
-.sub-nav{display:flex;gap:6px;margin-bottom:1.5rem;padding:0;flex-wrap:wrap}
+.sub-nav{display:flex;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap}
 .sub-tab{font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;color:var(--muted);transition:.15s;font-weight:500}
 .sub-tab.active{background:var(--text);border-color:var(--text);color:#fff}
 .sub-tab:hover:not(.active){background:var(--bg);color:var(--text)}
 .expense-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.5rem}
 .pos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:2rem}
 .capster-table th,.capster-table td{padding:8px 12px;font-size:12px}
-/* ── LOGIN OVERLAY ── */
+/* Form Master Data */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:1rem}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.form-group input,.form-group select{font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);outline:none;background:var(--surface)}
+.form-group input:focus,.form-group select:focus{border-color:var(--green)}
+.badge-aktif{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:20px;background:#e0f5ec;color:var(--green);font-weight:500}
+.badge-off{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:20px;background:#f5f5f3;color:var(--muted);font-weight:500}
+/* LOGIN */
 #login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
 .login-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;width:340px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
 .login-box .logo{justify-content:center;margin-bottom:1.5rem;font-size:17px}
@@ -79,11 +88,10 @@ tr:hover td{background:#FAFAF8}
 .login-box input{width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);outline:none;margin-bottom:10px}
 .login-box input:focus{border-color:var(--green)}
 .login-box button.login-btn{width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:9px;border-radius:var(--radius-sm);border:none;background:var(--green);color:#fff;cursor:pointer;font-weight:600}
-.login-box button.login-btn:hover{opacity:.9}
 .login-error{font-size:12px;color:var(--red);margin-bottom:8px;display:none}
 .login-form{display:none}
 .login-form.active{display:block}
-/* ── CAPSTER PAGE ── */
+/* CAPSTER PAGE */
 #capster-page{display:none;min-height:100vh;background:var(--bg)}
 .capster-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
 .capster-main{max-width:480px;margin:0 auto;padding:2rem 1.5rem}
@@ -98,15 +106,15 @@ tr:hover td{background:#FAFAF8}
 .btn-co{width:100%;font-family:'DM Sans',sans-serif;font-size:15px;padding:12px;border-radius:var(--radius-sm);border:none;background:var(--red);color:#fff;cursor:pointer;font-weight:600}
 .btn-ci:hover,.btn-co:hover{opacity:.85}
 .btn-ci:disabled,.btn-co:disabled{opacity:.4;cursor:not-allowed}
-/* Modal nama customer */
-#modal-customer{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:9998}
-#modal-customer.open{display:flex}
-.modal-box{background:var(--surface);border-radius:var(--radius);padding:1.5rem;width:320px;box-shadow:0 8px 32px rgba(0,0,0,.12)}
-.modal-title{font-size:15px;font-weight:600;margin-bottom:12px}
-.modal-box input{width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);outline:none;margin-bottom:12px}
-.modal-box input:focus{border-color:var(--green)}
-.modal-actions{display:flex;gap:8px}
-.modal-actions button{flex:1;font-family:'DM Sans',sans-serif;font-size:13px;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;font-weight:500}
+/* MODAL */
+#modal-customer,#modal-master{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:9998}
+#modal-customer.open,#modal-master.open{display:flex}
+.modal-box{background:var(--surface);border-radius:var(--radius);padding:1.5rem;width:420px;box-shadow:0 8px 32px rgba(0,0,0,.12);max-height:90vh;overflow-y:auto}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:16px}
+.modal-box input,.modal-box select{width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);outline:none;margin-bottom:10px}
+.modal-box input:focus,.modal-box select:focus{border-color:var(--green)}
+.modal-actions{display:flex;gap:8px;margin-top:8px}
+.modal-actions button{flex:1;font-family:'DM Sans',sans-serif;font-size:13px;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;font-weight:500}
 .modal-confirm{background:var(--green);color:#fff;border-color:var(--green)!important}
 .modal-cancel{background:var(--surface);color:var(--muted)}
 /* Absensi */
@@ -115,20 +123,15 @@ tr:hover td{background:#FAFAF8}
 .capster-card.aktif{border-color:var(--green);background:#f0faf6}
 .capster-name{font-weight:600;font-size:14px}
 .capster-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:3px 8px;border-radius:20px;font-weight:500}
-.badge-aktif{background:#e0f5ec;color:var(--green)}
-.badge-off{background:#f5f5f3;color:var(--muted)}
 .capster-time{font-size:11px;color:var(--hint);font-family:'DM Mono',monospace}
-.btn-checkin{font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 12px;border-radius:var(--radius-sm);border:none;background:var(--green);color:#fff;cursor:pointer;font-weight:600;width:100%}
-.btn-checkout{font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 12px;border-radius:var(--radius-sm);border:none;background:var(--red);color:#fff;cursor:pointer;font-weight:600;width:100%}
-.btn-checkin:hover,.btn-checkout:hover{opacity:.85}
 @media(max-width:768px){main{padding:1.25rem 1rem}header{padding:0 1rem;height:52px}#last-update{display:none}.metrics-grid,.pos-grid,.expense-summary{grid-template-columns:1fr 1fr}.main-tab{font-size:11px;padding:4px 9px}}
-@media(max-width:480px){main{padding:1rem .75rem}header{padding:0 .75rem;height:50px;gap:.5rem}.logo{font-size:13px}.main-tab{font-size:10px;padding:3px 7px}.btn svg+*{display:none}.metrics-grid,.pos-grid,.expense-summary{grid-template-columns:1fr 1fr;gap:8px}.metric{padding:.75rem .875rem}.metric-value{font-size:16px}table{font-size:12px}th,td{padding:7px 8px}.chart-wrap{height:110px}.capster-main{padding:1rem .75rem}}
+@media(max-width:480px){main{padding:1rem .75rem}header{padding:0 .75rem;height:50px;gap:.5rem}.logo{font-size:13px}.main-tab{font-size:10px;padding:3px 7px}.btn svg+*{display:none}.metrics-grid,.pos-grid,.expense-summary{grid-template-columns:1fr 1fr;gap:8px}.metric{padding:.75rem .875rem}.metric-value{font-size:16px}table{font-size:12px}th,td{padding:7px 8px}.chart-wrap{height:110px}.capster-main{padding:1rem .75rem}.modal-box{width:95vw}}
 @media(max-width:600px){.pos-two-col{grid-template-columns:1fr !important}#pos-search{width:100%;margin-top:6px}}
 </style>
 </head>
 <body>
 
-<!-- ═══ LOGIN OVERLAY ═══ -->
+<!-- LOGIN -->
 <div id="login-overlay">
   <div class="login-box">
     <div class="logo"><div class="logo-dot"></div>KasBot</div>
@@ -137,7 +140,7 @@ tr:hover td{background:#FAFAF8}
       <div class="login-tab" id="ltab-capster" onclick="switchLoginTab('capster')">💈 Capster</div>
     </div>
     <div class="login-form active" id="lform-admin">
-      <div class="login-error" id="login-error-admin">Password salah. Coba lagi.</div>
+      <div class="login-error" id="login-error-admin">Password salah.</div>
       <input type="password" id="login-input-admin" placeholder="Masukkan password..." onkeydown="if(event.key==='Enter')doLoginAdmin()"/>
       <button class="login-btn" onclick="doLoginAdmin()">Masuk sebagai Admin</button>
     </div>
@@ -150,7 +153,7 @@ tr:hover td{background:#FAFAF8}
   </div>
 </div>
 
-<!-- ═══ CAPSTER PAGE ═══ -->
+<!-- CAPSTER PAGE -->
 <div id="capster-page">
   <div class="capster-header">
     <div class="logo"><div class="logo-dot"></div>KasBot</div>
@@ -178,19 +181,31 @@ tr:hover td{background:#FAFAF8}
   </div>
 </div>
 
-<!-- ═══ MODAL NAMA CUSTOMER ═══ -->
+<!-- MODAL CUSTOMER -->
 <div id="modal-customer">
   <div class="modal-box">
     <div class="modal-title">👤 Nama Customer</div>
     <input type="text" id="modal-customer-input" placeholder="Ketik nama customer..." onkeydown="if(event.key==='Enter')confirmCheckIn()"/>
     <div class="modal-actions">
-      <button class="modal-cancel" onclick="closeModal()">Batal</button>
+      <button class="modal-cancel" onclick="closeModalCustomer()">Batal</button>
       <button class="modal-confirm" onclick="confirmCheckIn()">Check In ✓</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ ADMIN HEADER ═══ -->
+<!-- MODAL MASTER DATA -->
+<div id="modal-master">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-master-title">Tambah Data</div>
+    <div id="modal-master-body"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModalMaster()">Batal</button>
+      <button class="modal-confirm" id="modal-master-confirm" onclick="submitModalMaster()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN HEADER -->
 <header id="admin-header" style="display:none">
   <div class="logo"><div class="logo-dot"></div>KasBot</div>
   <div class="header-center">
@@ -198,6 +213,7 @@ tr:hover td{background:#FAFAF8}
     <button class="main-tab" id="maintab-komisi" onclick="switchMainTab('komisi')">💈 Komisi</button>
     <button class="main-tab" id="maintab-expense" onclick="switchMainTab('expense')">💰 Expense</button>
     <button class="main-tab" id="maintab-absensi" onclick="switchMainTab('absensi')">📋 Absensi</button>
+    <button class="main-tab" id="maintab-master" onclick="switchMainTab('master')">⚙️ Master</button>
   </div>
   <div class="header-right">
     <select id="outlet-selector" onchange="switchOutlet()" style="font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);max-width:160px">
@@ -213,7 +229,7 @@ tr:hover td{background:#FAFAF8}
   </div>
 </header>
 
-<!-- ═══ SECTION POS ═══ -->
+<!-- SECTION POS -->
 <div id="section-pos" style="display:none">
   <main>
     <div class="section-label">Ringkasan Penjualan Bulan Ini</div>
@@ -222,10 +238,7 @@ tr:hover td{background:#FAFAF8}
       <div class="metric"><div class="metric-label">Total Transaksi</div><div class="metric-value" id="pos-trx">—</div></div>
       <div class="metric"><div class="metric-label">Rata-rata / Transaksi</div><div class="metric-value" id="pos-avg">—</div></div>
     </div>
-    <div class="card">
-      <div class="card-head"><div class="card-title">Grafik Omzet Harian</div></div>
-      <div class="card-body"><div class="chart-wrap" id="pos-chart"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-    </div>
+    <div class="card"><div class="card-head"><div class="card-title">Grafik Omzet Harian</div></div><div class="card-body"><div class="chart-wrap" id="pos-chart"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
     <div class="pos-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
       <div class="card" style="margin-bottom:0"><div class="card-head"><div class="card-title">Per Metode Bayar</div></div><div id="pos-metode"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
       <div class="card" style="margin-bottom:0"><div class="card-head"><div class="card-title">Per Produk</div></div><div id="pos-produk"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
@@ -241,7 +254,7 @@ tr:hover td{background:#FAFAF8}
   </main>
 </div>
 
-<!-- ═══ SECTION KOMISI ═══ -->
+<!-- SECTION KOMISI -->
 <div id="section-komisi" style="display:none">
   <main>
     <div class="controls" style="margin-bottom:1.5rem">
@@ -250,29 +263,19 @@ tr:hover td{background:#FAFAF8}
         <button class="btn" id="komisi-btn-harian" onclick="switchKomisiMode('harian')">Harian</button>
       </div>
       <div style="flex:1"></div>
-      <button class="btn" onclick="exportKomisiCSV()">
-        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export CSV
-      </button>
+      <button class="btn" onclick="exportKomisiCSV()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
     </div>
-    <div class="section-label" id="komisi-periode-label">Komisi Bulan Ini</div>
     <div class="metrics-grid" style="margin-bottom:2rem">
       <div class="metric"><div class="metric-label">Total Omzet</div><div class="metric-value green" id="komisi-total-omzet">—</div></div>
       <div class="metric"><div class="metric-label">Total Komisi</div><div class="metric-value green" id="komisi-total-komisi">—</div></div>
       <div class="metric"><div class="metric-label">Jumlah Capster</div><div class="metric-value" id="komisi-total-capster">—</div></div>
     </div>
     <div class="card"><div class="card-head"><div class="card-title">Rekap Komisi per Capster</div></div><div style="overflow-x:auto"><div id="komisi-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
-    <div class="card">
-      <div class="card-head">
-        <div class="card-title">Detail Harian per Capster</div>
-        <select id="komisi-filter-capster" onchange="renderKomisiDetail()" style="font-size:12px;padding:4px 8px"><option value="">Semua Capster</option></select>
-      </div>
-      <div style="overflow-x:auto"><div id="komisi-detail"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-    </div>
+    <div class="card"><div class="card-head"><div class="card-title">Detail Harian per Capster</div><select id="komisi-filter-capster" onchange="renderKomisiDetail()" style="font-size:12px;padding:4px 8px"><option value="">Semua Capster</option></select></div><div style="overflow-x:auto"><div id="komisi-detail"><div class="empty">Pilih capster untuk lihat detail</div></div></div></div>
   </main>
 </div>
 
-<!-- ═══ SECTION EXPENSE ═══ -->
+<!-- SECTION EXPENSE -->
 <div id="section-expense" style="display:none">
   <main>
     <div class="sub-nav">
@@ -282,10 +285,7 @@ tr:hover td{background:#FAFAF8}
     <div id="expense-kasbesar">
       <div class="controls">
         <select id="expense-filter-bulan" onchange="applyExpenseFilter()"><option value="">Semua bulan</option></select>
-        <button class="btn" onclick="exportExpenseCSV('kasbesar')">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Export CSV
-        </button>
+        <button class="btn" onclick="exportExpenseCSV('kasbesar')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
       </div>
       <div class="section-label">Ringkasan Kas Besar</div>
       <div class="expense-summary">
@@ -293,13 +293,7 @@ tr:hover td{background:#FAFAF8}
         <div class="metric"><div class="metric-label">Total Keluar</div><div class="metric-value red" id="kb-keluar">—</div></div>
         <div class="metric"><div class="metric-label">Saldo</div><div class="metric-value" id="kb-saldo">—</div><div class="metric-sub" id="kb-trx">—</div></div>
       </div>
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title">Grafik Kas Besar</div>
-          <div class="legend"><span><div class="dot" style="background:var(--green)"></div>Masuk</span><span><div class="dot" style="background:var(--red)"></div>Keluar</span></div>
-        </div>
-        <div class="card-body"><div class="chart-wrap" id="kb-chart"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-      </div>
+      <div class="card"><div class="card-head"><div class="card-title">Grafik Kas Besar</div><div class="legend"><span><div class="dot" style="background:var(--green)"></div>Masuk</span><span><div class="dot" style="background:var(--red)"></div>Keluar</span></div></div><div class="card-body"><div class="chart-wrap" id="kb-chart"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
       <div class="card"><div class="card-head"><div class="card-title">Transaksi Kas Besar</div></div><div style="overflow-x:auto"><div id="kb-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
     </div>
     <div id="expense-petty" style="display:none">
@@ -309,19 +303,12 @@ tr:hover td{background:#FAFAF8}
         <div class="metric"><div class="metric-label">Total Keluar</div><div class="metric-value red" id="pc-keluar">—</div></div>
         <div class="metric"><div class="metric-label">Saldo</div><div class="metric-value" id="pc-saldo">—</div><div class="metric-sub" id="pc-trx">—</div></div>
       </div>
-      <div class="card">
-        <div class="card-head"><div class="card-title">Transaksi Petty Cash</div>
-          <button class="btn" onclick="exportExpenseCSV('petty')" style="font-size:11px">
-            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export
-          </button>
-        </div>
-        <div style="overflow-x:auto"><div id="pc-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-      </div>
+      <div class="card"><div class="card-head"><div class="card-title">Transaksi Petty Cash</div><button class="btn" onclick="exportExpenseCSV('petty')" style="font-size:11px"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button></div><div style="overflow-x:auto"><div id="pc-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
     </div>
   </main>
 </div>
 
-<!-- ═══ SECTION ABSENSI ═══ -->
+<!-- SECTION ABSENSI -->
 <div id="section-absensi" style="display:none">
   <main>
     <div class="controls" style="margin-bottom:1.5rem">
@@ -329,41 +316,60 @@ tr:hover td{background:#FAFAF8}
         <option value="">BOW BARBERSHOP</option>
         <option value="jelambar">BOW JELAMBAR</option>
       </select>
-      <button class="btn" onclick="loadAbsensi()">
-        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        Refresh
-      </button>
+      <button class="btn" onclick="loadAbsensi()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Refresh</button>
     </div>
     <div class="section-label">Status Capster Sekarang</div>
     <div class="capster-grid" id="absensi-status-grid"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
     <div class="card">
-      <div class="card-head">
-        <div class="card-title">Riwayat Absensi Hari Ini</div>
-        <span id="absensi-tanggal" style="font-size:12px;color:var(--hint);font-family:'DM Mono',monospace"></span>
-      </div>
+      <div class="card-head"><div class="card-title">Riwayat Absensi Hari Ini</div><span id="absensi-tanggal" style="font-size:12px;color:var(--hint);font-family:'DM Mono',monospace"></span></div>
       <div style="overflow-x:auto"><div id="absensi-riwayat-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
     </div>
   </main>
 </div>
 
+<!-- SECTION MASTER DATA -->
+<div id="section-master" style="display:none">
+  <main>
+    <div class="sub-nav">
+      <button class="sub-tab active" id="subtab-produk" onclick="switchMasterTab('produk')">🛍️ Produk</button>
+      <button class="sub-tab" id="subtab-capster" onclick="switchMasterTab('capster')">💈 Capster</button>
+    </div>
+
+    <!-- PRODUK -->
+    <div id="master-produk">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Daftar Produk</div>
+          <button class="btn btn-primary" onclick="openModalTambahProduk()">+ Tambah Produk</button>
+        </div>
+        <div style="overflow-x:auto"><div id="produk-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+      </div>
+    </div>
+
+    <!-- CAPSTER -->
+    <div id="master-capster" style="display:none">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Daftar Capster</div>
+          <button class="btn btn-primary" onclick="openModalTambahCapster()">+ Tambah Capster</button>
+        </div>
+        <div style="overflow-x:auto"><div id="capster-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
 <script>
-// ═══════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════
 const BASE = 'https://kasbot-backend-java-production-184e.up.railway.app';
 const API_KEY = 'kasbot_sk_2024_BOW_barber99';
 const DASHBOARD_PASSWORD = 'bow2024';
 
-// ═══════════════════════════════════════════════════
-// LOGIN
-// ═══════════════════════════════════════════════════
+// ═══ LOGIN ═══
 function switchLoginTab(tab) {
   ['admin','capster'].forEach(t => {
-    document.getElementById('ltab-' + t).className = 'login-tab' + (t === tab ? ' active' : '');
-    document.getElementById('lform-' + t).className = 'login-form' + (t === tab ? ' active' : '');
+    document.getElementById('ltab-'+t).className = 'login-tab'+(t===tab?' active':'');
+    document.getElementById('lform-'+t).className = 'login-form'+(t===tab?' active':'');
   });
-  document.getElementById('login-error-admin').style.display = 'none';
-  document.getElementById('login-error-capster').style.display = 'none';
 }
 
 function doLoginAdmin() {
@@ -373,32 +379,25 @@ function doLoginAdmin() {
     sessionStorage.setItem('kasbot_auth', DASHBOARD_PASSWORD);
     document.getElementById('login-overlay').style.display = 'none';
     document.getElementById('admin-header').style.display = 'flex';
-    showAdminSections();
+    document.getElementById('section-pos').style.display = 'block';
     initApp();
   } else {
     err.style.display = 'block';
     document.getElementById('login-input-admin').value = '';
-    document.getElementById('login-input-admin').focus();
   }
 }
 
 function logoutAdmin() { sessionStorage.removeItem('kasbot_auth'); location.reload(); }
-function showAdminSections() { document.getElementById('section-pos').style.display = 'block'; }
 
-// ═══════════════════════════════════════════════════
-// LOGIN CAPSTER
-// ═══════════════════════════════════════════════════
 let currentCapster = null;
-
 async function doLoginCapster() {
   const userId = document.getElementById('login-userid').value.trim().toUpperCase();
   const pin    = document.getElementById('login-pin').value.trim();
   const err    = document.getElementById('login-error-capster');
-  if (!userId || !pin) { err.textContent = 'User ID dan PIN wajib diisi.'; err.style.display = 'block'; return; }
+  if (!userId||!pin) { err.textContent='User ID dan PIN wajib diisi.'; err.style.display='block'; return; }
   try {
-    const res = await fetch(BASE + '/api/capster/login?api_key=' + API_KEY, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({userId, pin})
+    const res = await fetch(BASE+'/api/capster/login?api_key='+API_KEY, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId,pin})
     });
     const d = await res.json();
     if (d.success && d.capster) {
@@ -407,26 +406,21 @@ async function doLoginCapster() {
       document.getElementById('login-overlay').style.display = 'none';
       showCapsterPage(d.capster);
     } else {
-      err.textContent = 'User ID atau PIN salah.';
-      err.style.display = 'block';
+      err.textContent = 'User ID atau PIN salah.'; err.style.display = 'block';
       document.getElementById('login-pin').value = '';
-      document.getElementById('login-pin').focus();
     }
-  } catch(e) { err.textContent = 'Koneksi gagal. Coba lagi.'; err.style.display = 'block'; }
+  } catch(e) { err.textContent='Koneksi gagal.'; err.style.display='block'; }
 }
 
-function logoutCapster() { sessionStorage.removeItem('kasbot_capster'); currentCapster = null; location.reload(); }
+function logoutCapster() { sessionStorage.removeItem('kasbot_capster'); currentCapster=null; location.reload(); }
 
-// ═══════════════════════════════════════════════════
-// CAPSTER PAGE
-// ═══════════════════════════════════════════════════
+// ═══ CAPSTER PAGE ═══
 function showCapsterPage(capster) {
   document.getElementById('capster-page').style.display = 'block';
-  document.getElementById('capster-header-name').textContent = '💈 ' + capster.nama;
+  document.getElementById('capster-header-name').textContent = '💈 '+capster.nama;
   document.getElementById('cp-nama').textContent   = capster.nama;
-  document.getElementById('cp-outlet').textContent = capster.outlet || 'BOW BARBERSHOP';
-  document.getElementById('cp-tanggal').textContent =
-    new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('cp-outlet').textContent = capster.outlet||'BOW BARBERSHOP';
+  document.getElementById('cp-tanggal').textContent = new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   loadCapsterStatus();
   setInterval(loadCapsterStatus, 30000);
 }
@@ -434,465 +428,552 @@ function showCapsterPage(capster) {
 async function loadCapsterStatus() {
   if (!currentCapster) return;
   try {
-    const outlet = currentCapster.outlet || '';
-    const outletParam = outlet ? '?outlet=' + encodeURIComponent(outlet) : '';
-    const [statusRes, riwayatRes] = await Promise.all([
-      apiFetch(BASE + '/api/absensi/status' + outletParam),
-      apiFetch(BASE + '/api/absensi/riwayat' + outletParam)
-    ]);
-    let isAktif = false, waktuCi = '';
-    if (statusRes.success && statusRes.data) {
-      const found = statusRes.data.find(c => c.nama.toLowerCase() === currentCapster.nama.toLowerCase());
-      if (found) { isAktif = found.checkedIn; waktuCi = found.waktuCi || ''; }
+    const outlet = currentCapster.outlet||'';
+    const op = outlet ? '?outlet='+encodeURIComponent(outlet) : '';
+    const [sr, rr] = await Promise.all([apiFetch(BASE+'/api/absensi/status'+op), apiFetch(BASE+'/api/absensi/riwayat'+op)]);
+    let isAktif=false, waktuCi='';
+    if (sr.success && sr.data) {
+      const found = sr.data.find(c => c.nama.toLowerCase()===currentCapster.nama.toLowerCase());
+      if (found) { isAktif=found.checkedIn; waktuCi=found.waktuCi||''; }
     }
-    const badge = document.getElementById('cp-status-badge');
-    const btnCi = document.getElementById('cp-btn-ci');
-    const btnCo = document.getElementById('cp-btn-co');
-    const cpTime = document.getElementById('cp-time');
+    const badge=document.getElementById('cp-status-badge');
+    const btnCi=document.getElementById('cp-btn-ci');
+    const btnCo=document.getElementById('cp-btn-co');
     if (isAktif) {
-      badge.className = 'capster-hero-status status-aktif';
-      badge.textContent = '🟢 Sedang Bertugas';
-      cpTime.textContent = waktuCi ? 'Check in: ' + waktuCi.substring(11) : '';
-      btnCi.disabled = true; btnCo.disabled = false;
+      badge.className='capster-hero-status status-aktif'; badge.textContent='🟢 Sedang Bertugas';
+      document.getElementById('cp-time').textContent=waktuCi?'Check in: '+waktuCi.substring(11):'';
+      btnCi.disabled=true; btnCo.disabled=false;
     } else {
-      badge.className = 'capster-hero-status status-off';
-      badge.textContent = '🔴 Tidak Aktif';
-      cpTime.textContent = '';
-      btnCi.disabled = false; btnCo.disabled = true;
+      badge.className='capster-hero-status status-off'; badge.textContent='🔴 Tidak Aktif';
+      document.getElementById('cp-time').textContent=''; btnCi.disabled=false; btnCo.disabled=true;
     }
-    renderCapsterRiwayat(riwayatRes);
-  } catch(e) { console.error('[CAPSTER STATUS]', e); }
+    renderCapsterRiwayat(rr);
+  } catch(e) { console.error(e); }
 }
 
 function renderCapsterRiwayat(data) {
   const el = document.getElementById('cp-riwayat');
-  if (!data.success || !data.data || !data.data.length) { el.innerHTML = '<div class="empty">Belum ada riwayat hari ini</div>'; return; }
-  const myData = data.data.filter(r => r.nama.toLowerCase() === currentCapster.nama.toLowerCase());
-  if (!myData.length) { el.innerHTML = '<div class="empty">Belum ada riwayat hari ini</div>'; return; }
-  let html = '<table><thead><tr><th>#</th><th>Customer</th><th>Check In</th><th>Check Out</th><th style="text-align:right">Durasi</th><th>Status</th></tr></thead><tbody>';
-  let no = 1;
+  if (!data.success||!data.data||!data.data.length) { el.innerHTML='<div class="empty">Belum ada riwayat hari ini</div>'; return; }
+  const myData = data.data.filter(r => r.nama.toLowerCase()===currentCapster.nama.toLowerCase());
+  if (!myData.length) { el.innerHTML='<div class="empty">Belum ada riwayat hari ini</div>'; return; }
+  let html='<table><thead><tr><th>#</th><th>Customer</th><th>Check In</th><th>Check Out</th><th style="text-align:right">Durasi</th><th>Status</th></tr></thead><tbody>';
+  let no=1;
   myData.forEach(r => {
-    const ci = r.checkIn ? r.checkIn.substring(11) : '—';
-    const co = r.checkOut ? r.checkOut.substring(11) : '—';
-    const durasi = r.durasi ? r.durasi + ' mnt' : (r.status === 'AKTIF' ? 'Ongoing' : '—');
-    const statusBadge = r.status === 'AKTIF'
-      ? '<span style="color:var(--green);font-weight:600">● Aktif</span>'
-      : '<span style="color:var(--muted)">✓ Selesai</span>';
-    html += `<tr><td class="mono">${no++}</td><td><b>${r.namaCustomer||'—'}</b></td><td class="mono" style="font-size:11px">${ci}</td><td class="mono" style="font-size:11px">${co}</td><td style="text-align:right" class="mono">${durasi}</td><td>${statusBadge}</td></tr>`;
+    const statusBadge = r.status==='AKTIF' ? '<span style="color:var(--green);font-weight:600">● Aktif</span>' : '<span style="color:var(--muted)">✓ Selesai</span>';
+    html += `<tr><td class="mono">${no++}</td><td><b>${r.namaCustomer||'—'}</b></td><td class="mono" style="font-size:11px">${r.checkIn?r.checkIn.substring(11):'—'}</td><td class="mono" style="font-size:11px">${r.checkOut?r.checkOut.substring(11):'—'}</td><td style="text-align:right" class="mono">${r.durasi?r.durasi+' mnt':(r.status==='AKTIF'?'Ongoing':'—')}</td><td>${statusBadge}</td></tr>`;
   });
-  el.innerHTML = html + '</tbody></table>';
+  el.innerHTML = html+'</tbody></table>';
 }
 
 function openModalCheckIn() {
   document.getElementById('modal-customer').classList.add('open');
   document.getElementById('modal-customer-input').value = '';
-  setTimeout(() => document.getElementById('modal-customer-input').focus(), 100);
+  setTimeout(()=>document.getElementById('modal-customer-input').focus(),100);
 }
-function closeModal() { document.getElementById('modal-customer').classList.remove('open'); }
+function closeModalCustomer() { document.getElementById('modal-customer').classList.remove('open'); }
 
 async function confirmCheckIn() {
   const namaCustomer = document.getElementById('modal-customer-input').value.trim();
-  if (!namaCustomer) {
-    document.getElementById('modal-customer-input').style.borderColor = 'var(--red)';
-    setTimeout(() => document.getElementById('modal-customer-input').style.borderColor = '', 1000);
-    return;
-  }
-  closeModal();
+  if (!namaCustomer) { document.getElementById('modal-customer-input').style.borderColor='var(--red)'; setTimeout(()=>document.getElementById('modal-customer-input').style.borderColor='',1000); return; }
+  closeModalCustomer();
   try {
-    const outlet = currentCapster.outlet || 'BOW BARBERSHOP';
-    const res = await fetch(BASE + '/api/absensi/checkin?api_key=' + API_KEY, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({nama: currentCapster.nama, outlet, namaCustomer})
-    });
+    const outlet = currentCapster.outlet||'BOW BARBERSHOP';
+    const res = await fetch(BASE+'/api/absensi/checkin?api_key='+API_KEY, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nama:currentCapster.nama,outlet,namaCustomer})});
     const d = await res.json();
-    showToast(d.success ? '✅ Check In berhasil! Customer: ' + namaCustomer : '❌ ' + (d.error||'Gagal'), !d.success);
+    showToast(d.success?'✅ Check In berhasil! Customer: '+namaCustomer:'❌ '+(d.error||'Gagal'),!d.success);
     loadCapsterStatus();
-  } catch(e) { showToast('❌ Koneksi gagal', true); }
+  } catch(e) { showToast('❌ Koneksi gagal',true); }
 }
 
 async function doCapsterCheckOut() {
   if (!confirm('Check Out sekarang?')) return;
   try {
-    const outlet = currentCapster.outlet || 'BOW BARBERSHOP';
-    const res = await fetch(BASE + '/api/absensi/checkout?api_key=' + API_KEY, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({nama: currentCapster.nama, outlet})
-    });
+    const outlet = currentCapster.outlet||'BOW BARBERSHOP';
+    const res = await fetch(BASE+'/api/absensi/checkout?api_key='+API_KEY, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nama:currentCapster.nama,outlet})});
     const d = await res.json();
-    showToast(d.success ? '✅ Check Out berhasil! Durasi: ' + d.durasi + ' menit' : '❌ ' + (d.error||'Gagal'), !d.success);
+    showToast(d.success?'✅ Check Out berhasil! Durasi: '+d.durasi+' menit':'❌ '+(d.error||'Gagal'),!d.success);
     loadCapsterStatus();
-  } catch(e) { showToast('❌ Koneksi gagal', true); }
+  } catch(e) { showToast('❌ Koneksi gagal',true); }
 }
 
-function showToast(msg, isError=false) {
-  let t = document.getElementById('toast-notif');
-  if (!t) { t = document.createElement('div'); t.id = 'toast-notif'; t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;z-index:9999;transition:.3s;box-shadow:0 4px 16px rgba(0,0,0,.15)'; document.body.appendChild(t); }
-  t.textContent = msg;
-  t.style.background = isError ? 'var(--red)' : 'var(--green)';
-  t.style.color = '#fff'; t.style.opacity = '1';
-  setTimeout(() => { t.style.opacity = '0'; }, 3000);
+function showToast(msg,isError=false) {
+  let t=document.getElementById('toast-notif');
+  if (!t) { t=document.createElement('div'); t.id='toast-notif'; t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;z-index:9999;transition:.3s;box-shadow:0 4px 16px rgba(0,0,0,.15)'; document.body.appendChild(t); }
+  t.textContent=msg; t.style.background=isError?'var(--red)':'var(--green)'; t.style.color='#fff'; t.style.opacity='1';
+  setTimeout(()=>{t.style.opacity='0';},3000);
 }
 
-// ═══════════════════════════════════════════════════
-// AUTH CHECK ON LOAD
-// ═══════════════════════════════════════════════════
-function checkAuth() { return sessionStorage.getItem('kasbot_auth') === DASHBOARD_PASSWORD; }
+// ═══ AUTH CHECK ═══
+function checkAuth() { return sessionStorage.getItem('kasbot_auth')===DASHBOARD_PASSWORD; }
 const savedCapster = sessionStorage.getItem('kasbot_capster');
 if (savedCapster) {
-  try { currentCapster = JSON.parse(savedCapster); document.getElementById('login-overlay').style.display = 'none'; showCapsterPage(currentCapster); }
+  try { currentCapster=JSON.parse(savedCapster); document.getElementById('login-overlay').style.display='none'; showCapsterPage(currentCapster); }
   catch(e) { sessionStorage.removeItem('kasbot_capster'); }
 } else if (checkAuth()) {
-  document.getElementById('login-overlay').style.display = 'none';
-  document.getElementById('admin-header').style.display = 'flex';
-  showAdminSections(); initApp();
-} else { setTimeout(() => document.getElementById('login-input-admin').focus(), 100); }
+  document.getElementById('login-overlay').style.display='none';
+  document.getElementById('admin-header').style.display='flex';
+  document.getElementById('section-pos').style.display='block';
+  initApp();
+} else { setTimeout(()=>document.getElementById('login-input-admin').focus(),100); }
 
-// ═══════════════════════════════════════════════════
-// API
-// ═══════════════════════════════════════════════════
+// ═══ API ═══
 async function apiFetch(url) {
-  const sep = url.includes('?') ? '&' : '?';
-  const res = await fetch(url + sep + 'api_key=' + API_KEY);
+  const sep = url.includes('?')?'&':'?';
+  const res = await fetch(url+sep+'api_key='+API_KEY);
   return res.json();
 }
 
-// ═══════════════════════════════════════════════════
-// INIT ADMIN
-// ═══════════════════════════════════════════════════
-let currentOutlet = '';
-let currentMainTab = 'pos';
-
-function initApp() {
-  loadAll();
-  setInterval(loadAll, 5 * 60 * 1000);
+async function apiPost(url, body) {
+  const sep = url.includes('?')?'&':'?';
+  const res = await fetch(url+sep+'api_key='+API_KEY, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  return res.json();
 }
+
+// ═══ INIT ═══
+let currentOutlet='', currentMainTab='pos';
+
+function initApp() { loadAll(); setInterval(loadAll,5*60*1000); }
 
 function switchOutlet() {
   currentOutlet = document.getElementById('outlet-selector').value;
-  posData = null; komisiData = null; kbData = []; pcData = [];
+  posData=null; komisiData=null; kbData=[]; pcData=[];
   loadAll();
+  if (currentMainTab==='master') loadMasterData();
 }
 
 function switchMainTab(tab) {
   currentMainTab = tab;
-  ['pos','komisi','expense','absensi'].forEach(t => {
-    document.getElementById('section-' + t).style.display = t === tab ? 'block' : 'none';
-    document.getElementById('maintab-' + t).className = 'main-tab' + (t === tab ? ' active' : '');
+  ['pos','komisi','expense','absensi','master'].forEach(t => {
+    document.getElementById('section-'+t).style.display = t===tab?'block':'none';
+    document.getElementById('maintab-'+t).className = 'main-tab'+(t===tab?' active':'');
   });
-  if (tab === 'pos' && !posData) loadPOS();
-  if (tab === 'komisi' && !komisiData) loadKomisi('bulanan');
-  if (tab === 'expense') loadExpense();
-  if (tab === 'absensi') loadAbsensi();
+  if (tab==='pos'&&!posData) loadPOS();
+  if (tab==='komisi'&&!komisiData) loadKomisi('bulanan');
+  if (tab==='expense') loadExpense();
+  if (tab==='absensi') loadAbsensi();
+  if (tab==='master') loadMasterData();
 }
 
 function loadAll() {
-  loadPOS();
-  loadExpense();
-  document.getElementById('last-update').textContent =
-    new Date().toLocaleString('id-ID', {timeZone:'Asia/Jakarta', hour:'2-digit', minute:'2-digit'});
+  loadPOS(); loadExpense();
+  document.getElementById('last-update').textContent = new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit'});
 }
 
-// ═══════════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════════
-function fmt(n) { return 'Rp ' + Math.round(Number(n)||0).toLocaleString('id-ID'); }
+// ═══ UTILS ═══
+function fmt(n) { return 'Rp '+Math.round(Number(n)||0).toLocaleString('id-ID'); }
 function parseTgl(s) {
-  if (!s || s.includes('TOTAL') || s.includes('SALDO')) return null;
-  const p = s.split('/');
-  if (p.length === 3) return new Date(p[2], p[1]-1, p[0]);
+  if (!s||s.includes('TOTAL')) return null;
+  const p=s.split('/');
+  if (p.length===3) return new Date(p[2],p[1]-1,p[0]);
   return null;
 }
-function getBulanKey(d) { return d.getFullYear() + '-' + (d.getMonth()+1).toString().padStart(2,'0'); }
-function getBulanLabel(d) { return d.toLocaleString('id-ID', {month:'long', year:'numeric'}); }
+function getBulanKey(d) { return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0'); }
+function getBulanLabel(d) { return d.toLocaleString('id-ID',{month:'long',year:'numeric'}); }
 
-// ═══════════════════════════════════════════════════
-// POS MODULE
-// ═══════════════════════════════════════════════════
-let posData = null;
-
+// ═══ POS ═══
+let posData=null;
 async function loadPOS() {
   try {
-    const outletParam = currentOutlet ? `?outlet=${encodeURIComponent(currentOutlet)}` : '';
-    const d = await apiFetch(BASE + '/api/penjualan' + outletParam);
+    const op = currentOutlet?`?outlet=${encodeURIComponent(currentOutlet)}`:'';
+    const d = await apiFetch(BASE+'/api/penjualan'+op);
     if (!d.success) throw new Error(d.error);
-    posData = d;
-    document.getElementById('pos-omzet').textContent = fmt(d.summary.total_omzet);
-    document.getElementById('pos-trx').textContent   = d.summary.total_transaksi + ' transaksi';
-    document.getElementById('pos-avg').textContent   = fmt(d.summary.rata_rata);
-    renderPOSChart(d.by_hari);
-    renderPOSMetode(d.by_metode);
-    renderPOSProduk(d.by_produk);
-    renderPOSCapster(d.data);
-    renderPOSTrxTable(d.data);
-  } catch(e) { document.getElementById('pos-omzet').textContent = 'Error'; console.error('[POS]', e); }
+    posData=d;
+    document.getElementById('pos-omzet').textContent=fmt(d.summary.total_omzet);
+    document.getElementById('pos-trx').textContent=d.summary.total_transaksi+' transaksi';
+    document.getElementById('pos-avg').textContent=fmt(d.summary.rata_rata);
+    renderPOSChart(d.by_hari); renderPOSMetode(d.by_metode); renderPOSProduk(d.by_produk);
+    renderPOSCapster(d.data); renderPOSTrxTable(d.data);
+  } catch(e) { document.getElementById('pos-omzet').textContent='Error'; }
 }
 
 function renderPOSChart(by_hari) {
-  const el = document.getElementById('pos-chart');
-  const keys = Object.keys(by_hari||{}).sort();
-  if (!keys.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
-  const maxVal = Math.max(...keys.map(k => by_hari[k]), 1);
-  el.innerHTML = keys.map(k => {
-    const h = Math.max(Math.round((by_hari[k]/maxVal)*140), 2);
-    return `<div class="bar-group"><div class="bars"><div class="bar" style="height:${h}px;background:var(--green)" title="${fmt(by_hari[k])}"></div></div><div class="bar-lbl">${k.split('/')[0]}</div></div>`;
-  }).join('');
+  const el=document.getElementById('pos-chart');
+  const keys=Object.keys(by_hari||{}).sort();
+  if (!keys.length) { el.innerHTML='<div class="empty">Tidak ada data</div>'; return; }
+  const maxVal=Math.max(...keys.map(k=>by_hari[k]),1);
+  el.innerHTML=keys.map(k=>{const h=Math.max(Math.round((by_hari[k]/maxVal)*140),2);return`<div class="bar-group"><div class="bars"><div class="bar" style="height:${h}px;background:var(--green)" title="${fmt(by_hari[k])}"></div></div><div class="bar-lbl">${k.split('/')[0]}</div></div>`;}).join('');
 }
 
 function renderPOSMetode(by_metode) {
-  const el = document.getElementById('pos-metode');
-  const entries = Object.entries(by_metode||{}).sort((a,b) => b[1]-a[1]);
-  if (!entries.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
-  el.innerHTML = '<table><thead><tr><th>Metode</th><th style="text-align:right">Total</th></tr></thead><tbody>' +
-    entries.map(([m,v]) => `<tr><td>${m}</td><td style="text-align:right" class="mono green">${fmt(v)}</td></tr>`).join('') + '</tbody></table>';
+  const el=document.getElementById('pos-metode');
+  const entries=Object.entries(by_metode||{}).sort((a,b)=>b[1]-a[1]);
+  if (!entries.length) { el.innerHTML='<div class="empty">Tidak ada data</div>'; return; }
+  el.innerHTML='<table><thead><tr><th>Metode</th><th style="text-align:right">Total</th></tr></thead><tbody>'+entries.map(([m,v])=>`<tr><td>${m}</td><td style="text-align:right" class="mono green">${fmt(v)}</td></tr>`).join('')+'</tbody></table>';
 }
 
 function renderPOSProduk(by_produk) {
-  const el = document.getElementById('pos-produk');
-  const entries = Object.entries(by_produk||{}).sort((a,b) => b[1]-a[1]);
-  if (!entries.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
-  el.innerHTML = '<table><thead><tr><th>Produk</th><th style="text-align:right">Total</th></tr></thead><tbody>' +
-    entries.map(([p,v]) => `<tr><td>${p}</td><td style="text-align:right" class="mono green">${fmt(v)}</td></tr>`).join('') + '</tbody></table>';
+  const el=document.getElementById('pos-produk');
+  const entries=Object.entries(by_produk||{}).sort((a,b)=>b[1]-a[1]);
+  if (!entries.length) { el.innerHTML='<div class="empty">Tidak ada data</div>'; return; }
+  el.innerHTML='<table><thead><tr><th>Produk</th><th style="text-align:right">Total</th></tr></thead><tbody>'+entries.map(([p,v])=>`<tr><td>${p}</td><td style="text-align:right" class="mono green">${fmt(v)}</td></tr>`).join('')+'</tbody></table>';
 }
 
 function renderPOSCapster(data) {
-  const el = document.getElementById('pos-capster');
-  if (!data||!data.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
-  const cm = {};
-  data.forEach(t => { const c = t.capster||'—'; if (!cm[c]) cm[c]={transaksi:0,total:0}; cm[c].transaksi++; cm[c].total+=t.total; });
-  el.innerHTML = '<table class="capster-table"><thead><tr><th>Capster</th><th style="text-align:right">Transaksi</th><th style="text-align:right">Total Omzet</th><th style="text-align:right">Rata-rata</th></tr></thead><tbody>' +
-    Object.entries(cm).sort((a,b)=>b[1].total-a[1].total).map(([c,v]) =>
-      `<tr><td><b>${c}</b></td><td style="text-align:right" class="mono">${v.transaksi}</td><td style="text-align:right" class="mono green">${fmt(v.total)}</td><td style="text-align:right" class="mono">${fmt(v.transaksi>0?Math.round(v.total/v.transaksi):0)}</td></tr>`
-    ).join('') + '</tbody></table>';
+  const el=document.getElementById('pos-capster');
+  if (!data||!data.length) { el.innerHTML='<div class="empty">Tidak ada data</div>'; return; }
+  const cm={};
+  data.forEach(t=>{const c=t.capster||'—';if(!cm[c])cm[c]={transaksi:0,total:0};cm[c].transaksi++;cm[c].total+=t.total;});
+  el.innerHTML='<table class="capster-table"><thead><tr><th>Capster</th><th style="text-align:right">Transaksi</th><th style="text-align:right">Total Omzet</th><th style="text-align:right">Rata-rata</th></tr></thead><tbody>'+
+    Object.entries(cm).sort((a,b)=>b[1].total-a[1].total).map(([c,v])=>`<tr><td><b>${c}</b></td><td style="text-align:right" class="mono">${v.transaksi}</td><td style="text-align:right" class="mono green">${fmt(v.total)}</td><td style="text-align:right" class="mono">${fmt(v.transaksi>0?Math.round(v.total/v.transaksi):0)}</td></tr>`).join('')+'</tbody></table>';
 }
 
-function renderPOSTrxTable(data, filter='') {
-  const el = document.getElementById('pos-trx-table');
-  const filtered = filter ? data.filter(r => (r.customer||'').toLowerCase().includes(filter)||(r.hp||'').includes(filter)) : data;
-  if (!filtered||!filtered.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
-  el.innerHTML = '<table><thead><tr><th>No Nota</th><th>Waktu</th><th>Outlet</th><th>Kasir</th><th>Capster</th><th>Customer</th><th>Produk</th><th style="text-align:right">Total</th><th>Metode</th></tr></thead><tbody>' +
-    filtered.slice().reverse().map(r => `<tr>
-      <td class="mono" style="font-size:11px">${r.id||'—'}</td>
-      <td class="mono" style="font-size:11px">${r.waktu||'—'}</td>
-      <td style="font-size:11px">${r.outlet||'—'}</td>
-      <td style="font-size:11px">${r.kasir||'—'}</td>
-      <td>${r.capster||'—'}</td><td>${r.customer||'—'}</td><td>${r.produk||'—'}</td>
-      <td style="text-align:right" class="mono green">${fmt(r.total)}</td>
-      <td>${r.metode||'—'}</td></tr>`).join('') + '</tbody></table>';
+function renderPOSTrxTable(data,filter='') {
+  const el=document.getElementById('pos-trx-table');
+  const filtered=filter?data.filter(r=>(r.customer||'').toLowerCase().includes(filter)||(r.hp||'').includes(filter)):data;
+  if (!filtered||!filtered.length) { el.innerHTML='<div class="empty">Tidak ada data</div>'; return; }
+  el.innerHTML='<table><thead><tr><th>No Nota</th><th>Waktu</th><th>Outlet</th><th>Kasir</th><th>Capster</th><th>Customer</th><th>Produk</th><th style="text-align:right">Total</th><th>Metode</th></tr></thead><tbody>'+
+    filtered.slice().reverse().map(r=>`<tr><td class="mono" style="font-size:11px">${r.id||'—'}</td><td class="mono" style="font-size:11px">${r.waktu||'—'}</td><td style="font-size:11px">${r.outlet||'—'}</td><td style="font-size:11px">${r.kasir||'—'}</td><td>${r.capster||'—'}</td><td>${r.customer||'—'}</td><td>${r.produk||'—'}</td><td style="text-align:right" class="mono green">${fmt(r.total)}</td><td>${r.metode||'—'}</td></tr>`).join('')+'</tbody></table>';
 }
 
 function filterPosTrx() {
-  const q = document.getElementById('pos-search').value.toLowerCase().trim();
-  if (posData) renderPOSTrxTable(posData.data, q);
+  const q=document.getElementById('pos-search').value.toLowerCase().trim();
+  if (posData) renderPOSTrxTable(posData.data,q);
 }
 
-// ═══════════════════════════════════════════════════
-// KOMISI MODULE
-// ═══════════════════════════════════════════════════
-let komisiData = null, komisiMode = 'bulanan';
-
+// ═══ KOMISI ═══
+let komisiData=null, komisiMode='bulanan';
 async function loadKomisi(mode) {
-  komisiMode = mode || 'bulanan';
+  komisiMode=mode||'bulanan';
   try {
-    const outletParam = currentOutlet ? `&outlet=${encodeURIComponent(currentOutlet)}` : '';
-    const d = await apiFetch(BASE + '/api/penjualan/komisi?mode=' + komisiMode + outletParam);
-    if (!d.success && !d.data) throw new Error(d.error);
-    komisiData = d;
-    const totalOmzet  = d.data ? d.data.reduce((s,c) => s+(c.omzet||0), 0) : 0;
-    const totalKomisi = d.data ? d.data.reduce((s,c) => s+(c.komisi||0), 0) : 0;
-    document.getElementById('komisi-total-omzet').textContent   = fmt(totalOmzet);
-    document.getElementById('komisi-total-komisi').textContent  = fmt(totalKomisi);
-    document.getElementById('komisi-total-capster').textContent = (d.data||[]).length + ' capster';
+    const op=currentOutlet?`&outlet=${encodeURIComponent(currentOutlet)}`:'';
+    const d=await apiFetch(BASE+'/api/penjualan/komisi?mode='+komisiMode+op);
+    komisiData=d;
+    const totalOmzet=d.data?d.data.reduce((s,c)=>s+(c.omzet||0),0):0;
+    const totalKomisi=d.data?d.data.reduce((s,c)=>s+(c.komisi||0),0):0;
+    document.getElementById('komisi-total-omzet').textContent=fmt(totalOmzet);
+    document.getElementById('komisi-total-komisi').textContent=fmt(totalKomisi);
+    document.getElementById('komisi-total-capster').textContent=(d.data||[]).length+' capster';
     renderKomisiTable(d.data||[]);
-  } catch(e) { document.getElementById('komisi-total-omzet').textContent = 'Error'; console.error('[KOMISI]', e); }
+  } catch(e) { document.getElementById('komisi-total-omzet').textContent='Error'; }
 }
 
 function switchKomisiMode(mode) {
-  document.getElementById('komisi-btn-bulanan').style.cssText = mode==='bulanan' ? 'background:var(--green);color:#fff;border-color:var(--green)' : '';
-  document.getElementById('komisi-btn-harian').style.cssText  = mode==='harian'  ? 'background:var(--green);color:#fff;border-color:var(--green)' : '';
-  komisiData = null; loadKomisi(mode);
+  document.getElementById('komisi-btn-bulanan').style.cssText=mode==='bulanan'?'background:var(--green);color:#fff;border-color:var(--green)':'';
+  document.getElementById('komisi-btn-harian').style.cssText=mode==='harian'?'background:var(--green);color:#fff;border-color:var(--green)':'';
+  komisiData=null; loadKomisi(mode);
 }
 
 function renderKomisiTable(data) {
-  const el = document.getElementById('komisi-table');
-  if (!data.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
-  el.innerHTML = '<table><thead><tr><th>Capster</th><th style="text-align:right">Transaksi</th><th style="text-align:right">Omzet</th><th style="text-align:right">Komisi %</th><th style="text-align:right">Total Komisi</th></tr></thead><tbody>' +
-    data.map(c => `<tr><td><b>${c.capster||c.nama}</b></td><td style="text-align:right" class="mono">${c.jumlahTrx||c.transaksi||0}</td><td style="text-align:right" class="mono">${fmt(c.omzet)}</td><td style="text-align:right" class="mono">${((c.komisiPct||0)*100).toFixed(0)}%</td><td style="text-align:right" class="mono green"><b>${fmt(c.komisi)}</b></td></tr>`).join('') + '</tbody></table>';
+  const el=document.getElementById('komisi-table');
+  if (!data.length) { el.innerHTML='<div class="empty">Tidak ada data</div>'; return; }
+  el.innerHTML='<table><thead><tr><th>Capster</th><th style="text-align:right">Transaksi</th><th style="text-align:right">Omzet</th><th style="text-align:right">Komisi %</th><th style="text-align:right">Total Komisi</th></tr></thead><tbody>'+
+    data.map(c=>`<tr><td><b>${c.capster||c.nama}</b></td><td style="text-align:right" class="mono">${c.jumlahTrx||c.transaksi||0}</td><td style="text-align:right" class="mono">${fmt(c.omzet)}</td><td style="text-align:right" class="mono">${((c.komisiPct||0)*100).toFixed(0)}%</td><td style="text-align:right" class="mono green"><b>${fmt(c.komisi)}</b></td></tr>`).join('')+'</tbody></table>';
 }
 
-function renderKomisiDetail() { document.getElementById('komisi-detail').innerHTML = '<div class="empty">Pilih capster untuk lihat detail</div>'; }
+function renderKomisiDetail() { document.getElementById('komisi-detail').innerHTML='<div class="empty">Pilih capster untuk lihat detail</div>'; }
 
 function exportKomisiCSV() {
   if (!komisiData||!komisiData.data) return;
-  const csv = 'Capster,Transaksi,Omzet,Komisi\n' + komisiData.data.map(c => `${c.capster||c.nama},${c.jumlahTrx||0},${c.omzet||0},${c.komisi||0}`).join('\n');
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download = 'komisi-' + new Date().toISOString().slice(0,10) + '.csv'; a.click();
+  const csv='Capster,Transaksi,Omzet,Komisi\n'+komisiData.data.map(c=>`${c.capster||c.nama},${c.jumlahTrx||0},${c.omzet||0},${c.komisi||0}`).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='komisi-'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
 }
 
-// ═══════════════════════════════════════════════════
-// EXPENSE MODULE
-// ═══════════════════════════════════════════════════
-let expenseTab = 'kasbesar', kbData = [], pcData = [], kbFilterBulan = '';
+// ═══ EXPENSE ═══
+let expenseTab='kasbesar', kbData=[], pcData=[], kbFilterBulan='';
 
 function switchExpenseTab(tab) {
-  expenseTab = tab;
-  document.getElementById('expense-kasbesar').style.display = tab==='kasbesar' ? 'block' : 'none';
-  document.getElementById('expense-petty').style.display    = tab==='petty'    ? 'block' : 'none';
-  document.getElementById('subtab-kasbesar').className = 'sub-tab' + (tab==='kasbesar' ? ' active' : '');
-  document.getElementById('subtab-petty').className    = 'sub-tab' + (tab==='petty'    ? ' active' : '');
+  expenseTab=tab;
+  document.getElementById('expense-kasbesar').style.display=tab==='kasbesar'?'block':'none';
+  document.getElementById('expense-petty').style.display=tab==='petty'?'block':'none';
+  document.getElementById('subtab-kasbesar').className='sub-tab'+(tab==='kasbesar'?' active':'');
+  document.getElementById('subtab-petty').className='sub-tab'+(tab==='petty'?' active':'');
 }
 
-async function loadExpense() { await Promise.all([loadKasBesar(), loadPettyCash()]); }
+async function loadExpense() { await Promise.all([loadKasBesar(),loadPettyCash()]); }
 
 async function loadKasBesar() {
   try {
-    const outletParam = currentOutlet ? `?outlet=${encodeURIComponent(currentOutlet)}` : '';
-    const d = await apiFetch(BASE + '/api/summary' + outletParam);
+    const op=currentOutlet?`?outlet=${encodeURIComponent(currentOutlet)}`:'';
+    const d=await apiFetch(BASE+'/api/summary'+op);
     if (!d.success) throw 0;
-    document.getElementById('kb-masuk').textContent  = fmt(d.kas_besar ? d.kas_besar.masuk  : 0);
-    document.getElementById('kb-keluar').textContent = fmt(d.kas_besar ? d.kas_besar.keluar : 0);
-    document.getElementById('kb-saldo').textContent  = fmt(d.kas_besar ? d.kas_besar.saldo  : 0);
-    document.getElementById('kb-trx').textContent    = '—';
-    const trx = await apiFetch(BASE + '/api/transaksi' + outletParam);
-    if (trx.success || Array.isArray(trx)) {
-      kbData = Array.isArray(trx) ? trx : (trx.data || []);
+    document.getElementById('kb-masuk').textContent=fmt(d.kas_besar?d.kas_besar.masuk:0);
+    document.getElementById('kb-keluar').textContent=fmt(d.kas_besar?d.kas_besar.keluar:0);
+    document.getElementById('kb-saldo').textContent=fmt(d.kas_besar?d.kas_besar.saldo:0);
+    document.getElementById('kb-trx').textContent='—';
+    const trx=await apiFetch(BASE+'/api/transaksi'+op);
+    if (trx.success||Array.isArray(trx)) {
+      kbData=Array.isArray(trx)?trx:(trx.data||[]);
       populateKbFilter(); renderKbTable(); renderKbChart();
     }
-  } catch(e) { console.error('[KB]', e); }
+  } catch(e) { console.error('[KB]',e); }
 }
 
 function populateKbFilter() {
-  const keys = new Map();
-  kbData.forEach(t => { const d = parseTgl(t.tanggal); if (d) keys.set(getBulanKey(d), getBulanLabel(d)); });
-  const sel = document.getElementById('expense-filter-bulan');
-  while (sel.options.length > 1) sel.remove(1);
-  [...keys.entries()].sort((a,b) => b[0].localeCompare(a[0])).forEach(([k,v]) => {
-    const o = document.createElement('option'); o.value = k; o.textContent = v; sel.appendChild(o);
-  });
+  const keys=new Map();
+  kbData.forEach(t=>{const d=parseTgl(t.tanggal);if(d)keys.set(getBulanKey(d),getBulanLabel(d));});
+  const sel=document.getElementById('expense-filter-bulan');
+  while(sel.options.length>1) sel.remove(1);
+  [...keys.entries()].sort((a,b)=>b[0].localeCompare(a[0])).forEach(([k,v])=>{const o=document.createElement('option');o.value=k;o.textContent=v;sel.appendChild(o);});
 }
 
-function applyExpenseFilter() { kbFilterBulan = document.getElementById('expense-filter-bulan').value; renderKbTable(); renderKbChart(); }
+function applyExpenseFilter() { kbFilterBulan=document.getElementById('expense-filter-bulan').value; renderKbTable(); renderKbChart(); }
 function filterKb(data) {
   if (!kbFilterBulan) return data;
-  return data.filter(t => { const d = parseTgl(t.tanggal); return d && getBulanKey(d) === kbFilterBulan; });
+  return data.filter(t=>{const d=parseTgl(t.tanggal);return d&&getBulanKey(d)===kbFilterBulan;});
 }
 
 function renderKbTable() {
-  const el = document.getElementById('kb-table');
-  const data = filterKb(kbData);
-  if (!data.length) { el.innerHTML = '<div class="empty">Tidak ada data kas besar</div>'; return; }
-  el.innerHTML = '<table><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th>Penerima</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th><th style="text-align:right">Saldo</th></tr></thead><tbody>' +
-    data.map(t => {
-      const isMasuk = t.tipe === 'MASUK'; const n = t.nominal||0;
-      return `<tr><td class="mono">${t.tanggal||'—'}</td><td>${(t.deskripsi||'—').substring(0,40)}</td><td>${t.kategori||'—'}</td><td>${t.penerima||'—'}</td>
-        <td style="text-align:right" class="mono">${!isMasuk?'<span class="red">'+fmt(n)+'</span>':'—'}</td>
-        <td style="text-align:right" class="mono">${isMasuk?'<span class="green">'+fmt(n)+'</span>':'—'}</td>
-        <td style="text-align:right" class="mono">${t.saldo?fmt(t.saldo):'—'}</td></tr>`;
-    }).join('') + '</tbody></table>';
+  const el=document.getElementById('kb-table');
+  const data=filterKb(kbData);
+  if (!data.length) { el.innerHTML='<div class="empty">Tidak ada data kas besar</div>'; return; }
+  el.innerHTML='<table><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th>Penerima</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th><th style="text-align:right">Saldo</th></tr></thead><tbody>'+
+    data.map(t=>{const isMasuk=t.tipe==='MASUK';const n=t.nominal||0;return`<tr><td class="mono">${t.tanggal||'—'}</td><td>${(t.deskripsi||'—').substring(0,40)}</td><td>${t.kategori||'—'}</td><td>${t.penerima||'—'}</td><td style="text-align:right" class="mono">${!isMasuk?'<span class="red">'+fmt(n)+'</span>':'—'}</td><td style="text-align:right" class="mono">${isMasuk?'<span class="green">'+fmt(n)+'</span>':'—'}</td><td style="text-align:right" class="mono">${t.saldo?fmt(t.saldo):'—'}</td></tr>`;}).join('')+'</tbody></table>';
 }
 
 function renderKbChart() {
-  const el = document.getElementById('kb-chart');
-  const data = filterKb(kbData);
-  if (!data.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
-  const byBulan = {};
-  data.forEach(t => {
-    const d = parseTgl(t.tanggal); if (!d) return;
-    const k = getBulanKey(d);
-    const lbl = d.toLocaleString('id-ID',{month:'short'}) + " '" + String(d.getFullYear()).slice(2);
-    if (!byBulan[k]) byBulan[k] = {lbl, masuk:0, keluar:0};
-    if (t.tipe==='MASUK') byBulan[k].masuk += t.nominal||0; else byBulan[k].keluar += t.nominal||0;
-  });
-  const keys = Object.keys(byBulan).sort();
-  const maxVal = Math.max(...keys.map(k => Math.max(byBulan[k].masuk, byBulan[k].keluar)), 1);
-  el.innerHTML = keys.map(k => {
-    const b = byBulan[k];
-    const hM = Math.max(Math.round((b.masuk/maxVal)*140), 2);
-    const hK = Math.max(Math.round((b.keluar/maxVal)*140), 2);
-    return `<div class="bar-group"><div class="bars"><div class="bar" style="height:${hM}px;background:var(--green)" title="${fmt(b.masuk)}"></div><div class="bar" style="height:${hK}px;background:var(--red)" title="${fmt(b.keluar)}"></div></div><div class="bar-lbl">${b.lbl}</div></div>`;
-  }).join('');
+  const el=document.getElementById('kb-chart');
+  const data=filterKb(kbData);
+  if (!data.length) { el.innerHTML='<div class="empty">Tidak ada data</div>'; return; }
+  const byBulan={};
+  data.forEach(t=>{const d=parseTgl(t.tanggal);if(!d)return;const k=getBulanKey(d);const lbl=d.toLocaleString('id-ID',{month:'short'})+" '"+String(d.getFullYear()).slice(2);if(!byBulan[k])byBulan[k]={lbl,masuk:0,keluar:0};if(t.tipe==='MASUK')byBulan[k].masuk+=t.nominal||0;else byBulan[k].keluar+=t.nominal||0;});
+  const keys=Object.keys(byBulan).sort();
+  const maxVal=Math.max(...keys.map(k=>Math.max(byBulan[k].masuk,byBulan[k].keluar)),1);
+  el.innerHTML=keys.map(k=>{const b=byBulan[k];const hM=Math.max(Math.round((b.masuk/maxVal)*140),2);const hK=Math.max(Math.round((b.keluar/maxVal)*140),2);return`<div class="bar-group"><div class="bars"><div class="bar" style="height:${hM}px;background:var(--green)" title="${fmt(b.masuk)}"></div><div class="bar" style="height:${hK}px;background:var(--red)" title="${fmt(b.keluar)}"></div></div><div class="bar-lbl">${b.lbl}</div></div>`;}).join('');
 }
 
 async function loadPettyCash() {
   try {
-    const outletParam = currentOutlet ? `?outlet=${encodeURIComponent(currentOutlet)}` : '';
-    const d = await apiFetch(BASE + '/api/petty' + outletParam);
-    if (!d.success || !d.data) throw 0;
-    pcData = d.data;
-    let masuk = 0, keluar = 0;
-    d.data.forEach(t => { if (t.tipe==='MASUK') masuk+=t.nominal||0; else keluar+=t.nominal||0; });
-    document.getElementById('pc-masuk').textContent  = fmt(masuk);
-    document.getElementById('pc-keluar').textContent = fmt(keluar);
-    document.getElementById('pc-saldo').textContent  = fmt(masuk - keluar);
-    document.getElementById('pc-trx').textContent    = d.data.length + ' transaksi';
+    const op=currentOutlet?`?outlet=${encodeURIComponent(currentOutlet)}`:'';
+    const d=await apiFetch(BASE+'/api/petty'+op);
+    if (!d.success||!d.data) throw 0;
+    pcData=d.data;
+    let masuk=0,keluar=0;
+    d.data.forEach(t=>{if(t.tipe==='MASUK')masuk+=t.nominal||0;else keluar+=t.nominal||0;});
+    document.getElementById('pc-masuk').textContent=fmt(masuk);
+    document.getElementById('pc-keluar').textContent=fmt(keluar);
+    document.getElementById('pc-saldo').textContent=fmt(masuk-keluar);
+    document.getElementById('pc-trx').textContent=d.data.length+' transaksi';
     renderPcTable();
-  } catch(e) { console.error('[PC]', e); }
+  } catch(e) { console.error('[PC]',e); }
 }
 
 function renderPcTable() {
-  const el = document.getElementById('pc-table');
-  if (!pcData.length) { el.innerHTML = '<div class="empty">Tidak ada data petty cash</div>'; return; }
-  el.innerHTML = '<table><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th></tr></thead><tbody>' +
-    pcData.map(t => {
-      const isMasuk = t.tipe==='MASUK';
-      return `<tr><td class="mono">${t.tanggal||'—'}</td><td>${(t.deskripsi||'—').substring(0,40)}</td><td>${t.kategori||'—'}</td>
-        <td style="text-align:right" class="mono">${!isMasuk?'<span class="red">'+fmt(t.nominal||0)+'</span>':'—'}</td>
-        <td style="text-align:right" class="mono">${isMasuk?'<span class="green">'+fmt(t.nominal||0)+'</span>':'—'}</td></tr>`;
-    }).join('') + '</tbody></table>';
+  const el=document.getElementById('pc-table');
+  if (!pcData.length) { el.innerHTML='<div class="empty">Tidak ada data petty cash</div>'; return; }
+  el.innerHTML='<table><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th></tr></thead><tbody>'+
+    pcData.map(t=>{const isMasuk=t.tipe==='MASUK';return`<tr><td class="mono">${t.tanggal||'—'}</td><td>${(t.deskripsi||'—').substring(0,40)}</td><td>${t.kategori||'—'}</td><td style="text-align:right" class="mono">${!isMasuk?'<span class="red">'+fmt(t.nominal||0)+'</span>':'—'}</td><td style="text-align:right" class="mono">${isMasuk?'<span class="green">'+fmt(t.nominal||0)+'</span>':'—'}</td></tr>`;}).join('')+'</tbody></table>';
 }
 
 function exportExpenseCSV(type) {
-  const data = type==='kasbesar' ? filterKb(kbData) : pcData;
+  const data=type==='kasbesar'?filterKb(kbData):pcData;
   if (!data.length) { alert('Tidak ada data'); return; }
-  const csv = 'Tanggal,Deskripsi,Kategori,Tipe,Nominal\n' +
-    data.map(t => `${t.tanggal||''},${(t.deskripsi||'').replace(/,/g,' ')},${t.kategori||''},${t.tipe||''},${t.nominal||0}`).join('\n');
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download = type + '-' + new Date().toISOString().slice(0,10) + '.csv'; a.click();
+  const csv='Tanggal,Deskripsi,Kategori,Tipe,Nominal\n'+data.map(t=>`${t.tanggal||''},${(t.deskripsi||'').replace(/,/g,' ')},${t.kategori||''},${t.tipe||''},${t.nominal||0}`).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=type+'-'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
 }
 
-// ═══════════════════════════════════════════════════
-// ABSENSI MODULE (ADMIN)
-// ═══════════════════════════════════════════════════
+// ═══ ABSENSI ═══
 async function loadAbsensi() {
-  const outlet = document.getElementById('absensi-outlet').value;
-  const outletParam = outlet ? `?outlet=${encodeURIComponent(outlet)}` : '';
+  const outlet=document.getElementById('absensi-outlet').value;
+  const op=outlet?`?outlet=${encodeURIComponent(outlet)}`:'';
   try {
-    const [status, riwayat] = await Promise.all([
-      apiFetch(BASE + '/api/absensi/status' + outletParam),
-      apiFetch(BASE + '/api/absensi/riwayat' + outletParam)
-    ]);
-    renderAbsensiStatus(status, outlet);
-    renderAbsensiRiwayat(riwayat);
-  } catch(e) { console.error('[ABSENSI]', e); document.getElementById('absensi-status-grid').innerHTML = '<div class="empty">Error memuat data</div>'; }
+    const [status,riwayat]=await Promise.all([apiFetch(BASE+'/api/absensi/status'+op),apiFetch(BASE+'/api/absensi/riwayat'+op)]);
+    renderAbsensiStatus(status); renderAbsensiRiwayat(riwayat);
+  } catch(e) { document.getElementById('absensi-status-grid').innerHTML='<div class="empty">Error memuat data</div>'; }
 }
 
-function renderAbsensiStatus(data, outlet) {
-  const el = document.getElementById('absensi-status-grid');
-  if (!data.success || !data.data || !data.data.length) { el.innerHTML = '<div class="empty">Tidak ada capster terdaftar</div>'; return; }
-  el.innerHTML = data.data.map(c => {
-    const isAktif = c.checkedIn;
-    return `<div class="capster-card ${isAktif?'aktif':''}">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div class="capster-name">💈 ${c.nama}</div>
-        <span class="capster-badge ${isAktif?'badge-aktif':'badge-off'}">${isAktif?'🟢 Aktif':'🔴 Off'}</span>
-      </div>
-      <div class="capster-time">${isAktif?'Check in: '+(c.waktuCi?c.waktuCi.substring(11):'—'):'Belum check in'}</div>
-    </div>`;
-  }).join('');
+function renderAbsensiStatus(data) {
+  const el=document.getElementById('absensi-status-grid');
+  if (!data.success||!data.data||!data.data.length) { el.innerHTML='<div class="empty">Tidak ada capster terdaftar</div>'; return; }
+  el.innerHTML=data.data.map(c=>{const isAktif=c.checkedIn;return`<div class="capster-card ${isAktif?'aktif':''}"><div style="display:flex;align-items:center;justify-content:space-between"><div class="capster-name">💈 ${c.nama}</div><span class="capster-badge ${isAktif?'badge-aktif':'badge-off'}">${isAktif?'🟢 Aktif':'🔴 Off'}</span></div><div class="capster-time">${isAktif?'Check in: '+(c.waktuCi?c.waktuCi.substring(11):'—'):'Belum check in'}</div></div>`;}).join('');
 }
 
 function renderAbsensiRiwayat(data) {
-  const el = document.getElementById('absensi-riwayat-table');
-  document.getElementById('absensi-tanggal').textContent = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'});
-  if (!data.success || !data.data || !data.data.length) { el.innerHTML = '<div class="empty">Belum ada riwayat hari ini</div>'; return; }
-  el.innerHTML = '<table><thead><tr><th>Capster</th><th>Customer</th><th>Check In</th><th>Check Out</th><th style="text-align:right">Durasi</th><th>Status</th><th>Komisi</th></tr></thead><tbody>' +
-    data.data.map(r => `<tr>
-      <td><b>${r.nama}</b></td><td>${r.namaCustomer||'—'}</td>
-      <td class="mono" style="font-size:11px">${r.checkIn?r.checkIn.substring(11):'—'}</td>
-      <td class="mono" style="font-size:11px">${r.checkOut?r.checkOut.substring(11):'—'}</td>
-      <td style="text-align:right" class="mono">${r.durasi?r.durasi+' mnt':'—'}</td>
-      <td>${r.status==='AKTIF'?'<span style="color:var(--green);font-weight:600">● Aktif</span>':'<span style="color:var(--muted)">✓ Selesai</span>'}</td>
-      <td>${r.komisi==='YES'?'<span style="color:var(--green)">✓ Dihitung</span>':'<span style="color:var(--red)">✗ Tidak</span>'}</td>
-    </tr>`).join('') + '</tbody></table>';
+  const el=document.getElementById('absensi-riwayat-table');
+  document.getElementById('absensi-tanggal').textContent=new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'});
+  if (!data.success||!data.data||!data.data.length) { el.innerHTML='<div class="empty">Belum ada riwayat hari ini</div>'; return; }
+  el.innerHTML='<table><thead><tr><th>Capster</th><th>Customer</th><th>Check In</th><th>Check Out</th><th style="text-align:right">Durasi</th><th>Status</th><th>Komisi</th></tr></thead><tbody>'+
+    data.data.map(r=>`<tr><td><b>${r.nama}</b></td><td>${r.namaCustomer||'—'}</td><td class="mono" style="font-size:11px">${r.checkIn?r.checkIn.substring(11):'—'}</td><td class="mono" style="font-size:11px">${r.checkOut?r.checkOut.substring(11):'—'}</td><td style="text-align:right" class="mono">${r.durasi?r.durasi+' mnt':'—'}</td><td>${r.status==='AKTIF'?'<span style="color:var(--green);font-weight:600">● Aktif</span>':'<span style="color:var(--muted)">✓ Selesai</span>'}</td><td>${r.komisi==='YES'?'<span style="color:var(--green)">✓ Dihitung</span>':'<span style="color:var(--red)">✗ Tidak</span>'}</td></tr>`).join('')+'</tbody></table>';
+}
+
+// ═══ MASTER DATA ═══
+let masterTab='produk', produkList=[], capsterList=[];
+
+function switchMasterTab(tab) {
+  masterTab=tab;
+  document.getElementById('master-produk').style.display=tab==='produk'?'block':'none';
+  document.getElementById('master-capster').style.display=tab==='capster'?'block':'none';
+  document.getElementById('subtab-produk').className='sub-tab'+(tab==='produk'?' active':'');
+  document.getElementById('subtab-capster').className='sub-tab'+(tab==='capster'?' active':'');
+  if (tab==='produk') loadProduk();
+  if (tab==='capster') loadCapsterMaster();
+}
+
+async function loadMasterData() {
+  if (masterTab==='produk') loadProduk();
+  else loadCapsterMaster();
+}
+
+async function loadProduk() {
+  try {
+    const op=currentOutlet?`?outlet=${encodeURIComponent(currentOutlet)}`:'';
+    const d=await apiFetch(BASE+'/api/produk/list'+op);
+    produkList=d.data||[];
+    renderProdukTable();
+  } catch(e) { document.getElementById('produk-table').innerHTML='<div class="empty">Error memuat data</div>'; }
+}
+
+function renderProdukTable() {
+  const el=document.getElementById('produk-table');
+  if (!produkList.length) { el.innerHTML='<div class="empty">Belum ada produk</div>'; return; }
+  el.innerHTML='<table><thead><tr><th>ID</th><th>Nama Produk</th><th>Kategori</th><th style="text-align:right">Harga</th><th>Status</th><th style="text-align:center">Aksi</th></tr></thead><tbody>'+
+    produkList.map(p=>`<tr>
+      <td class="mono" style="font-size:11px">${p.id}</td>
+      <td><b>${p.nama}</b></td>
+      <td>${p.kategori||'—'}</td>
+      <td style="text-align:right" class="mono green">${fmt(p.harga)}</td>
+      <td><span class="${p.aktif?'badge-aktif':'badge-off'}">${p.aktif?'✓ Aktif':'✗ Nonaktif'}</span></td>
+      <td style="text-align:center">
+        <div style="display:flex;gap:4px;justify-content:center">
+          <button class="btn" style="padding:4px 8px;font-size:11px" onclick="openModalEditProduk(${p.rowIndex},'${p.nama}',${p.harga},'${p.kategori||''}')">✏️ Edit</button>
+          ${p.aktif?`<button class="btn btn-danger" style="padding:4px 8px;font-size:11px" onclick="hapusProduk(${p.rowIndex})">🗑️</button>`:''}
+        </div>
+      </td>
+    </tr>`).join('')+'</tbody></table>';
+}
+
+async function loadCapsterMaster() {
+  try {
+    const op=currentOutlet?`?outlet=${encodeURIComponent(currentOutlet)}`:'';
+    const d=await apiFetch(BASE+'/api/capster/semua'+op);
+    capsterList=d.data||[];
+    renderCapsterTable();
+  } catch(e) { document.getElementById('capster-table').innerHTML='<div class="empty">Error memuat data</div>'; }
+}
+
+function renderCapsterTable() {
+  const el=document.getElementById('capster-table');
+  if (!capsterList.length) { el.innerHTML='<div class="empty">Belum ada capster</div>'; return; }
+  el.innerHTML='<table><thead><tr><th>Nama</th><th>User ID</th><th style="text-align:right">Komisi Layanan</th><th style="text-align:right">Komisi Produk</th><th style="text-align:right">Komisi Paket</th><th>Status</th><th style="text-align:center">Aksi</th></tr></thead><tbody>'+
+    capsterList.map(c=>`<tr>
+      <td><b>${c.nama}</b></td>
+      <td class="mono">${c.userId||'—'}</td>
+      <td style="text-align:right" class="mono">${c.komisiLayanan||0}%</td>
+      <td style="text-align:right" class="mono">${c.komisiProduk||0}%</td>
+      <td style="text-align:right" class="mono">${c.komisiPaket||0}%</td>
+      <td><span class="${c.aktif?'badge-aktif':'badge-off'}">${c.aktif?'✓ Aktif':'✗ Nonaktif'}</span></td>
+      <td style="text-align:center">
+        <div style="display:flex;gap:4px;justify-content:center">
+          <button class="btn" style="padding:4px 8px;font-size:11px" onclick="openModalEditCapster(${c.rowIndex},'${c.nama}',${c.komisiLayanan||0},${c.komisiProduk||0},${c.komisiPaket||0},'${c.userId||''}')">✏️ Edit</button>
+          ${c.aktif?`<button class="btn btn-danger" style="padding:4px 8px;font-size:11px" onclick="hapusCapster(${c.rowIndex})">🗑️</button>`:''}
+        </div>
+      </td>
+    </tr>`).join('')+'</tbody></table>';
+}
+
+// ═══ MODAL MASTER ═══
+let modalMasterMode='', modalMasterRowIndex=0;
+
+function openModalMaster() { document.getElementById('modal-master').classList.add('open'); }
+function closeModalMaster() { document.getElementById('modal-master').classList.remove('open'); modalMasterMode=''; }
+
+function openModalTambahProduk() {
+  modalMasterMode='tambah-produk'; modalMasterRowIndex=0;
+  document.getElementById('modal-master-title').textContent='➕ Tambah Produk';
+  document.getElementById('modal-master-body').innerHTML=`
+    <div class="form-group"><label>Nama Produk *</label><input type="text" id="f-nama" placeholder="Cukur Rambut"/></div>
+    <div class="form-group"><label>Harga (Rp) *</label><input type="number" id="f-harga" placeholder="50000"/></div>
+    <div class="form-group"><label>Kategori</label><input type="text" id="f-kategori" placeholder="Layanan"/></div>`;
+  openModalMaster();
+}
+
+function openModalEditProduk(rowIndex, nama, harga, kategori) {
+  modalMasterMode='edit-produk'; modalMasterRowIndex=rowIndex;
+  document.getElementById('modal-master-title').textContent='✏️ Edit Produk';
+  document.getElementById('modal-master-body').innerHTML=`
+    <div class="form-group"><label>Nama Produk *</label><input type="text" id="f-nama" value="${nama}"/></div>
+    <div class="form-group"><label>Harga (Rp) *</label><input type="number" id="f-harga" value="${harga}"/></div>
+    <div class="form-group"><label>Kategori</label><input type="text" id="f-kategori" value="${kategori}"/></div>`;
+  openModalMaster();
+}
+
+function openModalTambahCapster() {
+  modalMasterMode='tambah-capster'; modalMasterRowIndex=0;
+  document.getElementById('modal-master-title').textContent='➕ Tambah Capster';
+  document.getElementById('modal-master-body').innerHTML=`
+    <div class="form-group"><label>Nama *</label><input type="text" id="f-nama" placeholder="Budi"/></div>
+    <div class="form-group"><label>User ID *</label><input type="text" id="f-userid" placeholder="BUDI01" style="text-transform:uppercase"/></div>
+    <div class="form-group"><label>PIN *</label><input type="password" id="f-pin" placeholder="4-6 digit" maxlength="6"/></div>
+    <div class="form-group"><label>Komisi Layanan (%)</label><input type="number" id="f-k-layanan" placeholder="5" value="0"/></div>
+    <div class="form-group"><label>Komisi Produk (%)</label><input type="number" id="f-k-produk" placeholder="10" value="0"/></div>
+    <div class="form-group"><label>Komisi Paket (%)</label><input type="number" id="f-k-paket" placeholder="10" value="0"/></div>`;
+  openModalMaster();
+}
+
+function openModalEditCapster(rowIndex, nama, kl, kp, kpkt, userId) {
+  modalMasterMode='edit-capster'; modalMasterRowIndex=rowIndex;
+  document.getElementById('modal-master-title').textContent='✏️ Edit Capster';
+  document.getElementById('modal-master-body').innerHTML=`
+    <div class="form-group"><label>Nama *</label><input type="text" id="f-nama" value="${nama}"/></div>
+    <div class="form-group"><label>User ID *</label><input type="text" id="f-userid" value="${userId}" style="text-transform:uppercase"/></div>
+    <div class="form-group"><label>PIN Baru (kosongkan jika tidak ganti)</label><input type="password" id="f-pin" placeholder="Kosongkan jika tidak ganti" maxlength="6"/></div>
+    <div class="form-group"><label>Komisi Layanan (%)</label><input type="number" id="f-k-layanan" value="${kl}"/></div>
+    <div class="form-group"><label>Komisi Produk (%)</label><input type="number" id="f-k-produk" value="${kp}"/></div>
+    <div class="form-group"><label>Komisi Paket (%)</label><input type="number" id="f-k-paket" value="${kpkt}"/></div>`;
+  openModalMaster();
+}
+
+async function submitModalMaster() {
+  const outlet = currentOutlet||'';
+  try {
+    let res;
+    if (modalMasterMode==='tambah-produk') {
+      const nama=document.getElementById('f-nama').value.trim();
+      const harga=parseInt(document.getElementById('f-harga').value)||0;
+      const kategori=document.getElementById('f-kategori').value.trim();
+      if (!nama) { showToast('❌ Nama produk wajib diisi',true); return; }
+      res=await apiPost(BASE+'/api/produk/tambah',{outlet,nama,harga,kategori});
+    } else if (modalMasterMode==='edit-produk') {
+      const nama=document.getElementById('f-nama').value.trim();
+      const harga=parseInt(document.getElementById('f-harga').value)||0;
+      const kategori=document.getElementById('f-kategori').value.trim();
+      if (!nama) { showToast('❌ Nama produk wajib diisi',true); return; }
+      res=await apiPost(BASE+'/api/produk/edit',{outlet,rowIndex:modalMasterRowIndex,nama,harga,kategori});
+    } else if (modalMasterMode==='tambah-capster') {
+      const nama=document.getElementById('f-nama').value.trim();
+      const userId=document.getElementById('f-userid').value.trim().toUpperCase();
+      const pin=document.getElementById('f-pin').value.trim();
+      const kl=parseFloat(document.getElementById('f-k-layanan').value)||0;
+      const kp=parseFloat(document.getElementById('f-k-produk').value)||0;
+      const kpkt=parseFloat(document.getElementById('f-k-paket').value)||0;
+      if (!nama||!userId||!pin) { showToast('❌ Nama, User ID, PIN wajib diisi',true); return; }
+      res=await apiPost(BASE+'/api/capster/tambah',{outlet,nama,userId,pin,komisiLayanan:kl,komisiProduk:kp,komisiPaket:kpkt});
+    } else if (modalMasterMode==='edit-capster') {
+      const nama=document.getElementById('f-nama').value.trim();
+      const userId=document.getElementById('f-userid').value.trim().toUpperCase();
+      const pin=document.getElementById('f-pin').value.trim();
+      const kl=parseFloat(document.getElementById('f-k-layanan').value)||0;
+      const kp=parseFloat(document.getElementById('f-k-produk').value)||0;
+      const kpkt=parseFloat(document.getElementById('f-k-paket').value)||0;
+      if (!nama||!userId) { showToast('❌ Nama dan User ID wajib diisi',true); return; }
+      res=await apiPost(BASE+'/api/capster/edit',{outlet,rowIndex:modalMasterRowIndex,nama,userId,pin,komisiLayanan:kl,komisiProduk:kp,komisiPaket:kpkt});
+    }
+    if (res&&res.success) {
+      showToast('✅ '+res.message);
+      closeModalMaster();
+      if (modalMasterMode.includes('produk')) loadProduk();
+      else loadCapsterMaster();
+    } else {
+      showToast('❌ '+(res?res.error:'Gagal'),true);
+    }
+  } catch(e) { showToast('❌ Koneksi gagal',true); }
+}
+
+async function hapusProduk(rowIndex) {
+  if (!confirm('Nonaktifkan produk ini?')) return;
+  try {
+    const res=await apiPost(BASE+'/api/produk/hapus',{outlet:currentOutlet||'',rowIndex});
+    showToast(res.success?'✅ Produk dinonaktifkan':'❌ '+(res.error||'Gagal'),!res.success);
+    if (res.success) loadProduk();
+  } catch(e) { showToast('❌ Koneksi gagal',true); }
+}
+
+async function hapusCapster(rowIndex) {
+  if (!confirm('Nonaktifkan capster ini?')) return;
+  try {
+    const res=await apiPost(BASE+'/api/capster/hapus',{outlet:currentOutlet||'',rowIndex});
+    showToast(res.success?'✅ Capster dinonaktifkan':'❌ '+(res.error||'Gagal'),!res.success);
+    if (res.success) loadCapsterMaster();
+  } catch(e) { showToast('❌ Koneksi gagal',true); }
 }
 </script>
 </body>
