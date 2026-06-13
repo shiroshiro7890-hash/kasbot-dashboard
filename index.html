@@ -59,16 +59,13 @@ tr:hover td{background:#FAFAF8}
 .empty{text-align:center;padding:2.5rem;color:var(--hint);font-size:13px}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--muted);border-radius:50%;animation:spin .6s linear infinite;vertical-align:-2px;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
-/* Main nav tabs */
 .main-tab{font-family:'DM Sans',sans-serif;font-size:13px;padding:5px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;color:var(--muted);transition:.15s;font-weight:500}
 .main-tab.active{background:var(--green);border-color:var(--green);color:#fff}
 .main-tab:hover:not(.active){background:var(--bg)}
-/* Sub nav (within POS section) */
 .sub-nav{display:flex;gap:6px;margin-bottom:1.5rem;padding:0;flex-wrap:wrap}
 .sub-tab{font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;color:var(--muted);transition:.15s;font-weight:500}
 .sub-tab.active{background:var(--text);border-color:var(--text);color:#fff}
 .sub-tab:hover:not(.active){background:var(--bg);color:var(--text)}
-/* expense specific */
 .expense-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.5rem}
 .pos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:2rem}
 .capster-table th,.capster-table td{padding:8px 12px;font-size:12px}
@@ -81,6 +78,18 @@ tr:hover td{background:#FAFAF8}
 .login-box button{width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:9px;border-radius:var(--radius-sm);border:none;background:var(--green);color:#fff;cursor:pointer;font-weight:600}
 .login-box button:hover{opacity:.9}
 .login-error{font-size:12px;color:var(--red);margin-bottom:8px;display:none}
+/* Absensi */
+.capster-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:2rem}
+.capster-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;display:flex;flex-direction:column;gap:8px}
+.capster-card.aktif{border-color:var(--green);background:#f0faf6}
+.capster-name{font-weight:600;font-size:14px}
+.capster-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:3px 8px;border-radius:20px;font-weight:500}
+.badge-aktif{background:#e0f5ec;color:var(--green)}
+.badge-off{background:#f5f5f3;color:var(--muted)}
+.capster-time{font-size:11px;color:var(--hint);font-family:'DM Mono',monospace}
+.btn-checkin{font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 12px;border-radius:var(--radius-sm);border:none;background:var(--green);color:#fff;cursor:pointer;font-weight:600;width:100%}
+.btn-checkout{font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 12px;border-radius:var(--radius-sm);border:none;background:var(--red);color:#fff;cursor:pointer;font-weight:600;width:100%}
+.btn-checkin:hover,.btn-checkout:hover{opacity:.85}
 @media(max-width:768px){
   main{padding:1.25rem 1rem}
   header{padding:0 1rem;height:52px}
@@ -124,7 +133,8 @@ tr:hover td{background:#FAFAF8}
   <div class="header-center">
     <button class="main-tab active" id="maintab-pos" onclick="switchMainTab('pos')">🏪 Penjualan</button>
     <button class="main-tab" id="maintab-komisi" onclick="switchMainTab('komisi')">💈 Komisi</button>
-    <button class="main-tab" id="maintab-expense" onclick="switchMainTab('expense')">💰 Cost/Expense</button>
+    <button class="main-tab" id="maintab-expense" onclick="switchMainTab('expense')">💰 Expense</button>
+    <button class="main-tab" id="maintab-absensi" onclick="switchMainTab('absensi')">📋 Absensi</button>
   </div>
   <div class="header-right">
     <select id="outlet-selector" onchange="switchOutlet()" style="font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);max-width:160px">
@@ -214,13 +224,10 @@ tr:hover td{background:#FAFAF8}
 <!-- ═══ SECTION COST / EXPENSE ═══ -->
 <div id="section-expense" style="display:none">
   <main>
-    <!-- Sub tabs: Kas Besar | Petty Cash -->
     <div class="sub-nav">
       <button class="sub-tab active" id="subtab-kasbesar" onclick="switchExpenseTab('kasbesar')">🏦 Kas Besar</button>
       <button class="sub-tab" id="subtab-petty" onclick="switchExpenseTab('petty')">💵 Petty Cash</button>
     </div>
-
-    <!-- KAS BESAR -->
     <div id="expense-kasbesar">
       <div class="controls">
         <select id="expense-filter-bulan" onchange="applyExpenseFilter()"><option value="">Semua bulan</option></select>
@@ -250,8 +257,6 @@ tr:hover td{background:#FAFAF8}
         <div style="overflow-x:auto"><div id="kb-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
       </div>
     </div>
-
-    <!-- PETTY CASH -->
     <div id="expense-petty" style="display:none">
       <div class="section-label">Ringkasan Petty Cash</div>
       <div class="expense-summary">
@@ -267,6 +272,39 @@ tr:hover td{background:#FAFAF8}
           </button>
         </div>
         <div style="overflow-x:auto"><div id="pc-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══ SECTION ABSENSI ═══ -->
+<div id="section-absensi" style="display:none">
+  <main>
+    <div class="controls" style="margin-bottom:1.5rem">
+      <select id="absensi-outlet" onchange="loadAbsensi()" style="font-size:12px;padding:6px 10px">
+        <option value="">BOW BARBERSHOP</option>
+        <option value="jelambar">BOW JELAMBAR</option>
+      </select>
+      <button class="btn" onclick="loadAbsensi()">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Refresh
+      </button>
+    </div>
+
+    <div class="section-label">Status Capster Sekarang</div>
+    <div class="capster-grid" id="absensi-status-grid">
+      <div class="empty"><span class="spinner"></span>Memuat...</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Riwayat Absensi Hari Ini</div>
+        <span id="absensi-tanggal" style="font-size:12px;color:var(--hint);font-family:'DM Mono',monospace"></span>
+      </div>
+      <div style="overflow-x:auto">
+        <div id="absensi-riwayat-table">
+          <div class="empty"><span class="spinner"></span>Memuat...</div>
+        </div>
       </div>
     </div>
   </main>
@@ -354,13 +392,14 @@ function switchOutlet() {
 // ═══════════════════════════════════════════════════
 function switchMainTab(tab) {
   currentMainTab = tab;
-  ['pos','komisi','expense'].forEach(t => {
+  ['pos','komisi','expense','absensi'].forEach(t => {
     document.getElementById('section-' + t).style.display = t === tab ? 'block' : 'none';
     document.getElementById('maintab-' + t).className = 'main-tab' + (t === tab ? ' active' : '');
   });
   if (tab === 'pos' && !posData) loadPOS();
   if (tab === 'komisi' && !komisiData) loadKomisi('bulanan');
   if (tab === 'expense') loadExpense();
+  if (tab === 'absensi') loadAbsensi();
 }
 
 function loadAll() {
@@ -400,7 +439,7 @@ async function loadPOS() {
     renderPOSChart(d.by_hari);
     renderPOSMetode(d.by_metode);
     renderPOSProduk(d.by_produk);
-    renderPOSCapster(d.by_capster);
+    renderPOSCapster(d.data);
     renderPOSTrxTable(d.data);
   } catch(e) {
     document.getElementById('pos-omzet').textContent = 'Error';
@@ -433,17 +472,24 @@ function renderPOSMetode(by_metode) {
 
 function renderPOSProduk(by_produk) {
   const el = document.getElementById('pos-produk');
-  const entries = Object.entries(by_produk||{}).sort((a,b) => b[1].total - a[1].total);
+  const entries = Object.entries(by_produk||{}).sort((a,b) => b[1]-a[1]);
   if (!entries.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
-  let html = '<table><thead><tr><th>Produk</th><th style="text-align:right">Qty</th><th style="text-align:right">Total</th></tr></thead><tbody>';
-  entries.forEach(([p, v]) => { html += `<tr><td>${p}</td><td style="text-align:right" class="mono">${v.qty}</td><td style="text-align:right" class="mono green">${fmt(v.total)}</td></tr>`; });
+  let html = '<table><thead><tr><th>Produk</th><th style="text-align:right">Total</th></tr></thead><tbody>';
+  entries.forEach(([p, v]) => { html += `<tr><td>${p}</td><td style="text-align:right" class="mono green">${fmt(v)}</td></tr>`; });
   el.innerHTML = html + '</tbody></table>';
 }
 
-function renderPOSCapster(by_capster) {
+function renderPOSCapster(data) {
   const el = document.getElementById('pos-capster');
-  const entries = Object.entries(by_capster||{}).sort((a,b) => b[1].total - a[1].total);
-  if (!entries.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
+  if (!data || !data.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
+  const capsterMap = {};
+  data.forEach(t => {
+    const c = t.capster || '—';
+    if (!capsterMap[c]) capsterMap[c] = {transaksi:0, total:0};
+    capsterMap[c].transaksi++;
+    capsterMap[c].total += t.total;
+  });
+  const entries = Object.entries(capsterMap).sort((a,b) => b[1].total - a[1].total);
   let html = '<table class="capster-table"><thead><tr><th>Capster</th><th style="text-align:right">Transaksi</th><th style="text-align:right">Total Omzet</th><th style="text-align:right">Rata-rata</th></tr></thead><tbody>';
   entries.forEach(([c, v]) => {
     const avg = v.transaksi > 0 ? Math.round(v.total / v.transaksi) : 0;
@@ -455,21 +501,21 @@ function renderPOSCapster(by_capster) {
 function renderPOSTrxTable(data, filter='') {
   const el = document.getElementById('pos-trx-table');
   const filtered = filter ? data.filter(r =>
-    (r.nama_customer||'').toLowerCase().includes(filter) || (r.hp_customer||'').includes(filter)
+    (r.customer||'').toLowerCase().includes(filter) || (r.hp||'').includes(filter)
   ) : data;
-  if (!filtered.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
-  let html = '<table><thead><tr><th>No Nota</th><th>Waktu</th><th>Capster</th><th>Customer</th><th>HP</th><th>Produk</th><th style="text-align:right">Qty</th><th style="text-align:right">Total</th><th>Metode</th></tr></thead><tbody>';
+  if (!filtered || !filtered.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
+  let html = '<table><thead><tr><th>No Nota</th><th>Waktu</th><th>Outlet</th><th>Kasir</th><th>Capster</th><th>Customer</th><th>Produk</th><th style="text-align:right">Total</th><th>Metode</th></tr></thead><tbody>';
   filtered.slice().reverse().forEach(r => {
     html += `<tr>
-      <td class="mono" style="font-size:11px">${r.no_nota}</td>
-      <td class="mono" style="font-size:11px">${r.waktu}</td>
+      <td class="mono" style="font-size:11px">${r.id||'—'}</td>
+      <td class="mono" style="font-size:11px">${r.waktu||'—'}</td>
+      <td style="font-size:11px">${r.outlet||'—'}</td>
+      <td style="font-size:11px">${r.kasir||'—'}</td>
       <td>${r.capster||'—'}</td>
-      <td>${r.nama_customer||'—'}</td>
-      <td class="mono">${r.hp_customer||'—'}</td>
-      <td>${r.produk}</td>
-      <td style="text-align:right" class="mono">${r.qty}</td>
+      <td>${r.customer||'—'}</td>
+      <td>${r.produk||'—'}</td>
       <td style="text-align:right" class="mono green">${fmt(r.total)}</td>
-      <td>${r.metode_bayar}</td>
+      <td>${r.metode||'—'}</td>
     </tr>`;
   });
   el.innerHTML = html + '</tbody></table>';
@@ -490,21 +536,14 @@ async function loadKomisi(mode) {
   try {
     const outletParam = currentOutlet ? `&outlet=${encodeURIComponent(currentOutlet)}` : '';
     const d = await apiFetch(BASE + '/api/penjualan/komisi?mode=' + komisiMode + outletParam);
-    if (!d.success) throw new Error(d.error);
+    if (!d.success && !d.data) throw new Error(d.error);
     komisiData = d;
-    document.getElementById('komisi-total-omzet').textContent  = fmt(d.summary.total_omzet);
-    document.getElementById('komisi-total-komisi').textContent = fmt(d.summary.total_komisi);
-    document.getElementById('komisi-total-capster').textContent= d.summary.total_capster + ' capster';
-    document.getElementById('komisi-periode-label').textContent=
-      komisiMode === 'harian' ? 'Komisi Hari Ini (' + d.today + ')' : 'Komisi Bulan Ini';
-    const sel = document.getElementById('komisi-filter-capster');
-    sel.innerHTML = '<option value="">Semua Capster</option>';
-    d.data.forEach(c => {
-      const o = document.createElement('option');
-      o.value = c.nama; o.textContent = c.nama; sel.appendChild(o);
-    });
-    renderKomisiTable(d.data);
-    renderKomisiDetail();
+    const totalOmzet  = d.data ? d.data.reduce((s,c) => s + (c.omzet||0), 0) : 0;
+    const totalKomisi = d.data ? d.data.reduce((s,c) => s + (c.komisi||0), 0) : 0;
+    document.getElementById('komisi-total-omzet').textContent  = fmt(totalOmzet);
+    document.getElementById('komisi-total-komisi').textContent = fmt(totalKomisi);
+    document.getElementById('komisi-total-capster').textContent= (d.data||[]).length + ' capster';
+    renderKomisiTable(d.data||[]);
   } catch(e) {
     document.getElementById('komisi-total-omzet').textContent = 'Error';
     console.error('[KOMISI]', e);
@@ -522,60 +561,39 @@ function switchKomisiMode(mode) {
 
 function renderKomisiTable(data) {
   const el = document.getElementById('komisi-table');
-  const filtered = data.filter(c => c.nama !== '-');
-  if (!filtered.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
-  let html = '<table><thead><tr><th>Capster</th><th style="text-align:right">Transaksi</th><th style="text-align:right">Omzet Layanan</th><th style="text-align:right">Komisi Layanan</th><th style="text-align:right">Omzet Produk</th><th style="text-align:right">Komisi Produk</th><th style="text-align:right">Omzet Paket</th><th style="text-align:right">Komisi Paket</th><th style="text-align:right;background:#f0faf6">Total Komisi</th></tr></thead><tbody>';
-  filtered.forEach(c => {
+  if (!data.length) { el.innerHTML = '<div class="empty">Tidak ada data</div>'; return; }
+  let html = '<table><thead><tr><th>Capster</th><th style="text-align:right">Transaksi</th><th style="text-align:right">Omzet</th><th style="text-align:right">Komisi %</th><th style="text-align:right">Total Komisi</th></tr></thead><tbody>';
+  data.forEach(c => {
     html += `<tr>
-      <td><b>${c.nama}</b><br><span class="mono" style="font-size:10px;color:var(--hint)">L:${c.komisi_layanan_pct}% P:${c.komisi_produk_pct}% Pkt:${c.komisi_paket_pct}%</span></td>
-      <td style="text-align:right" class="mono">${c.transaksi}</td>
-      <td style="text-align:right" class="mono">${fmt(c.omzet_layanan)}</td>
-      <td style="text-align:right" class="mono green">${fmt(c.komisi_dari_layanan)}</td>
-      <td style="text-align:right" class="mono">${fmt(c.omzet_produk)}</td>
-      <td style="text-align:right" class="mono green">${fmt(c.komisi_dari_produk)}</td>
-      <td style="text-align:right" class="mono">${fmt(c.omzet_paket)}</td>
-      <td style="text-align:right" class="mono green">${fmt(c.komisi_dari_paket)}</td>
-      <td style="text-align:right;background:#f0faf6" class="mono"><b>${fmt(c.total_komisi)}</b></td>
+      <td><b>${c.capster||c.nama}</b></td>
+      <td style="text-align:right" class="mono">${c.jumlahTrx||c.transaksi||0}</td>
+      <td style="text-align:right" class="mono">${fmt(c.omzet)}</td>
+      <td style="text-align:right" class="mono">${((c.komisiPct||0)*100).toFixed(0)}%</td>
+      <td style="text-align:right" class="mono green"><b>${fmt(c.komisi)}</b></td>
     </tr>`;
   });
-  const totalKomisi = filtered.reduce((s,c) => s + c.total_komisi, 0);
-  html += `<tr style="background:var(--bg);font-weight:600"><td>TOTAL</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td style="text-align:right;background:#e6f7f0" class="mono green"><b>${fmt(totalKomisi)}</b></td></tr>`;
   el.innerHTML = html + '</tbody></table>';
 }
 
 function renderKomisiDetail() {
-  if (!komisiData) return;
   const el = document.getElementById('komisi-detail');
-  const fc = document.getElementById('komisi-filter-capster').value;
-  const capsters = fc ? komisiData.data.filter(c => c.nama === fc) : komisiData.data.filter(c => c.nama !== '-');
-  const allDates = new Set();
-  capsters.forEach(c => Object.keys(c.detail_hari||{}).forEach(d => allDates.add(d)));
-  const dates = [...allDates].sort();
-  if (!dates.length) { el.innerHTML = '<div class="empty">Tidak ada data harian</div>'; return; }
-  let html = '<table><thead><tr><th>Tanggal</th><th>Capster</th><th style="text-align:right">Transaksi</th><th style="text-align:right">Omzet</th><th style="text-align:right">Komisi</th></tr></thead><tbody>';
-  dates.forEach(tgl => {
-    capsters.forEach(c => {
-      const d = (c.detail_hari||{})[tgl]; if (!d) return;
-      html += `<tr><td class="mono" style="font-size:11px">${tgl}</td><td><b>${c.nama}</b></td><td style="text-align:right" class="mono">${d.transaksi}</td><td style="text-align:right" class="mono">${fmt(d.omzet)}</td><td style="text-align:right" class="mono green"><b>${fmt(d.komisi)}</b></td></tr>`;
-    });
-  });
-  el.innerHTML = html + '</tbody></table>';
+  el.innerHTML = '<div class="empty">Pilih capster untuk lihat detail</div>';
 }
 
 function exportKomisiCSV() {
-  if (!komisiData) return;
-  let csv = 'Capster,Transaksi,Omzet Layanan,Komisi Layanan,Omzet Produk,Komisi Produk,Omzet Paket,Komisi Paket,Total Komisi\n';
-  komisiData.data.filter(c => c.nama !== '-').forEach(c => {
-    csv += `${c.nama},${c.transaksi},${c.omzet_layanan},${c.komisi_dari_layanan},${c.omzet_produk},${c.komisi_dari_produk},${c.omzet_paket},${c.komisi_dari_paket},${c.total_komisi}\n`;
+  if (!komisiData || !komisiData.data) return;
+  let csv = 'Capster,Transaksi,Omzet,Komisi\n';
+  komisiData.data.forEach(c => {
+    csv += `${c.capster||c.nama},${c.jumlahTrx||0},${c.omzet||0},${c.komisi||0}\n`;
   });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download = 'komisi-' + komisiMode + '-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.download = 'komisi-' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
 }
 
 // ═══════════════════════════════════════════════════
-// EXPENSE MODULE (Kas Besar + Petty Cash)
+// EXPENSE MODULE
 // ═══════════════════════════════════════════════════
 let expenseTab = 'kasbesar';
 let kbData = [], pcData = [];
@@ -597,15 +615,13 @@ async function loadKasBesar() {
   try {
     const d = await apiFetch(BASE + '/api/summary');
     if (!d.success) throw 0;
-    // Summary
-    document.getElementById('kb-masuk').textContent  = fmt(d.kas_besar.masuk);
-    document.getElementById('kb-keluar').textContent = fmt(d.kas_besar.keluar);
-    document.getElementById('kb-saldo').textContent  = fmt(d.kas_besar.saldo);
-    document.getElementById('kb-trx').textContent    = (d.kas_besar.total_transaksi || '—') + ' transaksi';
-    // Transaksi detail
+    document.getElementById('kb-masuk').textContent  = fmt(d.kas_besar ? d.kas_besar.masuk : 0);
+    document.getElementById('kb-keluar').textContent = fmt(d.kas_besar ? d.kas_besar.keluar : 0);
+    document.getElementById('kb-saldo').textContent  = fmt(d.kas_besar ? d.kas_besar.saldo : 0);
+    document.getElementById('kb-trx').textContent    = '—';
     const trx = await apiFetch(BASE + '/api/transaksi');
-    if (trx.success) {
-      kbData = trx.data.filter(t => t.group === 'KAS BESAR' && t.tanggal && !t.tanggal.includes('TOTAL'));
+    if (trx.success || Array.isArray(trx)) {
+      kbData = Array.isArray(trx) ? trx : (trx.data || []);
       populateKbFilter();
       renderKbTable();
       renderKbChart();
@@ -640,23 +656,18 @@ function renderKbTable() {
   const el = document.getElementById('kb-table');
   const data = filterKb(kbData);
   if (!data.length) { el.innerHTML = '<div class="empty">Tidak ada data kas besar</div>'; return; }
-  let html = '<table><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th>Penerima</th><th>Rekening</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th><th style="text-align:right">Saldo</th><th>Foto</th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th>Penerima</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th><th style="text-align:right">Saldo</th></tr></thead><tbody>';
   data.forEach(t => {
-    const isMasuk = t.jenis === 'Dana Masuk' || (t.kredit && t.kredit > 0);
-    const nominal = t.nominal || t.kredit || t.debet || 0;
-    const keluar  = !isMasuk ? `<span class="red">${fmt(nominal)}</span>` : '—';
-    const masuk   = isMasuk  ? `<span class="green">${fmt(nominal)}</span>` : '—';
-    const foto    = t.foto ? `<a href="${t.foto}" target="_blank" style="color:var(--green);font-size:11px">Lihat</a>` : '—';
+    const isMasuk = t.tipe === 'MASUK';
+    const nominal = t.nominal || 0;
     html += `<tr>
       <td class="mono">${t.tanggal||'—'}</td>
-      <td>${(t.deskripsi||t.vendor||'—').substring(0,40)}</td>
+      <td>${(t.deskripsi||'—').substring(0,40)}</td>
       <td>${t.kategori||'—'}</td>
-      <td style="font-size:12px">${t.nama_penerima||'—'}</td>
-      <td class="mono" style="font-size:11px">${t.rekening||'—'}</td>
-      <td style="text-align:right" class="mono">${keluar}</td>
-      <td style="text-align:right" class="mono">${masuk}</td>
+      <td>${t.penerima||'—'}</td>
+      <td style="text-align:right" class="mono">${!isMasuk ? '<span class="red">'+fmt(nominal)+'</span>' : '—'}</td>
+      <td style="text-align:right" class="mono">${isMasuk ? '<span class="green">'+fmt(nominal)+'</span>' : '—'}</td>
       <td style="text-align:right" class="mono">${t.saldo > 0 ? fmt(t.saldo) : '—'}</td>
-      <td>${foto}</td>
     </tr>`;
   });
   el.innerHTML = html + '</tbody></table>';
@@ -672,9 +683,8 @@ function renderKbChart() {
     const k = getBulanKey(d);
     const lbl = d.toLocaleString('id-ID',{month:'short'}) + " '" + String(d.getFullYear()).slice(2);
     if (!byBulan[k]) byBulan[k] = {lbl, masuk:0, keluar:0};
-    const isMasuk = t.jenis === 'Dana Masuk' || (t.kredit && t.kredit > 0);
-    const val = t.nominal || t.kredit || t.debet || 0;
-    if (isMasuk) byBulan[k].masuk += val; else byBulan[k].keluar += val;
+    if (t.tipe === 'MASUK') byBulan[k].masuk += t.nominal||0;
+    else byBulan[k].keluar += t.nominal||0;
   });
   const keys = Object.keys(byBulan).sort();
   const maxVal = Math.max(...keys.map(k => Math.max(byBulan[k].masuk, byBulan[k].keluar)), 1);
@@ -693,12 +703,14 @@ async function loadPettyCash() {
     const d = await apiFetch(BASE + '/api/petty');
     if (!d.success || !d.data) throw 0;
     pcData = d.data;
-    // Hitung summary
     let masuk = 0, keluar = 0;
-    d.data.forEach(t => { masuk += (t.kredit||0); keluar += (t.debet||0); });
+    d.data.forEach(t => {
+      if (t.tipe === 'MASUK') masuk += t.nominal||0;
+      else keluar += t.nominal||0;
+    });
     document.getElementById('pc-masuk').textContent  = fmt(masuk);
     document.getElementById('pc-keluar').textContent = fmt(keluar);
-    document.getElementById('pc-saldo').textContent  = fmt(d.saldo_sekarang || (masuk - keluar));
+    document.getElementById('pc-saldo').textContent  = fmt(masuk - keluar);
     document.getElementById('pc-trx').textContent    = d.data.length + ' transaksi';
     renderPcTable();
   } catch(e) { console.error('[PC]', e); }
@@ -707,21 +719,15 @@ async function loadPettyCash() {
 function renderPcTable() {
   const el = document.getElementById('pc-table');
   if (!pcData.length) { el.innerHTML = '<div class="empty">Tidak ada data petty cash</div>'; return; }
-  let html = '<table><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th>Penerima</th><th>Rekening</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th><th style="text-align:right">Saldo</th><th>Foto</th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th style="text-align:right">Keluar</th><th style="text-align:right">Masuk</th></tr></thead><tbody>';
   pcData.forEach(t => {
-    const keluar = t.debet > 0  ? `<span class="red">${fmt(t.debet)}</span>` : '—';
-    const masuk  = t.kredit > 0 ? `<span class="green">${fmt(t.kredit)}</span>` : '—';
-    const foto   = t.foto ? `<a href="${t.foto}" target="_blank" style="color:var(--green);font-size:11px">Lihat</a>` : '—';
+    const isMasuk = t.tipe === 'MASUK';
     html += `<tr>
       <td class="mono">${t.tanggal||'—'}</td>
       <td>${(t.deskripsi||'—').substring(0,40)}</td>
       <td>${t.kategori||'—'}</td>
-      <td style="font-size:12px">${t.nama_penerima||'—'}</td>
-      <td class="mono" style="font-size:11px">${t.rekening||'—'}</td>
-      <td style="text-align:right" class="mono">${keluar}</td>
-      <td style="text-align:right" class="mono">${masuk}</td>
-      <td style="text-align:right" class="mono">${fmt(t.saldo||0)}</td>
-      <td>${foto}</td>
+      <td style="text-align:right" class="mono">${!isMasuk ? '<span class="red">'+fmt(t.nominal||0)+'</span>' : '—'}</td>
+      <td style="text-align:right" class="mono">${isMasuk ? '<span class="green">'+fmt(t.nominal||0)+'</span>' : '—'}</td>
     </tr>`;
   });
   el.innerHTML = html + '</tbody></table>';
@@ -730,16 +736,130 @@ function renderPcTable() {
 function exportExpenseCSV(type) {
   const data = type === 'kasbesar' ? filterKb(kbData) : pcData;
   if (!data.length) { alert('Tidak ada data'); return; }
-  let csv = 'Tanggal,Deskripsi,Kategori,Penerima,Rekening,Keluar,Masuk,Saldo\n';
+  let csv = 'Tanggal,Deskripsi,Kategori,Tipe,Nominal\n';
   data.forEach(t => {
-    const isMasuk = t.jenis === 'Dana Masuk' || (t.kredit && t.kredit > 0);
-    const nominal = t.nominal || t.kredit || t.debet || 0;
-    csv += `${t.tanggal||''},${(t.deskripsi||t.vendor||'').replace(/,/g,' ')},${t.kategori||''},${t.nama_penerima||''},${t.rekening||''},${isMasuk ? 0 : nominal},${isMasuk ? nominal : 0},${t.saldo||0}\n`;
+    csv += `${t.tanggal||''},${(t.deskripsi||'').replace(/,/g,' ')},${t.kategori||''},${t.tipe||''},${t.nominal||0}\n`;
   });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
   a.download = type + '-' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
+}
+
+// ═══════════════════════════════════════════════════
+// ABSENSI MODULE
+// ═══════════════════════════════════════════════════
+async function loadAbsensi() {
+  const outlet = document.getElementById('absensi-outlet').value;
+  const outletParam = outlet ? `?outlet=${encodeURIComponent(outlet)}` : '';
+  try {
+    const [status, riwayat] = await Promise.all([
+      apiFetch(BASE + '/api/absensi/status' + outletParam),
+      apiFetch(BASE + '/api/absensi/riwayat' + outletParam)
+    ]);
+    renderAbsensiStatus(status, outlet);
+    renderAbsensiRiwayat(riwayat);
+  } catch(e) {
+    console.error('[ABSENSI]', e);
+    document.getElementById('absensi-status-grid').innerHTML = '<div class="empty">Error memuat data</div>';
+  }
+}
+
+function renderAbsensiStatus(data, outlet) {
+  const el = document.getElementById('absensi-status-grid');
+  if (!data.success || !data.data || !data.data.length) {
+    el.innerHTML = '<div class="empty">Tidak ada capster terdaftar</div>';
+    return;
+  }
+  let html = '';
+  data.data.forEach(c => {
+    const isAktif = c.checkedIn;
+    html += `
+      <div class="capster-card ${isAktif ? 'aktif' : ''}">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="capster-name">💈 ${c.nama}</div>
+          <span class="capster-badge ${isAktif ? 'badge-aktif' : 'badge-off'}">
+            ${isAktif ? '🟢 Aktif' : '🔴 Off'}
+          </span>
+        </div>
+        ${isAktif ? `<div class="capster-time">Check in: ${c.waktuCi ? c.waktuCi.substring(11) : '—'}</div>` : '<div class="capster-time">Belum check in</div>'}
+        ${isAktif
+          ? `<button class="btn-checkout" onclick="doCheckOut('${c.nama}','${outlet}')">⬇️ Check Out</button>`
+          : `<button class="btn-checkin"  onclick="doCheckIn('${c.nama}','${outlet}')">⬆️ Check In</button>`
+        }
+      </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function renderAbsensiRiwayat(data) {
+  const el = document.getElementById('absensi-riwayat-table');
+  const today = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'});
+  document.getElementById('absensi-tanggal').textContent = today;
+
+  if (!data.success || !data.data || !data.data.length) {
+    el.innerHTML = '<div class="empty">Belum ada riwayat hari ini</div>';
+    return;
+  }
+
+  let html = '<table><thead><tr><th>Capster</th><th>Check In</th><th>Check Out</th><th style="text-align:right">Durasi</th><th>Status</th><th>Komisi</th></tr></thead><tbody>';
+  data.data.forEach(r => {
+    const ci     = r.checkIn  ? r.checkIn.substring(11)  : '—';
+    const co     = r.checkOut ? r.checkOut.substring(11) : '—';
+    const durasi = r.durasi   ? r.durasi + ' mnt'        : '—';
+    const statusBadge = r.status === 'AKTIF'
+      ? '<span style="color:var(--green);font-weight:600">● Aktif</span>'
+      : '<span style="color:var(--muted)">✓ Selesai</span>';
+    const komisiBadge = r.komisi === 'YES'
+      ? '<span style="color:var(--green)">✓ Dihitung</span>'
+      : '<span style="color:var(--red)">✗ Tidak</span>';
+    html += `<tr>
+      <td><b>${r.nama}</b></td>
+      <td class="mono" style="font-size:11px">${ci}</td>
+      <td class="mono" style="font-size:11px">${co}</td>
+      <td style="text-align:right" class="mono">${durasi}</td>
+      <td>${statusBadge}</td>
+      <td>${komisiBadge}</td>
+    </tr>`;
+  });
+  el.innerHTML = html + '</tbody></table>';
+}
+
+async function doCheckIn(nama, outlet) {
+  try {
+    const outletName = outlet || 'BOW BARBERSHOP';
+    const res = await fetch(BASE + '/api/absensi/checkin?api_key=' + API_KEY, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({nama, outlet: outletName})
+    });
+    const d = await res.json();
+    if (d.success) {
+      alert('✅ Check In berhasil!\n' + nama + '\n' + d.waktuCheckIn);
+    } else {
+      alert('❌ ' + (d.error || 'Gagal check in'));
+    }
+    loadAbsensi();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function doCheckOut(nama, outlet) {
+  if (!confirm('Check Out ' + nama + '?')) return;
+  try {
+    const outletName = outlet || 'BOW BARBERSHOP';
+    const res = await fetch(BASE + '/api/absensi/checkout?api_key=' + API_KEY, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({nama, outlet: outletName})
+    });
+    const d = await res.json();
+    if (d.success) {
+      alert('✅ Check Out berhasil!\n' + nama + '\nDurasi: ' + d.durasi + ' menit');
+    } else {
+      alert('❌ ' + (d.error || 'Gagal check out'));
+    }
+    loadAbsensi();
+  } catch(e) { alert('Error: ' + e.message); }
 }
 </script>
 </body>
