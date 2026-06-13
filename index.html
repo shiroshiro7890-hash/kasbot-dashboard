@@ -69,15 +69,50 @@ tr:hover td{background:#FAFAF8}
 .expense-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.5rem}
 .pos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:2rem}
 .capster-table th,.capster-table td{padding:8px 12px;font-size:12px}
-/* Login */
+
+/* ── LOGIN OVERLAY ── */
 #login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
-.login-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;width:320px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;width:340px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
 .login-box .logo{justify-content:center;margin-bottom:1.5rem;font-size:17px}
+.login-tabs{display:flex;gap:6px;margin-bottom:1.25rem}
+.login-tab{flex:1;font-family:'DM Sans',sans-serif;font-size:13px;padding:7px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;cursor:pointer;color:var(--muted);transition:.15s;font-weight:500;text-align:center}
+.login-tab.active{background:var(--green);border-color:var(--green);color:#fff}
 .login-box input{width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);outline:none;margin-bottom:10px}
 .login-box input:focus{border-color:var(--green)}
-.login-box button{width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:9px;border-radius:var(--radius-sm);border:none;background:var(--green);color:#fff;cursor:pointer;font-weight:600}
-.login-box button:hover{opacity:.9}
+.login-box button.login-btn{width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:9px;border-radius:var(--radius-sm);border:none;background:var(--green);color:#fff;cursor:pointer;font-weight:600}
+.login-box button.login-btn:hover{opacity:.9}
 .login-error{font-size:12px;color:var(--red);margin-bottom:8px;display:none}
+.login-form{display:none}
+.login-form.active{display:block}
+
+/* ── CAPSTER PAGE ── */
+#capster-page{display:none;min-height:100vh;background:var(--bg)}
+.capster-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+.capster-main{max-width:480px;margin:0 auto;padding:2rem 1.5rem}
+.capster-hero{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;text-align:center}
+.capster-hero-name{font-size:22px;font-weight:600;margin-bottom:4px}
+.capster-hero-outlet{font-size:13px;color:var(--muted);margin-bottom:12px}
+.capster-hero-status{display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:5px 14px;border-radius:20px;font-weight:600;margin-bottom:16px}
+.status-aktif{background:#e0f5ec;color:var(--green)}
+.status-off{background:#f5f5f3;color:var(--muted)}
+.capster-hero-time{font-size:12px;color:var(--hint);font-family:'DM Mono',monospace;margin-bottom:16px}
+.btn-ci{width:100%;font-family:'DM Sans',sans-serif;font-size:15px;padding:12px;border-radius:var(--radius-sm);border:none;background:var(--green);color:#fff;cursor:pointer;font-weight:600;margin-bottom:8px}
+.btn-co{width:100%;font-family:'DM Sans',sans-serif;font-size:15px;padding:12px;border-radius:var(--radius-sm);border:none;background:var(--red);color:#fff;cursor:pointer;font-weight:600}
+.btn-ci:hover,.btn-co:hover{opacity:.85}
+.btn-ci:disabled,.btn-co:disabled{opacity:.4;cursor:not-allowed}
+
+/* Modal nama customer */
+#modal-customer{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:9998}
+#modal-customer.open{display:flex}
+.modal-box{background:var(--surface);border-radius:var(--radius);padding:1.5rem;width:320px;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:12px}
+.modal-box input{width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);outline:none;margin-bottom:12px}
+.modal-box input:focus{border-color:var(--green)}
+.modal-actions{display:flex;gap:8px}
+.modal-actions button{flex:1;font-family:'DM Sans',sans-serif;font-size:13px;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;font-weight:500}
+.modal-confirm{background:var(--green);color:#fff;border-color:var(--green)!important}
+.modal-cancel{background:var(--surface);color:var(--muted)}
+
 /* Absensi */
 .capster-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:2rem}
 .capster-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;display:flex;flex-direction:column;gap:8px}
@@ -90,6 +125,7 @@ tr:hover td{background:#FAFAF8}
 .btn-checkin{font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 12px;border-radius:var(--radius-sm);border:none;background:var(--green);color:#fff;cursor:pointer;font-weight:600;width:100%}
 .btn-checkout{font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 12px;border-radius:var(--radius-sm);border:none;background:var(--red);color:#fff;cursor:pointer;font-weight:600;width:100%}
 .btn-checkin:hover,.btn-checkout:hover{opacity:.85}
+
 @media(max-width:768px){
   main{padding:1.25rem 1rem}
   header{padding:0 1rem;height:52px}
@@ -109,6 +145,7 @@ tr:hover td{background:#FAFAF8}
   table{font-size:12px}
   th,td{padding:7px 8px}
   .chart-wrap{height:110px}
+  .capster-main{padding:1rem .75rem}
 }
 @media(max-width:600px){
   .pos-two-col{grid-template-columns:1fr !important}
@@ -118,17 +155,77 @@ tr:hover td{background:#FAFAF8}
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ═══ LOGIN OVERLAY ═══ -->
 <div id="login-overlay">
   <div class="login-box">
     <div class="logo"><div class="logo-dot"></div>KasBot</div>
-    <div class="login-error" id="login-error">Password salah. Coba lagi.</div>
-    <input type="password" id="login-input" placeholder="Masukkan password..." onkeydown="if(event.key==='Enter')doLogin()"/>
-    <button onclick="doLogin()">Masuk</button>
+    <div class="login-tabs">
+      <div class="login-tab active" id="ltab-admin" onclick="switchLoginTab('admin')">👑 Admin</div>
+      <div class="login-tab" id="ltab-capster" onclick="switchLoginTab('capster')">💈 Capster</div>
+    </div>
+
+    <!-- Form Admin -->
+    <div class="login-form active" id="lform-admin">
+      <div class="login-error" id="login-error-admin">Password salah. Coba lagi.</div>
+      <input type="password" id="login-input-admin" placeholder="Masukkan password..." onkeydown="if(event.key==='Enter')doLoginAdmin()"/>
+      <button class="login-btn" onclick="doLoginAdmin()">Masuk sebagai Admin</button>
+    </div>
+
+    <!-- Form Capster -->
+    <div class="login-form" id="lform-capster">
+      <div class="login-error" id="login-error-capster">User ID atau PIN salah.</div>
+      <input type="text" id="login-userid" placeholder="User ID (contoh: GUGUN01)" style="text-transform:uppercase" onkeydown="if(event.key==='Enter')document.getElementById('login-pin').focus()"/>
+      <input type="password" id="login-pin" placeholder="PIN (4-6 digit)" maxlength="6" onkeydown="if(event.key==='Enter')doLoginCapster()"/>
+      <button class="login-btn" onclick="doLoginCapster()">Masuk sebagai Capster</button>
+    </div>
   </div>
 </div>
 
-<header>
+<!-- ═══ CAPSTER PAGE ═══ -->
+<div id="capster-page">
+  <div class="capster-header">
+    <div class="logo"><div class="logo-dot"></div>KasBot</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span id="capster-header-name" style="font-size:13px;color:var(--muted)"></span>
+      <button class="btn" onclick="logoutCapster()">Keluar</button>
+    </div>
+  </div>
+  <div class="capster-main">
+    <div class="capster-hero">
+      <div class="capster-hero-name" id="cp-nama">—</div>
+      <div class="capster-hero-outlet" id="cp-outlet">—</div>
+      <div id="cp-status-badge" class="capster-hero-status status-off">🔴 Tidak Aktif</div>
+      <div class="capster-hero-time" id="cp-time"></div>
+      <button class="btn-ci" id="cp-btn-ci" onclick="openModalCheckIn()">⬆️ Check In</button>
+      <button class="btn-co" id="cp-btn-co" onclick="doCapsterCheckOut()" disabled>⬇️ Check Out</button>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Riwayat Hari Ini</div>
+        <span id="cp-tanggal" style="font-size:12px;color:var(--hint);font-family:'DM Mono',monospace"></span>
+      </div>
+      <div style="overflow-x:auto">
+        <div id="cp-riwayat"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL NAMA CUSTOMER ═══ -->
+<div id="modal-customer">
+  <div class="modal-box">
+    <div class="modal-title">👤 Nama Customer</div>
+    <input type="text" id="modal-customer-input" placeholder="Ketik nama customer..." onkeydown="if(event.key==='Enter')confirmCheckIn()"/>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Batal</button>
+      <button class="modal-confirm" onclick="confirmCheckIn()">Check In ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN HEADER ═══ -->
+<header id="admin-header" style="display:none">
   <div class="logo"><div class="logo-dot"></div>KasBot</div>
   <div class="header-center">
     <button class="main-tab active" id="maintab-pos" onclick="switchMainTab('pos')">🏪 Penjualan</button>
@@ -145,11 +242,12 @@ tr:hover td{background:#FAFAF8}
       <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
       Refresh
     </button>
+    <button class="btn" onclick="logoutAdmin()" style="color:var(--red)">Keluar</button>
   </div>
 </header>
 
 <!-- ═══ SECTION POS ═══ -->
-<div id="section-pos">
+<div id="section-pos" style="display:none">
   <main>
     <div class="section-label">Ringkasan Penjualan Bulan Ini</div>
     <div class="pos-grid">
@@ -205,7 +303,7 @@ tr:hover td{background:#FAFAF8}
       <div class="metric"><div class="metric-label">Total Komisi</div><div class="metric-value green" id="komisi-total-komisi">—</div></div>
       <div class="metric"><div class="metric-label">Jumlah Capster</div><div class="metric-value" id="komisi-total-capster">—</div></div>
     </div>
-    <div class="card" style="margin-bottom:1.5rem">
+    <div class="card">
       <div class="card-head"><div class="card-title">Rekap Komisi per Capster</div></div>
       <div style="overflow-x:auto"><div id="komisi-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
     </div>
@@ -221,7 +319,7 @@ tr:hover td{background:#FAFAF8}
   </main>
 </div>
 
-<!-- ═══ SECTION COST / EXPENSE ═══ -->
+<!-- ═══ SECTION EXPENSE ═══ -->
 <div id="section-expense" style="display:none">
   <main>
     <div class="sub-nav">
@@ -290,21 +388,17 @@ tr:hover td{background:#FAFAF8}
         Refresh
       </button>
     </div>
-
     <div class="section-label">Status Capster Sekarang</div>
     <div class="capster-grid" id="absensi-status-grid">
       <div class="empty"><span class="spinner"></span>Memuat...</div>
     </div>
-
     <div class="card">
       <div class="card-head">
         <div class="card-title">Riwayat Absensi Hari Ini</div>
         <span id="absensi-tanggal" style="font-size:12px;color:var(--hint);font-family:'DM Mono',monospace"></span>
       </div>
       <div style="overflow-x:auto">
-        <div id="absensi-riwayat-table">
-          <div class="empty"><span class="spinner"></span>Memuat...</div>
-        </div>
+        <div id="absensi-riwayat-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
       </div>
     </div>
   </main>
@@ -319,22 +413,288 @@ const API_KEY = 'kasbot_sk_2024_BOW_barber99';
 const DASHBOARD_PASSWORD = 'bow2024';
 
 // ═══════════════════════════════════════════════════
-// AUTH
+// LOGIN TAB SWITCH
 // ═══════════════════════════════════════════════════
-function doLogin() {
-  const val = document.getElementById('login-input').value;
-  const err = document.getElementById('login-error');
+function switchLoginTab(tab) {
+  ['admin','capster'].forEach(t => {
+    document.getElementById('ltab-' + t).className = 'login-tab' + (t === tab ? ' active' : '');
+    document.getElementById('lform-' + t).className = 'login-form' + (t === tab ? ' active' : '');
+  });
+  document.getElementById('login-error-admin').style.display = 'none';
+  document.getElementById('login-error-capster').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════
+// LOGIN ADMIN
+// ═══════════════════════════════════════════════════
+function doLoginAdmin() {
+  const val = document.getElementById('login-input-admin').value;
+  const err = document.getElementById('login-error-admin');
   if (val === DASHBOARD_PASSWORD) {
     sessionStorage.setItem('kasbot_auth', DASHBOARD_PASSWORD);
     document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('admin-header').style.display = 'flex';
+    showAdminSections();
     initApp();
   } else {
     err.style.display = 'block';
-    document.getElementById('login-input').value = '';
-    document.getElementById('login-input').focus();
+    document.getElementById('login-input-admin').value = '';
+    document.getElementById('login-input-admin').focus();
   }
 }
+
+function logoutAdmin() {
+  sessionStorage.removeItem('kasbot_auth');
+  location.reload();
+}
+
+function showAdminSections() {
+  document.getElementById('section-pos').style.display = 'block';
+}
+
+// ═══════════════════════════════════════════════════
+// LOGIN CAPSTER
+// ═══════════════════════════════════════════════════
+let currentCapster = null;
+
+async function doLoginCapster() {
+  const userId = document.getElementById('login-userid').value.trim().toUpperCase();
+  const pin    = document.getElementById('login-pin').value.trim();
+  const err    = document.getElementById('login-error-capster');
+
+  if (!userId || !pin) {
+    err.textContent = 'User ID dan PIN wajib diisi.';
+    err.style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch(BASE + '/api/capster/login?api_key=' + API_KEY, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({userId, pin})
+    });
+    const d = await res.json();
+    if (d.success && d.capster) {
+      currentCapster = d.capster;
+      sessionStorage.setItem('kasbot_capster', JSON.stringify(d.capster));
+      document.getElementById('login-overlay').style.display = 'none';
+      showCapsterPage(d.capster);
+    } else {
+      err.textContent = 'User ID atau PIN salah.';
+      err.style.display = 'block';
+      document.getElementById('login-pin').value = '';
+      document.getElementById('login-pin').focus();
+    }
+  } catch(e) {
+    err.textContent = 'Koneksi gagal. Coba lagi.';
+    err.style.display = 'block';
+  }
+}
+
+function logoutCapster() {
+  sessionStorage.removeItem('kasbot_capster');
+  currentCapster = null;
+  location.reload();
+}
+
+// ═══════════════════════════════════════════════════
+// CAPSTER PAGE
+// ═══════════════════════════════════════════════════
+function showCapsterPage(capster) {
+  document.getElementById('capster-page').style.display = 'block';
+  document.getElementById('capster-header-name').textContent = '💈 ' + capster.nama;
+  document.getElementById('cp-nama').textContent   = capster.nama;
+  document.getElementById('cp-outlet').textContent = capster.outlet || 'BOW BARBERSHOP';
+  document.getElementById('cp-tanggal').textContent =
+    new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  loadCapsterStatus();
+  setInterval(loadCapsterStatus, 30000);
+}
+
+async function loadCapsterStatus() {
+  if (!currentCapster) return;
+  try {
+    const outlet = currentCapster.outlet || '';
+    const outletParam = outlet ? '?outlet=' + encodeURIComponent(outlet) : '';
+    const [statusRes, riwayatRes] = await Promise.all([
+      apiFetch(BASE + '/api/absensi/status' + outletParam),
+      apiFetch(BASE + '/api/absensi/riwayat' + outletParam)
+    ]);
+
+    // Cari status capster ini
+    let isAktif = false;
+    let waktuCi = '';
+    if (statusRes.success && statusRes.data) {
+      const found = statusRes.data.find(c =>
+        c.nama.toLowerCase() === currentCapster.nama.toLowerCase());
+      if (found) {
+        isAktif = found.checkedIn;
+        waktuCi = found.waktuCi || '';
+      }
+    }
+
+    // Update UI status
+    const badge  = document.getElementById('cp-status-badge');
+    const btnCi  = document.getElementById('cp-btn-ci');
+    const btnCo  = document.getElementById('cp-btn-co');
+    const cpTime = document.getElementById('cp-time');
+
+    if (isAktif) {
+      badge.className = 'capster-hero-status status-aktif';
+      badge.textContent = '🟢 Sedang Bertugas';
+      cpTime.textContent = waktuCi ? 'Check in: ' + waktuCi.substring(11) : '';
+      btnCi.disabled = true;
+      btnCo.disabled = false;
+    } else {
+      badge.className = 'capster-hero-status status-off';
+      badge.textContent = '🔴 Tidak Aktif';
+      cpTime.textContent = '';
+      btnCi.disabled = false;
+      btnCo.disabled = true;
+    }
+
+    // Render riwayat
+    renderCapsterRiwayat(riwayatRes);
+  } catch(e) {
+    console.error('[CAPSTER STATUS]', e);
+  }
+}
+
+function renderCapsterRiwayat(data) {
+  const el = document.getElementById('cp-riwayat');
+  if (!data.success || !data.data || !data.data.length) {
+    el.innerHTML = '<div class="empty">Belum ada riwayat hari ini</div>';
+    return;
+  }
+  const myData = data.data.filter(r =>
+    r.nama.toLowerCase() === currentCapster.nama.toLowerCase());
+  if (!myData.length) {
+    el.innerHTML = '<div class="empty">Belum ada riwayat hari ini</div>';
+    return;
+  }
+  let html = '<table><thead><tr><th>#</th><th>Customer</th><th>Check In</th><th>Check Out</th><th style="text-align:right">Durasi</th><th>Status</th></tr></thead><tbody>';
+  let no = 1;
+  myData.forEach(r => {
+    const ci      = r.checkIn  ? r.checkIn.substring(11)  : '—';
+    const co      = r.checkOut ? r.checkOut.substring(11) : '—';
+    const durasi  = r.durasi   ? r.durasi + ' mnt'        : (r.status === 'AKTIF' ? 'Ongoing' : '—');
+    const customer= r.namaCustomer || '—';
+    const statusBadge = r.status === 'AKTIF'
+      ? '<span style="color:var(--green);font-weight:600">● Aktif</span>'
+      : '<span style="color:var(--muted)">✓ Selesai</span>';
+    html += `<tr>
+      <td class="mono">${no++}</td>
+      <td><b>${customer}</b></td>
+      <td class="mono" style="font-size:11px">${ci}</td>
+      <td class="mono" style="font-size:11px">${co}</td>
+      <td style="text-align:right" class="mono">${durasi}</td>
+      <td>${statusBadge}</td>
+    </tr>`;
+  });
+  el.innerHTML = html + '</tbody></table>';
+}
+
+// ═══════════════════════════════════════════════════
+// CHECK IN / OUT CAPSTER PAGE
+// ═══════════════════════════════════════════════════
+function openModalCheckIn() {
+  document.getElementById('modal-customer').classList.add('open');
+  document.getElementById('modal-customer-input').value = '';
+  setTimeout(() => document.getElementById('modal-customer-input').focus(), 100);
+}
+
+function closeModal() {
+  document.getElementById('modal-customer').classList.remove('open');
+}
+
+async function confirmCheckIn() {
+  const namaCustomer = document.getElementById('modal-customer-input').value.trim();
+  if (!namaCustomer) {
+    document.getElementById('modal-customer-input').style.borderColor = 'var(--red)';
+    setTimeout(() => document.getElementById('modal-customer-input').style.borderColor = '', 1000);
+    return;
+  }
+  closeModal();
+
+  try {
+    const outlet = currentCapster.outlet || 'BOW BARBERSHOP';
+    const res = await fetch(BASE + '/api/absensi/checkin?api_key=' + API_KEY, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({nama: currentCapster.nama, outlet, namaCustomer})
+    });
+    const d = await res.json();
+    if (d.success) {
+      showToast('✅ Check In berhasil! Customer: ' + namaCustomer);
+    } else {
+      showToast('❌ ' + (d.error || 'Gagal check in'), true);
+    }
+    loadCapsterStatus();
+  } catch(e) {
+    showToast('❌ Koneksi gagal', true);
+  }
+}
+
+async function doCapsterCheckOut() {
+  if (!confirm('Check Out sekarang?')) return;
+  try {
+    const outlet = currentCapster.outlet || 'BOW BARBERSHOP';
+    const res = await fetch(BASE + '/api/absensi/checkout?api_key=' + API_KEY, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({nama: currentCapster.nama, outlet})
+    });
+    const d = await res.json();
+    if (d.success) {
+      showToast('✅ Check Out berhasil! Durasi: ' + d.durasi + ' menit');
+    } else {
+      showToast('❌ ' + (d.error || 'Gagal check out'), true);
+    }
+    loadCapsterStatus();
+  } catch(e) {
+    showToast('❌ Koneksi gagal', true);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// TOAST NOTIFICATION
+// ═══════════════════════════════════════════════════
+function showToast(msg, isError=false) {
+  let t = document.getElementById('toast-notif');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast-notif';
+    t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;z-index:9999;transition:.3s;box-shadow:0 4px 16px rgba(0,0,0,.15)';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.background = isError ? 'var(--red)' : 'var(--green)';
+  t.style.color = '#fff';
+  t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; }, 3000);
+}
+
+// ═══════════════════════════════════════════════════
+// AUTH CHECK ON LOAD
+// ═══════════════════════════════════════════════════
 function checkAuth() { return sessionStorage.getItem('kasbot_auth') === DASHBOARD_PASSWORD; }
+
+const savedCapster = sessionStorage.getItem('kasbot_capster');
+if (savedCapster) {
+  try {
+    currentCapster = JSON.parse(savedCapster);
+    document.getElementById('login-overlay').style.display = 'none';
+    showCapsterPage(currentCapster);
+  } catch(e) { sessionStorage.removeItem('kasbot_capster'); }
+} else if (checkAuth()) {
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('admin-header').style.display = 'flex';
+  showAdminSections();
+  initApp();
+} else {
+  setTimeout(() => document.getElementById('login-input-admin').focus(), 100);
+}
 
 // ═══════════════════════════════════════════════════
 // API
@@ -346,7 +706,7 @@ async function apiFetch(url) {
 }
 
 // ═══════════════════════════════════════════════════
-// INIT
+// INIT ADMIN
 // ═══════════════════════════════════════════════════
 let currentOutlet = '';
 let currentMainTab = 'pos';
@@ -357,16 +717,6 @@ function initApp() {
   setInterval(loadAll, 5 * 60 * 1000);
 }
 
-if (checkAuth()) {
-  document.getElementById('login-overlay').style.display = 'none';
-  initApp();
-} else {
-  setTimeout(() => document.getElementById('login-input').focus(), 100);
-}
-
-// ═══════════════════════════════════════════════════
-// OUTLETS
-// ═══════════════════════════════════════════════════
 async function loadOutlets() {
   try {
     const d = await apiFetch(BASE + '/api/outlets');
@@ -387,9 +737,6 @@ function switchOutlet() {
   loadAll();
 }
 
-// ═══════════════════════════════════════════════════
-// MAIN TAB SWITCH
-// ═══════════════════════════════════════════════════
 function switchMainTab(tab) {
   currentMainTab = tab;
   ['pos','komisi','expense','absensi'].forEach(t => {
@@ -747,7 +1094,7 @@ function exportExpenseCSV(type) {
 }
 
 // ═══════════════════════════════════════════════════
-// ABSENSI MODULE
+// ABSENSI MODULE (ADMIN)
 // ═══════════════════════════════════════════════════
 async function loadAbsensi() {
   const outlet = document.getElementById('absensi-outlet').value;
@@ -783,10 +1130,6 @@ function renderAbsensiStatus(data, outlet) {
           </span>
         </div>
         ${isAktif ? `<div class="capster-time">Check in: ${c.waktuCi ? c.waktuCi.substring(11) : '—'}</div>` : '<div class="capster-time">Belum check in</div>'}
-        ${isAktif
-          ? `<button class="btn-checkout" onclick="doCheckOut('${c.nama}','${outlet}')">⬇️ Check Out</button>`
-          : `<button class="btn-checkin"  onclick="doCheckIn('${c.nama}','${outlet}')">⬆️ Check In</button>`
-        }
       </div>`;
   });
   el.innerHTML = html;
@@ -796,17 +1139,16 @@ function renderAbsensiRiwayat(data) {
   const el = document.getElementById('absensi-riwayat-table');
   const today = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'});
   document.getElementById('absensi-tanggal').textContent = today;
-
   if (!data.success || !data.data || !data.data.length) {
     el.innerHTML = '<div class="empty">Belum ada riwayat hari ini</div>';
     return;
   }
-
-  let html = '<table><thead><tr><th>Capster</th><th>Check In</th><th>Check Out</th><th style="text-align:right">Durasi</th><th>Status</th><th>Komisi</th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>Capster</th><th>Customer</th><th>Check In</th><th>Check Out</th><th style="text-align:right">Durasi</th><th>Status</th><th>Komisi</th></tr></thead><tbody>';
   data.data.forEach(r => {
-    const ci     = r.checkIn  ? r.checkIn.substring(11)  : '—';
-    const co     = r.checkOut ? r.checkOut.substring(11) : '—';
-    const durasi = r.durasi   ? r.durasi + ' mnt'        : '—';
+    const ci      = r.checkIn  ? r.checkIn.substring(11)  : '—';
+    const co      = r.checkOut ? r.checkOut.substring(11) : '—';
+    const durasi  = r.durasi   ? r.durasi + ' mnt'        : '—';
+    const customer= r.namaCustomer || '—';
     const statusBadge = r.status === 'AKTIF'
       ? '<span style="color:var(--green);font-weight:600">● Aktif</span>'
       : '<span style="color:var(--muted)">✓ Selesai</span>';
@@ -815,6 +1157,7 @@ function renderAbsensiRiwayat(data) {
       : '<span style="color:var(--red)">✗ Tidak</span>';
     html += `<tr>
       <td><b>${r.nama}</b></td>
+      <td>${customer}</td>
       <td class="mono" style="font-size:11px">${ci}</td>
       <td class="mono" style="font-size:11px">${co}</td>
       <td style="text-align:right" class="mono">${durasi}</td>
