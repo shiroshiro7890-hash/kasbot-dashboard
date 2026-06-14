@@ -712,20 +712,33 @@ function switchLoginTab(t){
     $('lform-'+x).className='login-form'+(x===t?' active':'')
   })
 }
-function doLoginAdmin(){
-  const val=v('linput-admin'),err=$('lerr-admin'),info=$('linfo-admin');
+async function doLoginAdmin(){
+  const val=v('linput-admin'),err=$('lerr-admin'),info=$('linfo-admin'),btn=$('lbtn-admin');
   err.style.display='none';info.style.display='none';
   if(!val){err.textContent='Password wajib diisi.';err.style.display='block';return;}
-  if(val==='bow2024'){
-    fails=0;
-    CU={nama:'Admin',userId:'admin',role:'ADMIN',outlet:''};
-    sessionStorage.setItem('kb_u',JSON.stringify(CU));
-    $('login-overlay').style.display='none';initDash();
-  }else{
-    fails++;err.textContent='Password salah.';err.style.display='block';
-    $('linput-admin').value='';
-    if(fails>=MAX_FAIL){$('linput-admin').disabled=true;$('lbtn-admin').disabled=true;}
-    else{info.textContent='Sisa: '+(MAX_FAIL-fails)+'x';info.style.display='block';}
+  if(fails>=MAX_FAIL){err.textContent='Terlalu banyak percobaan. Refresh halaman.';err.style.display='block';return;}
+  btn.disabled=true;btn.textContent='Memverifikasi...';
+  try{
+    const r=await fetch(BASE+'/api/session/admin',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({password:val})});
+    const d=await r.json();
+    if(d.success){
+      fails=0;
+      CU={nama:d.nama||'Admin',userId:'admin',role:'ADMIN',outlet:''};
+      sessionStorage.setItem('kb_u',JSON.stringify(CU));
+      sessionStorage.setItem('kb_t',Date.now().toString());
+      $('login-overlay').style.display='none';initDash();
+    }else{
+      fails++;
+      err.textContent=d.error||'Password salah.';err.style.display='block';
+      $('linput-admin').value='';
+      if(fails>=MAX_FAIL){$('linput-admin').disabled=true;btn.disabled=true;btn.textContent='Terkunci';}
+      else{info.textContent='Sisa: '+(MAX_FAIL-fails)+'x';info.style.display='block';btn.disabled=false;btn.textContent='Masuk sebagai Admin';}
+    }
+  }catch{
+    err.textContent='Koneksi gagal — pastikan server aktif.';err.style.display='block';
+    btn.disabled=false;btn.textContent='Masuk sebagai Admin';
   }
 }
 async function doLoginStaff(){
@@ -740,12 +753,13 @@ async function doLoginStaff(){
     if(d.success&&d.user){
       CU={...d.user,role:(d.user.role||'CAPSTER').toUpperCase()};
       sessionStorage.setItem('kb_u',JSON.stringify(CU));
+      sessionStorage.setItem('kb_t',Date.now().toString());
       $('login-overlay').style.display='none';
       CU.role==='CAPSTER'?showCpPage(CU):initDash();
     }else{err.textContent=d.error||'User ID atau PIN salah.';err.style.display='block';$('linput-pin').value='';}
   }catch(e){err.textContent='Koneksi gagal — pastikan server aktif.';err.style.display='block';}
 }
-function logoutUser(){sessionStorage.removeItem('kb_u');CU=null;location.reload();}
+function logoutUser(){sessionStorage.removeItem('kb_u');sessionStorage.removeItem('kb_t');CU=null;location.reload();}
 
 /* ═══════════════════════════════════════
    INIT DASH
@@ -880,8 +894,15 @@ async function doCapsterCheckOut(){
    INIT ON LOAD
 ═══════════════════════════════════════ */
 const _su=sessionStorage.getItem('kb_u');
-if(_su){try{CU=JSON.parse(_su);$('login-overlay').style.display='none';CU.role==='CAPSTER'?showCpPage(CU):initDash()}catch{sessionStorage.removeItem('kb_u')}}
-else{setTimeout(()=>$('linput-admin').focus(),200)}
+const _st=sessionStorage.getItem('kb_t'); // login timestamp
+const SESSION_TIMEOUT=8*60*60*1000; // 8 jam
+if(_su&&_st&&(Date.now()-parseInt(_st))<SESSION_TIMEOUT){
+  try{CU=JSON.parse(_su);$('login-overlay').style.display='none';CU.role==='CAPSTER'?showCpPage(CU):initDash()}
+  catch{sessionStorage.removeItem('kb_u');sessionStorage.removeItem('kb_t')}
+}else{
+  sessionStorage.removeItem('kb_u');sessionStorage.removeItem('kb_t');
+  setTimeout(()=>$('linput-admin').focus(),200)
+}
 
 /* ═══════════════════════════════════════
    API HELPERS
