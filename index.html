@@ -737,15 +737,67 @@ function renderPOSMetode(by){const el=$('pos-metode-tbl'),e=Object.entries(by||{
 function renderPOSProduk(by){const el=$('pos-produk-tbl'),e=Object.entries(by||{}).sort((a,b)=>b[1]-a[1]);if(!e.length){el.innerHTML='<div class="empty">—</div>';return}el.innerHTML='<table><thead><tr><th>Produk</th><th style="text-align:right">Total</th></tr></thead><tbody>'+e.map(([p,v])=>`<tr><td>${p}</td><td style="text-align:right" class="mono green">${fmt(v)}</td></tr>`).join('')+'</tbody></table>'}
 function renderPOSCapster(data){
   const el=$('pos-capster-tbl');if(!data||!data.length){el.innerHTML='<div class="empty">—</div>';return}
-  const cm={};data.forEach(t=>{const c=t.capster||'—';if(!cm[c])cm[c]={t:0,v:0};cm[c].t++;cm[c].v+=t.total});
-  el.innerHTML='<table><thead><tr><th>Capster</th><th style="text-align:right">Trx</th><th style="text-align:right">Omzet</th><th style="text-align:right">Rata</th></tr></thead><tbody>'+Object.entries(cm).sort((a,b)=>b[1].v-a[1].v).map(([c,v])=>`<tr><td><b>${c}</b></td><td style="text-align:right" class="mono">${v.t}</td><td style="text-align:right" class="mono green">${fmt(v.v)}</td><td style="text-align:right" class="mono">${fmt(v.t>0?Math.round(v.v/v.t):0)}</td></tr>`).join('')+'</tbody></table>'
+  // Ambil % komisi dari komisiData
+  const pctMap={};
+  if(komisiData&&komisiData.data){komisiData.data.forEach(c=>{pctMap[c.capster||c.nama]=c.komisiPct||0;});}
+  const cm={};
+  data.forEach(t=>{
+    const c=t.capster||'—';
+    if(!cm[c])cm[c]={t:0,v:0,k:0,pct:pctMap[c]||0};
+    cm[c].t++;cm[c].v+=t.total;
+    cm[c].k+=Math.round((t.total||0)*(pctMap[c]||0));
+  });
+  const rows=Object.entries(cm).sort((a,b)=>b[1].v-a[1].v);
+  // Total semua
+  const totTrx=rows.reduce((s,[,v])=>s+v.t,0);
+  const totOmzet=rows.reduce((s,[,v])=>s+v.v,0);
+  const totKomisi=rows.reduce((s,[,v])=>s+v.k,0);
+  el.innerHTML='<table><thead><tr>'
+    +'<th>Capster</th>'
+    +'<th style="text-align:right">Trx</th>'
+    +'<th style="text-align:right">Omzet</th>'
+    +'<th style="text-align:right">Komisi</th>'
+    +'<th style="text-align:right">Rata-rata</th>'
+    +'</tr></thead><tbody>'
+    +rows.map(([c,v])=>`<tr>
+      <td><b>${c}</b></td>
+      <td style="text-align:right" class="mono">${v.t}</td>
+      <td style="text-align:right" class="mono green">${fmt(v.v)}</td>
+      <td style="text-align:right" class="mono" style="color:#1D9E75">${v.k>0?fmt(v.k):'<span style="color:var(--muted)">—</span>'}</td>
+      <td style="text-align:right" class="mono">${fmt(v.t>0?Math.round(v.v/v.t):0)}</td>
+    </tr>`).join('')
+    +`<tr style="background:var(--surface);font-weight:700;border-top:2px solid var(--border)">
+      <td>TOTAL</td>
+      <td style="text-align:right" class="mono">${totTrx}</td>
+      <td style="text-align:right" class="mono green">${fmt(totOmzet)}</td>
+      <td style="text-align:right" class="mono green">${fmt(totKomisi)}</td>
+      <td style="text-align:right" class="mono">${fmt(totTrx>0?Math.round(totOmzet/totTrx):0)}</td>
+    </tr>`
+    +'</tbody></table>'
 }
 function renderPOSTrxTbl(data,q=''){
   const el=$('pos-trx-tbl'),fd=q?data.filter(r=>(r.customer||'').toLowerCase().includes(q)||(r.hp||'').includes(q)):data;
   if(!fd||!fd.length){el.innerHTML='<div class="empty">Tidak ada data</div>';return}
   const canEdit=CU?.role==='ADMIN'||CU?.role==='KASIR';
-  el.innerHTML='<table><thead><tr><th>Nota</th><th>Tgl</th><th>Capster</th><th>Customer</th><th>Produk</th><th style="text-align:right">Total</th><th>Mtd</th>'+(canEdit?'<th></th>':'')+'</tr></thead><tbody>'+
-    fd.slice().reverse().map(r=>`<tr><td class="mono" style="font-size:10px">${r.id||'—'}</td><td class="mono">${r.waktu?r.waktu.substring(0,10):'—'}</td><td>${r.capster||'—'}</td><td>${r.customer||'—'}</td><td style="font-size:11px">${r.produk||'—'}</td><td style="text-align:right" class="mono green">${fmt(r.total)}</td><td style="font-size:11px">${r.metode||'—'}</td>${canEdit?`<td><button class="btn" style="padding:2px 6px;font-size:11px" onclick="openEditTrx('${r.id}','${(r.customer||'').replace(/'/g,"\\'")}','${r.hp||''}')">✏️</button></td>`:''}</tr>`).join('')+'</tbody></table>'
+  const pctMap={};
+  if(komisiData&&komisiData.data){komisiData.data.forEach(c=>{pctMap[c.capster||c.nama]=c.komisiPct||0;});}
+  // Hitung total bawah
+  const totOmzet=fd.reduce((s,r)=>s+(r.total||0),0);
+  const totKomisi=fd.reduce((s,r)=>{const pct=pctMap[r.capster]||0;return s+Math.round((r.total||0)*pct);},0);
+  el.innerHTML='<table><thead><tr><th>Nota</th><th>Tgl</th><th>Capster</th><th>Customer</th><th>Produk</th><th style="text-align:right">Total</th><th style="text-align:right">Komisi</th><th>Mtd</th>'+(canEdit?'<th></th>':'')+'</tr></thead><tbody>'+
+    fd.slice().reverse().map(r=>{
+      const pct=pctMap[r.capster]||0;
+      const kom=pct>0?Math.round((r.total||0)*pct):0;
+      const komCell=kom>0?`<td style="text-align:right;font-size:11px" class="mono green" title="${Math.round(pct*100)}%">${fmt(kom)}</td>`:'<td style="text-align:right;color:var(--muted);font-size:11px">—</td>';
+      return `<tr><td class="mono" style="font-size:10px">${r.id||'—'}</td><td class="mono">${r.waktu?r.waktu.substring(0,10):'—'}</td><td>${r.capster||'—'}</td><td>${r.customer||'—'}</td><td style="font-size:11px">${r.produk||'—'}</td><td style="text-align:right" class="mono green">${fmt(r.total)}</td>${komCell}<td style="font-size:11px">${r.metode||'—'}</td>${canEdit?`<td><button class="btn" style="padding:2px 6px;font-size:11px" onclick="openEditTrx('${r.id}','${(r.customer||'').replace(/'/g,"\\'")}','${r.hp||''}')">✏️</button></td>`:''}</tr>`;
+    }).join('')
+    +`<tr style="background:var(--surface);font-weight:700;border-top:2px solid var(--border)">
+      <td colspan="5" style="font-size:12px">TOTAL (${fd.length} transaksi)</td>
+      <td style="text-align:right" class="mono green">${fmt(totOmzet)}</td>
+      <td style="text-align:right" class="mono green">${fmt(totKomisi)}</td>
+      <td colspan="${canEdit?2:1}"></td>
+    </tr>`
+    +'</tbody></table>'
 }
 function filterPosTrx(){const q=v('pos-search').toLowerCase().trim();if(posData)renderPOSTrxTbl(filterD(posData.data||[],'waktu','pos-dari','pos-sampai'),q)}
 function openEditTrx(nota,cust,hp){$('etrx-nota').value=nota;$('etrx-cust').value=cust;$('etrx-hp').value=hp;openModal('modal-edit-trx')}
@@ -1081,11 +1133,80 @@ async function verifikasiKodeTransaksi(){
   try{
     const r=await apiPost(BASE+'/api/komisi/verifikasi',{outlet:CU.outlet||'',capster:CU.nama,noNota:kode});
     if(r.success&&r.verified){
-      el.innerHTML='<div style="background:#e0f5ec;border:1px solid var(--green);border-radius:var(--rs);padding:12px;font-size:13px"><div style="font-weight:700;color:var(--green);margin-bottom:8px">Transaksi Terverifikasi!</div><div><b>No Nota:</b> '+r.noNota+'</div><div><b>Produk:</b> '+r.produk+'</div><div><b>Customer:</b> '+(r.customer||'—')+'</div><div><b>Total:</b> <span class="mono green">'+fmt(r.total)+'</span></div><div><b>Waktu:</b> '+r.waktu+'</div></div>';
+      // Hitung komisi dari pct yang dikembalikan backend
+      const komisiNominal=r.komisi||0;
+      const komisiPct=r.komisiPct?Math.round(r.komisiPct*100):0;
+      const komisiHtml=komisiNominal>0
+        ?'<div style="margin-top:10px;padding:10px;background:#d4edda;border-radius:var(--rs);text-align:center"><div style="font-size:11px;color:#085041;margin-bottom:2px">Komisi kamu dari transaksi ini</div><div style="font-size:20px;font-weight:700;color:#085041">'+fmt(komisiNominal)+'</div><div style="font-size:11px;color:#085041">('+komisiPct+'% dari '+fmt(r.total)+')</div></div>'
+        :'';
+      el.innerHTML='<div style="background:#e0f5ec;border:1px solid var(--green);border-radius:var(--rs);padding:12px;font-size:13px"><div style="font-weight:700;color:var(--green);margin-bottom:8px">✅ Transaksi Terverifikasi!</div><div><b>No Nota:</b> '+r.noNota+'</div><div><b>Produk:</b> '+r.produk+'</div><div><b>Customer:</b> '+(r.customer||'—')+'</div><div><b>Total:</b> <span class="mono green">'+fmt(r.total)+'</span></div><div><b>Waktu:</b> '+r.waktu+'</div>'+komisiHtml+'</div>';
     } else {
       el.innerHTML='<div style="background:#fff5f5;border:1px solid var(--red);border-radius:var(--rs);padding:12px;font-size:13px;color:var(--red)">'+(r.error||'Kode tidak ditemukan')+'</div>';
     }
   }catch{el.innerHTML='<div style="color:var(--red);padding:10px;font-size:13px">Koneksi gagal</div>';}
+}
+
+/* VERIFIKASI TRX KASIR/ADMIN */
+function openModalVerifKasir(){
+  $('verifKasirNota').value='';
+  $('verifKasirResult').innerHTML='';
+  openModal('modal-verif-kasir');
+  setTimeout(()=>$('verifKasirNota').focus(),300);
+}
+
+async function verifikasiTrxKasir(){
+  const kode=v('verifKasirNota').trim().toUpperCase();
+  const el=$('verifKasirResult');
+  if(!kode){toast('Masukkan kode transaksi',true);return;}
+  el.innerHTML='<div style="text-align:center;padding:10px"><span class="spinner"></span></div>';
+  try{
+    // Cari di posData dulu (sudah loaded)
+    let found=null;
+    if(posData&&posData.data){found=posData.data.find(r=>r.id===kode);}
+    if(!found){
+      // Fallback: panggil API verifikasi
+      const r=await apiPost(BASE+'/api/komisi/verifikasi',{outlet:outlet||'',capster:'',noNota:kode});
+      if(r.success&&r.verified){
+        const komisiPct=r.komisiPct||0;
+        const komisiNom=r.komisi||Math.round((r.total||0)*komisiPct);
+        const pctStr=Math.round(komisiPct*100);
+        el.innerHTML=buildVerifResult(r,komisiNom,pctStr);return;
+      } else {
+        el.innerHTML='<div style="background:#fff5f5;border:1px solid var(--red);border-radius:var(--rs);padding:12px;font-size:13px;color:var(--red)">'+(r.error||'Kode tidak ditemukan')+'</div>';return;
+      }
+    }
+    // Hitung komisi dari komisiData
+    let komisiPct=0;
+    if(komisiData&&komisiData.data){
+      const cd=komisiData.data.find(c=>(c.capster||c.nama)===found.capster);
+      if(cd)komisiPct=cd.komisiPct||0;
+    }
+    const komisiNom=Math.round((found.total||0)*komisiPct);
+    const pctStr=Math.round(komisiPct*100);
+    const r2={noNota:found.id,capster:found.capster,produk:found.produk,total:found.total,customer:found.customer,waktu:found.waktu,metode:found.metode};
+    el.innerHTML=buildVerifResult(r2,komisiNom,pctStr);
+  }catch{el.innerHTML='<div style="color:var(--red);padding:10px;font-size:13px">Koneksi gagal</div>';}
+}
+
+function buildVerifResult(r,komisiNom,pctStr){
+  const komisiHtml=komisiNom>0
+    ?`<div style="margin-top:10px;padding:10px;background:#d4edda;border-radius:var(--rs);text-align:center">
+        <div style="font-size:11px;color:#085041;margin-bottom:2px">Komisi capster dari transaksi ini</div>
+        <div style="font-size:22px;font-weight:700;color:#085041">${fmt(komisiNom)}</div>
+        <div style="font-size:11px;color:#085041">(${pctStr}% dari ${fmt(r.total)})</div>
+      </div>`
+    :'';
+  return `<div style="background:#e0f5ec;border:1px solid var(--green);border-radius:var(--rs);padding:12px;font-size:13px">
+    <div style="font-weight:700;color:var(--green);margin-bottom:8px">✅ Transaksi Ditemukan</div>
+    <div><b>No Nota:</b> ${r.noNota}</div>
+    <div><b>Capster:</b> ${r.capster||'—'}</div>
+    <div><b>Produk:</b> ${r.produk||'—'}</div>
+    <div><b>Customer:</b> ${r.customer||'—'}</div>
+    <div><b>Total:</b> <span class="mono green">${fmt(r.total)}</span></div>
+    <div><b>Metode:</b> ${r.metode||'—'}</div>
+    <div><b>Waktu:</b> ${r.waktu||'—'}</div>
+    ${komisiHtml}
+  </div>`;
 }
 
 /* CLOSING HARIAN */
