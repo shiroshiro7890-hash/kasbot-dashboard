@@ -157,7 +157,21 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
 .lr-profit{grid-column:1/-1;background:linear-gradient(135deg,#f0fdf9,#e0f5ec)}
 .log-item{padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px}.log-item:last-child{border-bottom:none}
 .log-aksi{font-weight:600}.log-detail{color:var(--muted);margin-top:2px;font-size:11px}
-@media print{body *{visibility:hidden}#thermal-print,#thermal-print *{visibility:visible}#thermal-print{position:fixed;left:0;top:0;width:80mm;font-family:'Courier New',monospace;font-size:11px;color:#000;background:#fff}.no-print{display:none!important}}
+@media print{
+  body *{visibility:hidden}
+  #thermal-print{display:block!important}
+  #thermal-print,#thermal-print *{visibility:visible}
+  #thermal-print{
+    position:fixed;left:0;top:0;
+    width:80mm;max-width:80mm;
+    font-family:'Courier New',Courier,monospace;
+    font-size:11px;color:#000;background:#fff;
+    margin:0;padding:3mm;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  .no-print{display:none!important}
+}
 @media(min-width:900px){main{padding:2rem 1.5rem}#bottom-nav{display:none!important}#admin-header{display:flex}#header-tabs{display:flex}.grid-3{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:600px) and (max-width:899px){#bottom-nav{display:none!important}#admin-header{display:flex}main{padding:1.5rem 1.25rem}.main-tab{font-size:11px;padding:4px 9px}.grid-3{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:599px){:root{--nav-h:52px}#admin-header{display:none!important}#bottom-nav{display:block}main{padding:1rem .875rem;padding-bottom:calc(var(--bnav-h) + max(1rem,var(--sab)) + .5rem)}.grid-3{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr 1fr}.metric-value{font-size:16px}.metric{padding:.75rem .875rem}th,td{padding:8px 10px;font-size:12px}.chart-wrap{height:100px}.capster-grid{grid-template-columns:1fr 1fr}.lr-grid{grid-template-columns:1fr 1fr}.card-head{padding:.6rem .875rem}#last-update{display:none}.controls{gap:6px}.date-filter{padding:4px 6px}.date-filter input[type=date]{max-width:120px;font-size:12px!important}}
@@ -755,7 +769,15 @@ ${it?`<div style="display:flex;justify-content:space-between"><span>Tunai</span>
 <div>Capster : ${d.capster||'—'}</div><div>Customer: ${d.customer||'Umum'}</div>
 <div style="border-top:1px dashed #000;margin:3px 0"></div>
 <div style="text-align:center">Terima kasih! 🙏</div></div>`;
-  el.style.display='block';window.print();el.style.display='none'
+  el.style.display='block';
+  // Tunggu DOM render dulu baru print (penting untuk mobile browser)
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      window.print();
+      // Sembunyikan lagi setelah print dialog muncul
+      setTimeout(()=>{el.style.display='none'},1000);
+    });
+  });
 }
 function kirimWA(){
   const d=strukData;if(!d)return;
