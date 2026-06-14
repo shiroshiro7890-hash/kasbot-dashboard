@@ -455,7 +455,10 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
     <div class="date-filter"><label>Dari</label><input type="date" id="laporan-dari" onchange="loadLaporan()"/><label>s/d</label><input type="date" id="laporan-sampai" onchange="loadLaporan()"/><button class="btn btn-reset" onclick="resetFilter('laporan-dari','laporan-sampai',loadLaporan)">✕</button></div>
     <button class="btn" onclick="loadLaporan()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
   </div>
-  <div class="section-label" id="laporan-period">Laporan Bulan Ini</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div class="section-label" id="laporan-period" style="margin-bottom:0">Laporan Bulan Ini</div>
+    <button id="btn-export-pdf" class="btn" onclick="exportLaporanPDF()" style="background:#D85A30;color:#fff;border-color:#D85A30;padding:8px 14px">📥 Export PDF</button>
+  </div>
   <div class="lr-grid">
     <div class="lr-card"><div class="lr-label">💰 Omzet</div><div class="lr-value green" id="lr-omzet">—</div></div>
     <div class="lr-card"><div class="lr-label">📤 Expense</div><div class="lr-value red" id="lr-exp">—</div></div>
@@ -489,9 +492,13 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
 <script>
 /* CONFIG */
 const BASE='https://kasbot-backend-java-production-184e.up.railway.app';
-const API_KEY='kasbot_sk_2024_BOW_barber99';
-const ADMIN_PASS='bow2024';
 const MAX_FAIL=5;
+// API key & password TIDAK ada di frontend — semua via session token
+// Session token disimpan di sessionStorage (bukan di kode)
+function getToken(){return sessionStorage.getItem('kb_token')||'';}
+function setToken(t){sessionStorage.setItem('kb_token',t);}
+function clearToken(){sessionStorage.removeItem('kb_token');}
+
 const ROLE_TABS={ADMIN:['pos','komisi','expense','absensi','laporan','notifikasi','closing','kunjungan','aset','master'],KASIR:['pos','komisi','expense','notifikasi','closing'],CAPSTER:[]};
 const TAB_CFG={pos:{l:'🏪 Jual',s:'Jual'},komisi:{l:'💈 Komisi',s:'Komisi'},expense:{l:'💰 Kas',s:'Kas'},absensi:{l:'📋 Absen',s:'Absen'},laporan:{l:'📊 Laporan',s:'Laporan'},notifikasi:{l:'🔔 Notif',s:'Notif',notif:true},master:{l:'⚙️ Master',s:'Master'},
   closing:{l:'🔐 Closing',s:'Closing'},
@@ -550,34 +557,50 @@ function switchLoginTab(t){
     $('lform-'+x).className='login-form'+(x===t?' active':'')
   })
 }
-function doLoginAdmin(){
+async function doLoginAdmin(){
   const val=v('linput-admin'),err=$('lerr-admin'),info=$('linfo-admin');
-  if(val===ADMIN_PASS){
-    fails=0;CU={nama:'Admin',userId:'admin',role:'ADMIN',outlet:''};
-    sessionStorage.setItem('kb_u',JSON.stringify(CU));
-    $('login-overlay').style.display='none';initDash()
-  }else{
-    fails++;err.textContent='Password salah.';err.style.display='block';
-    $('linput-admin').value='';
-    if(fails>=MAX_FAIL){$('linput-admin').disabled=true;$('lbtn-admin').disabled=true}
-    else{info.textContent='Sisa: '+(MAX_FAIL-fails)+'x';info.style.display='block'}
-  }
+  if(!val){err.textContent='Password wajib diisi.';err.style.display='block';return;}
+  try{
+    const r=await fetch(BASE+'/api/session/admin',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({password:val})});
+    const d=await r.json();
+    if(d.success&&d.token){
+      fails=0;
+      setToken(d.token);
+      CU={nama:'Admin',userId:'admin',role:'ADMIN',outlet:''};
+      sessionStorage.setItem('kb_u',JSON.stringify(CU));
+      $('login-overlay').style.display='none';initDash();
+    }else{
+      fails++;err.textContent='Password salah.';err.style.display='block';
+      $('linput-admin').value='';
+      if(fails>=MAX_FAIL){$('linput-admin').disabled=true;$('lbtn-admin').disabled=true;}
+      else{info.textContent='Sisa: '+(MAX_FAIL-fails)+'x';info.style.display='block';}
+    }
+  }catch{err.textContent='Koneksi gagal.';err.style.display='block';}
 }
 async function doLoginStaff(){
   const uid=v('linput-userid').trim().toUpperCase(),pin=v('linput-pin').trim(),err=$('lerr-staff');
-  if(!uid||!pin){err.textContent='User ID dan PIN wajib.';err.style.display='block';return}
+  if(!uid||!pin){err.textContent='User ID dan PIN wajib.';err.style.display='block';return;}
   try{
-    const r=await fetch(BASE+'/api/auth/login?api_key='+API_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:uid,pin})});
+    const r=await fetch(BASE+'/api/auth/login',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({userId:uid,pin})});
     const d=await r.json();
     if(d.success&&d.user){
+      if(d.token)setToken(d.token);
       CU={...d.user,role:(d.user.role||'CAPSTER').toUpperCase()};
       sessionStorage.setItem('kb_u',JSON.stringify(CU));
       $('login-overlay').style.display='none';
-      CU.role==='CAPSTER'?showCpPage(CU):initDash()
-    }else{err.textContent=d.error||'User ID atau PIN salah.';err.style.display='block';$('linput-pin').value=''}
-  }catch{err.textContent='Koneksi gagal.';err.style.display='block'}
+      CU.role==='CAPSTER'?showCpPage(CU):initDash();
+    }else{err.textContent=d.error||'User ID atau PIN salah.';err.style.display='block';$('linput-pin').value='';}
+  }catch{err.textContent='Koneksi gagal.';err.style.display='block';}
 }
-function logoutUser(){sessionStorage.removeItem('kb_u');CU=null;location.reload()}
+function logoutUser(){
+  const t=getToken();
+  if(t){fetch(BASE+'/api/session/logout',{method:'POST',headers:{'X-Session-Token':t}}).catch(()=>{});}
+  clearToken();sessionStorage.removeItem('kb_u');CU=null;location.reload();
+}
 
 /* INIT DASH */
 function initDash(){
@@ -653,13 +676,13 @@ async function confirmCheckIn(){
   const nc=v('modal-ci-input').trim();
   if(!nc){$('modal-ci-input').style.borderColor='var(--red)';setTimeout(()=>$('modal-ci-input').style.borderColor='',1000);return}
   closeModal('modal-customer');
-  try{const out=CU.outlet||'BOW BARBERSHOP';const r=await fetch(BASE+'/api/absensi/checkin?api_key='+API_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nama:CU.nama,outlet:out,namaCustomer:nc})});
+  try{const out=CU.outlet||'BOW BARBERSHOP';const r=await fetch(BASE+'/api/absensi/checkin',{method:'POST',headers:{'Content-Type':'application/json','X-Session-Token':getToken()},body:JSON.stringify({nama:CU.nama,outlet:out,namaCustomer:nc})});
   const d=await r.json();toast(d.success?'✅ Check In: '+nc:'❌ '+(d.error||'Gagal'),!d.success);loadCpStatus()}
   catch{toast('❌ Koneksi gagal',true)}
 }
 async function doCapsterCheckOut(){
   if(!confirm('Check Out sekarang?'))return;
-  try{const out=CU.outlet||'BOW BARBERSHOP';const r=await fetch(BASE+'/api/absensi/checkout?api_key='+API_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nama:CU.nama,outlet:out})});
+  try{const out=CU.outlet||'BOW BARBERSHOP';const r=await fetch(BASE+'/api/absensi/checkout',{method:'POST',headers:{'Content-Type':'application/json','X-Session-Token':getToken()},body:JSON.stringify({nama:CU.nama,outlet:out})});
   const d=await r.json();toast(d.success?'✅ Check Out! '+d.durasi+' menit':'❌ '+(d.error||'Gagal'),!d.success);loadCpStatus();loadCpHistory()}
   catch{toast('❌ Koneksi gagal',true)}
 }
@@ -670,8 +693,16 @@ if(_su){try{CU=JSON.parse(_su);$('login-overlay').style.display='none';CU.role==
 else{setTimeout(()=>$('linput-admin').focus(),200)}
 
 /* API */
-async function apiFetch(url){const sep=url.includes('?')?'&':'?';return(await fetch(url+sep+'api_key='+API_KEY)).json()}
-async function apiPost(url,body){const sep=url.includes('?')?'&':'?';return(await fetch(url+sep+'api_key='+API_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json()}
+async function apiFetch(url){
+  const res=await fetch(url,{headers:{'X-Session-Token':getToken()}});
+  if(res.status===401){logoutUser();return{success:false,error:'Session expired'};}
+  return res.json();
+}
+async function apiPost(url,body){
+  const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-Session-Token':getToken()},body:JSON.stringify(body)});
+  if(res.status===401){logoutUser();return{success:false,error:'Session expired'};}
+  return res.json();
+}
 
 /* APP INIT */
 function initApp(){loadAll();setInterval(loadAll,5*60*1000)}
@@ -1349,6 +1380,179 @@ async function uploadFotoCloudinary(file, folder) {
 
 
 
+
+
+/* ════════════════════════════════════════
+   EXPORT PDF — Laporan Bulanan & Komisi
+   Pakai jsPDF (CDN) — tidak perlu backend
+════════════════════════════════════════ */
+async function loadJsPDF(){
+  if(window.jspdf)return window.jspdf.jsPDF;
+  return new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload=()=>resolve(window.jspdf.jsPDF);
+    s.onerror=()=>reject(new Error('Gagal load jsPDF'));
+    document.head.appendChild(s);
+  });
+}
+
+function fmtPDF(n){return'Rp '+Math.round(Number(n)||0).toLocaleString('id-ID');}
+
+async function exportLaporanPDF(){
+  const btn=$('btn-export-pdf');
+  if(btn){btn.textContent='⏳ Membuat PDF...';btn.disabled=true;}
+  try{
+    const PDF=await loadJsPDF();
+    const doc=new PDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const outlet=$('outlet-sel')?.options[$('outlet-sel')?.selectedIndex]?.text||'BOW BARBERSHOP';
+    const periode=$('laporan-period')?.textContent||'Laporan';
+    const now=new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'});
+
+    // ── Header ──
+    doc.setFillColor(29,158,117);
+    doc.rect(0,0,210,28,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(18);doc.setFont('helvetica','bold');
+    doc.text('KasBot',14,12);
+    doc.setFontSize(10);doc.setFont('helvetica','normal');
+    doc.text('Sistem Manajemen Barbershop',14,19);
+    doc.setFontSize(11);doc.setFont('helvetica','bold');
+    doc.text(outlet,210-14,12,{align:'right'});
+    doc.setFontSize(9);doc.setFont('helvetica','normal');
+    doc.text(periode,210-14,19,{align:'right'});
+
+    // ── Info ──
+    doc.setTextColor(100,100,100);
+    doc.setFontSize(8);
+    doc.text('Dicetak: '+now,14,33);
+
+    let y=40;
+
+    // ── Ringkasan Keuangan ──
+    doc.setTextColor(30,30,30);
+    doc.setFontSize(13);doc.setFont('helvetica','bold');
+    doc.text('Ringkasan Keuangan',14,y);y+=7;
+
+    const omzet=parseInt($('lr-omzet')?.textContent?.replace(/[^0-9]/g,'')||'0');
+    const expense=parseInt($('lr-exp')?.textContent?.replace(/[^0-9]/g,'')||'0');
+    const profit=omzet-expense;
+    const margin=omzet>0?Math.round(profit/omzet*100):0;
+    const kb=parseInt($('lr-kb')?.textContent?.replace(/[^0-9]/g,'')||'0');
+    const pc=parseInt($('lr-pc')?.textContent?.replace(/[^0-9]/g,'')||'0');
+
+    const rows=[
+      ['Total Omzet', fmtPDF(omzet), ''],
+      ['Expense Kas Besar', fmtPDF(kb), ''],
+      ['Expense Petty Cash', fmtPDF(pc), ''],
+      ['Total Expense', fmtPDF(expense), ''],
+      ['Net Profit', fmtPDF(profit), margin+'%'],
+    ];
+
+    doc.setFont('helvetica','normal');doc.setFontSize(9);
+    rows.forEach((row,i)=>{
+      const isTotal=(row[0]==='Net Profit');
+      if(isTotal){
+        doc.setFillColor(profit>=0?220:255,profit>=0?250:220,profit>=0?230:220);
+        doc.rect(14,y-4,182,8,'F');
+        doc.setFont('helvetica','bold');
+        doc.setTextColor(profit>=0?15:180,profit>=0?100:50,profit>=0?70:50);
+      }else{
+        doc.setFillColor(i%2===0?248:255,i%2===0?248:255,i%2===0?248:255);
+        doc.rect(14,y-4,182,8,'F');
+        doc.setFont('helvetica','normal');doc.setTextColor(50,50,50);
+      }
+      doc.text(row[0],18,y);
+      doc.text(row[1],150,y,{align:'right'});
+      if(row[2])doc.text(row[2],196,y,{align:'right'});
+      y+=8;
+    });
+
+    // ── Garis batas ──
+    y+=5;doc.setDrawColor(200,200,200);doc.setLineWidth(0.3);doc.line(14,y,196,y);y+=8;
+
+    // ── Rekap Komisi Capster ──
+    if(komisiData&&komisiData.data&&komisiData.data.length){
+      doc.setTextColor(30,30,30);
+      doc.setFontSize(13);doc.setFont('helvetica','bold');
+      doc.text('Rekap Komisi Capster',14,y);y+=7;
+
+      // Header tabel
+      doc.setFillColor(29,158,117);
+      doc.rect(14,y-4,182,8,'F');
+      doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(9);
+      doc.text('Capster',18,y);
+      doc.text('Transaksi',80,y,{align:'right'});
+      doc.text('Omzet',130,y,{align:'right'});
+      doc.text('% Komisi',165,y,{align:'right'});
+      doc.text('Komisi',196,y,{align:'right'});
+      y+=8;
+
+      komisiData.data.forEach((c,i)=>{
+        if(y>270){doc.addPage();y=20;}
+        doc.setFillColor(i%2===0?248:255,i%2===0?248:255,i%2===0?248:255);
+        doc.rect(14,y-4,182,8,'F');
+        doc.setTextColor(50,50,50);doc.setFont('helvetica','normal');doc.setFontSize(8);
+        doc.text(String(c.capster||c.nama||''),18,y);
+        doc.text(String(c.transaksi||0),80,y,{align:'right'});
+        doc.text(fmtPDF(c.omzet),130,y,{align:'right'});
+        doc.text(((c.komisiPct||0)*100).toFixed(0)+'%',165,y,{align:'right'});
+        doc.setTextColor(15,100,70);doc.setFont('helvetica','bold');
+        doc.text(fmtPDF(c.komisi),196,y,{align:'right'});
+        y+=8;
+      });
+
+      // Total komisi
+      const totK=komisiData.data.reduce((s,c)=>s+(c.komisi||0),0);
+      doc.setFillColor(220,250,230);doc.rect(14,y-4,182,8,'F');
+      doc.setTextColor(15,100,70);doc.setFont('helvetica','bold');doc.setFontSize(9);
+      doc.text('TOTAL KOMISI',18,y);
+      doc.text(fmtPDF(totK),196,y,{align:'right'});
+      y+=12;
+    }
+
+    // ── Ringkasan Penjualan ──
+    if(posData&&posData.data&&posData.data.length){
+      if(y>220){doc.addPage();y=20;}
+      doc.setTextColor(30,30,30);
+      doc.setFontSize(13);doc.setFont('helvetica','bold');
+      doc.text('Ringkasan Penjualan',14,y);y+=7;
+
+      // Per metode bayar
+      const byMetode={};
+      posData.data.forEach(r=>{byMetode[r.metode||'—']=(byMetode[r.metode||'—']||0)+r.total;});
+      doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(80,80,80);
+      doc.text('Per Metode Pembayaran',18,y);y+=5;
+      Object.entries(byMetode).sort((a,b)=>b[1]-a[1]).forEach(([ m,v],i)=>{
+        doc.setFillColor(i%2===0?248:255,i%2===0?248:255,i%2===0?248:255);
+        doc.rect(14,y-4,182,7,'F');
+        doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(50,50,50);
+        doc.text(m,18,y);doc.text(fmtPDF(v),196,y,{align:'right'});
+        y+=7;
+      });
+      y+=4;
+    }
+
+    // ── Footer ──
+    const pageCount=doc.getNumberOfPages();
+    for(let i=1;i<=pageCount;i++){
+      doc.setPage(i);
+      doc.setTextColor(160,160,160);doc.setFontSize(8);doc.setFont('helvetica','normal');
+      doc.text('KasBot — Sistem Manajemen Barbershop',14,290);
+      doc.text(`Halaman ${i} dari ${pageCount}`,196,290,{align:'right'});
+      doc.setDrawColor(200,200,200);doc.setLineWidth(0.2);doc.line(14,285,196,285);
+    }
+
+    // Download
+    const fname=`KasBot_Laporan_${periode.replace(/[^a-zA-Z0-9]/g,'_')}_${outlet.replace(/ /g,'_')}.pdf`;
+    doc.save(fname);
+    toast('✅ PDF berhasil didownload!');
+  }catch(e){
+    console.error(e);toast('❌ Gagal buat PDF: '+e.message,true);
+  }finally{
+    if(btn){btn.textContent='📥 Export PDF';btn.disabled=false;}
+  }
+}
 
 </script>
 
