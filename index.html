@@ -175,6 +175,14 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
 @media(min-width:900px){main{padding:2rem 1.5rem}#bottom-nav{display:none!important}#admin-header{display:flex}#header-tabs{display:flex}.grid-3{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:600px) and (max-width:899px){#bottom-nav{display:none!important}#admin-header{display:flex}main{padding:1.5rem 1.25rem}.main-tab{font-size:11px;padding:4px 9px}.grid-3{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:599px){:root{--nav-h:52px}#admin-header{display:none!important}#bottom-nav{display:block}main{padding:1rem .875rem;padding-bottom:calc(var(--bnav-h) + max(1rem,var(--sab)) + .5rem)}.grid-3{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr 1fr}.metric-value{font-size:16px}.metric{padding:.75rem .875rem}th,td{padding:8px 10px;font-size:12px}.chart-wrap{height:100px}.capster-grid{grid-template-columns:1fr 1fr}.lr-grid{grid-template-columns:1fr 1fr}.card-head{padding:.6rem .875rem}#last-update{display:none}.controls{gap:6px}.date-filter{padding:4px 6px}.date-filter input[type=date]{max-width:120px;font-size:12px!important}}
+.foto-upload-wrap{margin-top:8px}
+.foto-upload-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;border-radius:var(--rs);border:1.5px dashed var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;transition:.15s;touch-action:manipulation;min-height:48px}
+.foto-upload-btn:hover,.foto-upload-btn:active{background:#f0faf6;border-color:var(--green);color:var(--green)}
+.foto-upload-btn.loading{opacity:.6;pointer-events:none}
+.foto-preview{display:none;margin-top:8px;position:relative}
+.foto-preview img{width:100%;max-height:180px;object-fit:cover;border-radius:var(--rs);border:1px solid var(--border)}
+.foto-preview-del{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:24px;height:24px;font-size:14px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center}
+.foto-upload-hint{font-size:11px;color:var(--muted);margin-top:5px;text-align:center}
 @media(max-width:379px){main{padding:.875rem .75rem;padding-bottom:calc(var(--bnav-h) + max(.875rem,var(--sab)) + .5rem)}.grid-3,.grid-2{grid-template-columns:1fr 1fr;gap:6px}.metric-value{font-size:14px}.metric{padding:.65rem .75rem}.metric-label{font-size:10px}.card-title{font-size:12px}th,td{padding:7px 8px;font-size:11px}.btn{font-size:12px;padding:6px 9px}.bnav-icon{font-size:16px}.bnav-label{font-size:8px}.date-filter input[type=date]{max-width:100px;font-size:11px!important}.capster-grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -1192,12 +1200,12 @@ function renderAsetTable(){
 }
 function openModalTambahAset(){
   asetMode='tambah';asetRow=0;$('mm-aset-title').textContent='Tambah Aset';
-  $('mm-aset-body').innerHTML=mi('a-nama','Nama Aset *','text','Gunting Rambut','','autocomplete="off"')+mi('a-kat','Kategori','text','Alat Potong','','autocomplete="off"')+'<label>Kondisi</label><select class="modal-select" id="a-kondisi" style="margin-top:4px"><option value="BAIK">Baik</option><option value="SEDANG">Sedang</option><option value="RUSAK">Rusak</option></select>'+mi('a-tglbeli','Tanggal Beli','date','','','')+mi('a-harga','Harga (Rp)','number','','','inputmode="numeric"')+mi('a-catatan','Catatan','text','','','autocomplete="off"')+mi('a-foto','URL Foto (opsional)','url','https://...','','autocomplete="off"');
+  $('mm-aset-body').innerHTML=mi('a-nama','Nama Aset *','text','Gunting Rambut','','autocomplete="off"')+mi('a-kat','Kategori','text','Alat Potong','','autocomplete="off"')+'<label>Kondisi</label><select class="modal-select" id="a-kondisi" style="margin-top:4px"><option value="BAIK">Baik</option><option value="SEDANG">Sedang</option><option value="RUSAK">Rusak</option></select>'+mi('a-tglbeli','Tanggal Beli','date','','','')+mi('a-harga','Harga (Rp)','number','','','inputmode="numeric"')+mi('a-catatan','Catatan','text','','','autocomplete="off"')+'<label>Foto Aset (opsional)</label>'+'<div class="foto-upload-wrap" id="aset-foto-wrap">'+'<input type="file" id="aset-foto-input" accept="image/*" capture="environment" style="display:none" onchange="onFotoSelected(this,\'aset\')" />'+'<button type="button" class="foto-upload-btn" id="aset-foto-btn" onclick="document.getElementById(\'aset-foto-input\').click()">📷 Ambil / Pilih Foto dari Galeri</button>'+'<div class="foto-preview" id="aset-foto-preview"><img id="aset-foto-img" src="" alt="preview"/><button class="foto-preview-del" onclick="hapusFoto(\'aset\')">✕</button></div>'+'<div class="foto-upload-hint">Foto langsung terupload ke Cloudinary saat submit</div>'+'</div>';
   openModal('modal-aset');
 }
 function openModalUpdateAset(rowIndex,kondisi,status,catatan){
   asetMode='update';asetRow=rowIndex;$('mm-aset-title').textContent='Update Aset';
-  $('mm-aset-body').innerHTML='<label>Kondisi</label><select class="modal-select" id="a-kondisi" style="margin-top:4px"><option value="BAIK"'+(kondisi==='BAIK'?' selected':'')+'>Baik</option><option value="SEDANG"'+(kondisi==='SEDANG'?' selected':'')+'>Sedang</option><option value="RUSAK"'+(kondisi==='RUSAK'?' selected':'')+'>Rusak</option></select><label>Status</label><select class="modal-select" id="a-status" style="margin-top:4px"><option value="AKTIF"'+(status==='AKTIF'?' selected':'')+'>Aktif / Dipakai</option><option value="RUSAK"'+(status==='RUSAK'?' selected':'')+'>Rusak</option><option value="DIGANTI"'+(status==='DIGANTI'?' selected':'')+'>Sudah Diganti</option><option value="HILANG"'+(status==='HILANG'?' selected':'')+'>Hilang</option></select>'+mi('a-catatan','Catatan','text','',catatan,'autocomplete="off"')+mi('a-foto','URL Foto Baru (opsional)','url','https://...','','autocomplete="off"');
+  $('mm-aset-body').innerHTML='<label>Kondisi</label><select class="modal-select" id="a-kondisi" style="margin-top:4px"><option value="BAIK"'+(kondisi==='BAIK'?' selected':'')+'>Baik</option><option value="SEDANG"'+(kondisi==='SEDANG'?' selected':'')+'>Sedang</option><option value="RUSAK"'+(kondisi==='RUSAK'?' selected':'')+'>Rusak</option></select><label>Status</label><select class="modal-select" id="a-status" style="margin-top:4px"><option value="AKTIF"'+(status==='AKTIF'?' selected':'')+'>Aktif / Dipakai</option><option value="RUSAK"'+(status==='RUSAK'?' selected':'')+'>Rusak</option><option value="DIGANTI"'+(status==='DIGANTI'?' selected':'')+'>Sudah Diganti</option><option value="HILANG"'+(status==='HILANG'?' selected':'')+'>Hilang</option></select>'+mi('a-catatan','Catatan','text','',catatan,'autocomplete="off"')+'<label>Update Foto (opsional)</label>'+'<div class="foto-upload-wrap" id="aset-foto-wrap">'+'<input type="file" id="aset-foto-input" accept="image/*" capture="environment" style="display:none" onchange="onFotoSelected(this,\'aset\')" />'+'<button type="button" class="foto-upload-btn" id="aset-foto-btn" onclick="document.getElementById(\'aset-foto-input\').click()">📷 Ambil / Pilih Foto dari Galeri</button>'+'<div class="foto-preview" id="aset-foto-preview"><img id="aset-foto-img" src="" alt="preview"/><button class="foto-preview-del" onclick="hapusFoto(\'aset\')">✕</button></div>'+'<div class="foto-upload-hint">Foto langsung terupload ke Cloudinary saat submit</div>'+'</div>';
   openModal('modal-aset');
 }
 async function submitModalAset(){
@@ -1206,7 +1214,7 @@ async function submitModalAset(){
     var r;
     if(asetMode==='tambah'){
       const nama=g('a-nama');if(!nama){toast('Nama aset wajib',true);return;}
-      r=await apiPost(BASE+'/api/aset/tambah',{outlet:outlet||'',nama:nama,kategori:g('a-kat'),kondisi:g('a-kondisi')||'BAIK',tanggalBeli:g('a-tglbeli'),harga:parseInt(g('a-harga'))||0,catatan:g('a-catatan'),fotoUrl:g('a-foto'),addedBy:CU.nama});
+      r=await apiPost(BASE+'/api/aset/tambah',{outlet:outlet||'',nama:nama,kategori:g('a-kat'),kondisi:g('a-kondisi')||'BAIK',tanggalBeli:g('a-tglbeli'),harga:parseInt(g('a-harga'))||0,catatan:g('a-catatan'),fotoUrl:g('req-foto'),addedBy:CU.nama});
     } else {
       r=await apiPost(BASE+'/api/aset/update',{outlet:outlet||'',rowIndex:asetRow,kondisi:g('a-kondisi'),status:g('a-status'),catatan:g('a-catatan'),fotoUrl:g('a-foto'),updatedBy:CU.nama});
     }
@@ -1237,7 +1245,7 @@ function renderRequestTable(data){
 }
 function openModalSubmitRequest(){
   $('mm-req-title').textContent='Request Barang';
-  $('mm-req-body').innerHTML=mi('req-barang','Nama Barang *','text','Gunting Professional','','autocomplete="off"')+mi('req-jml','Jumlah *','number','1','1','inputmode="numeric" min="1"')+mi('req-alasan','Alasan / Keterangan *','text','Gunting sudah tumpul','','autocomplete="off"')+mi('req-foto','URL Foto Barang Rusak (opsional)','url','https://...','','autocomplete="off"');
+  $('mm-req-body').innerHTML=mi('req-barang','Nama Barang *','text','Gunting Professional','','autocomplete="off"')+mi('req-jml','Jumlah *','number','1','1','inputmode="numeric" min="1"')+mi('req-alasan','Alasan / Keterangan *','text','Gunting sudah tumpul','','autocomplete="off"')+'<label>Foto Barang Rusak (opsional)</label>'+'<div class="foto-upload-wrap" id="req-foto-wrap">'+'<input type="file" id="req-foto-input" accept="image/*" capture="environment" style="display:none" onchange="onFotoSelected(this,\'req\')" />'+'<button type="button" class="foto-upload-btn" id="req-foto-btn" onclick="document.getElementById(\'req-foto-input\').click()">📷 Ambil / Pilih Foto dari Galeri</button>'+'<div class="foto-preview" id="req-foto-preview"><img id="req-foto-img" src="" alt="preview"/><button class="foto-preview-del" onclick="hapusFoto(\'req\')">✕</button></div>'+'<div class="foto-upload-hint">Foto langsung terupload ke Cloudinary saat submit</div>'+'</div>';
   openModal('modal-request');
 }
 async function submitModalRequest(){
@@ -1245,7 +1253,7 @@ async function submitModalRequest(){
   const barang=g('req-barang'),alasan=g('req-alasan');
   if(!barang||!alasan){toast('Nama barang dan alasan wajib',true);return;}
   try{
-    const r=await apiPost(BASE+'/api/request/submit',{outlet:outlet||(CU&&CU.outlet)||'',capster:CU.nama,namaBarang:barang,jumlah:g('req-jml')||'1',alasan:alasan,fotoUrl:g('req-foto')});
+    const r=await apiPost(BASE+'/api/request/submit',{outlet:outlet||(CU&&CU.outlet)||'',capster:CU.nama,namaBarang:barang,jumlah:g('req-jml')||'1',alasan:alasan,fotoUrl:''});
     if(r.success){toast('Request terkirim!');closeModal('modal-request');loadRequestBarang();}
     else toast((r.error||'Gagal'),true);
   }catch{toast('Koneksi gagal',true);}
@@ -1281,6 +1289,159 @@ function loadAll(){
   var sel=$('kunjungan-tahun');
   if(sel){var now=new Date();for(var i=0;i<3;i++){var y=now.getFullYear()-i;var o=document.createElement('option');o.value=y;o.textContent=y;sel.appendChild(o);}}
 })();
+
+
+/* ════════════════════════════════════════
+   CLOUDINARY UNSIGNED UPLOAD — Foto dari Galeri
+   Pakai Upload Preset (unsigned) — aman di frontend
+════════════════════════════════════════ */
+const CLOUD_NAME   = 'dgtkcw13d';
+const UPLOAD_PRESET = 'kasbot_unsigned'; // Buat di Cloudinary Dashboard → Settings → Upload Presets
+
+// State foto per konteks (req / aset)
+const _fotoState = {req:'', aset:''};
+
+function onFotoSelected(input, ctx) {
+  const file = input.files[0];
+  if (!file) return;
+  // Validasi ukuran max 10MB
+  if (file.size > 10 * 1024 * 1024) {
+    toast('Foto terlalu besar, maksimal 10MB', true);
+    input.value = '';
+    return;
+  }
+  // Tampilkan preview lokal
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = $(ctx + '-foto-img');
+    const prev = $(ctx + '-foto-preview');
+    const btn  = $(ctx + '-foto-btn');
+    if (img) img.src = e.target.result;
+    if (prev) prev.style.display = 'block';
+    if (btn) btn.textContent = '✅ Foto dipilih — ganti?';
+  };
+  reader.readAsDataURL(file);
+  // Simpan file di state untuk upload saat submit
+  _fotoState[ctx] = file;
+}
+
+function hapusFoto(ctx) {
+  _fotoState[ctx] = '';
+  const input = $(ctx + '-foto-input');
+  const prev  = $(ctx + '-foto-preview');
+  const btn   = $(ctx + '-foto-btn');
+  const img   = $(ctx + '-foto-img');
+  if (input) input.value = '';
+  if (prev) prev.style.display = 'none';
+  if (img) img.src = '';
+  if (btn) btn.textContent = '📷 Ambil / Pilih Foto dari Galeri';
+}
+
+async function uploadFotoCloudinary(file, folder) {
+  if (!file) return '';
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', UPLOAD_PRESET);
+  fd.append('folder', folder);
+  try {
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+      { method: 'POST', body: fd }
+    );
+    if (!res.ok) throw new Error('Upload gagal: ' + res.status);
+    const data = await res.json();
+    return data.secure_url || '';
+  } catch(e) {
+    console.error('Cloudinary upload error:', e);
+    toast('Upload foto gagal: ' + e.message, true);
+    return '';
+  }
+}
+
+// Override submitModalRequest — tambah upload foto dulu
+const _origSubmitReq = submitModalRequest;
+async function submitModalRequest() {
+  const g = id => ($(id)||{value:''}).value.trim();
+  const barang = g('req-barang'), alasan = g('req-alasan');
+  if (!barang || !alasan) { toast('Nama barang dan alasan wajib', true); return; }
+
+  // Upload foto dulu kalau ada
+  let fotoUrl = '';
+  if (_fotoState.req) {
+    const btn = $('req-foto-btn');
+    if (btn) { btn.textContent = '⏳ Mengupload foto...'; btn.classList.add('loading'); }
+    fotoUrl = await uploadFotoCloudinary(_fotoState.req, 'kasbot_request');
+    if (btn) { btn.classList.remove('loading'); }
+  }
+
+  try {
+    const r = await apiPost(BASE + '/api/request/submit', {
+      outlet: outlet || (CU && CU.outlet) || '',
+      capster: CU.nama,
+      namaBarang: barang,
+      jumlah: g('req-jml') || '1',
+      alasan: alasan,
+      fotoUrl: fotoUrl
+    });
+    if (r.success) {
+      toast('Request terkirim!');
+      closeModal('modal-request');
+      hapusFoto('req');
+      loadRequestBarang();
+    } else toast((r.error || 'Gagal'), true);
+  } catch { toast('Koneksi gagal', true); }
+}
+
+// Override submitModalAset — tambah upload foto dulu
+const _origSubmitAset = submitModalAset;
+async function submitModalAset() {
+  const g = id => ($(id)||{value:''}).value.trim();
+  let r;
+
+  // Upload foto dulu kalau ada
+  let fotoUrl = '';
+  if (_fotoState.aset) {
+    const btn = $('aset-foto-btn');
+    if (btn) { btn.textContent = '⏳ Mengupload foto...'; btn.classList.add('loading'); }
+    const folder = asetMode === 'tambah' ? 'kasbot_aset' : 'kasbot_aset_update';
+    fotoUrl = await uploadFotoCloudinary(_fotoState.aset, folder);
+    if (btn) { btn.classList.remove('loading'); }
+  }
+
+  try {
+    if (asetMode === 'tambah') {
+      const nama = g('a-nama');
+      if (!nama) { toast('Nama aset wajib', true); return; }
+      r = await apiPost(BASE + '/api/aset/tambah', {
+        outlet: outlet || '',
+        nama: nama,
+        kategori: g('a-kat'),
+        kondisi: g('a-kondisi') || 'BAIK',
+        tanggalBeli: g('a-tglbeli'),
+        harga: parseInt(g('a-harga')) || 0,
+        catatan: g('a-catatan'),
+        fotoUrl: fotoUrl,
+        addedBy: CU.nama
+      });
+    } else {
+      r = await apiPost(BASE + '/api/aset/update', {
+        outlet: outlet || '',
+        rowIndex: asetRow,
+        kondisi: g('a-kondisi'),
+        status: g('a-status'),
+        catatan: g('a-catatan'),
+        fotoUrl: fotoUrl,
+        updatedBy: CU.nama
+      });
+    }
+    if (r && r.success) {
+      toast('Aset ' + (asetMode === 'tambah' ? 'ditambahkan' : 'diupdate'));
+      closeModal('modal-aset');
+      hapusFoto('aset');
+      loadAset();
+    } else toast((r && r.error) || 'Gagal', true);
+  } catch { toast('Koneksi gagal', true); }
+}
 
 </script>
 
