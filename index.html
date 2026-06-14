@@ -651,16 +651,78 @@ tr:hover td{background:#FAFAF8}
 </main></div>
 
 <div id="section-absensi" style="display:none"><main>
-  <div class="controls">
-    <select id="absensi-outlet" onchange="loadAbsensi()" style="font-size:12px;padding:6px 8px;-webkit-appearance:none;appearance:none">
-      <option value="">BOW BARBERSHOP</option>
-      <option value="jelambar">BOW JELAMBAR</option>
-    </select>
-    <div class="date-filter">
-      <label>Tgl</label>
-      <input type="date" id="absensi-tgl" onchange="loadAbsensi()"/>
-      <button class="btn" style="padding:4px 8px;font-size:11px" onclick="resetFilter('absensi-tgl',null,loadAbsensi)">✕</button>
-    </div>
+  async function loadAbsensi(){
+  const outlet=document.getElementById('absensi-outlet').value;
+  const dari=document.getElementById('absensi-dari').value;
+  const sampai=document.getElementById('absensi-sampai').value;
+  const op=outlet?`?outlet=${encodeURIComponent(outlet)}`:'';
+
+  // Label tanggal di header tabel
+  const el=document.getElementById('absensi-tanggal');
+  if(dari&&sampai) el.textContent=fmtTgl(dari)+' — '+fmtTgl(sampai);
+  else if(dari) el.textContent='Dari '+fmtTgl(dari);
+  else if(sampai) el.textContent='s/d '+fmtTgl(sampai);
+  else el.textContent=new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  try{
+    const[status,riwayat]=await Promise.all([
+      apiFetch(BASE+'/api/absensi/status'+op),
+      apiFetch(BASE+'/api/absensi/riwayat'+op)
+    ]);
+    renderAbsensiStatus(status);
+    absensiRiwayatAll=riwayat.data||[];
+    renderAbsensiRiwayat(dari,sampai);
+  }catch(e){
+    document.getElementById('absensi-status-grid').innerHTML='<div class="empty">Error</div>';
+  }
+}
+
+function resetAbsensiFilter(){
+  document.getElementById('absensi-dari').value='';
+  document.getElementById('absensi-sampai').value='';
+  loadAbsensi();
+}
+
+function fmtTgl(isoStr){
+  if(!isoStr)return'';
+  const[y,m,d]=isoStr.split('-');
+  return`${d}/${m}/${y}`;
+}
+
+function renderAbsensiRiwayat(dari,sampai){
+  const el=document.getElementById('absensi-riwayat-table');
+  let data=absensiRiwayatAll;
+
+  // Filter by date range
+  if(dari||sampai){
+    data=absensiRiwayatAll.filter(r=>{
+      if(!r.checkIn)return false;
+      // checkIn format: "dd/MM/yyyy HH:mm"
+      const parts=r.checkIn.substring(0,10).split('/');
+      if(parts.length<3)return true;
+      const tglRow=new Date(parts[2],parts[1]-1,parts[0]);
+      if(dari&&tglRow<new Date(dari))return false;
+      if(sampai&&tglRow>new Date(sampai))return false;
+      return true;
+    });
+  }
+
+  if(!data.length){
+    el.innerHTML='<div class="empty">Tidak ada data</div>';
+    return;
+  }
+
+  el.innerHTML='<table><thead><tr><th>Tanggal</th><th>Capster</th><th>Customer</th><th>CI</th><th>CO</th><th style="text-align:right">Durasi</th><th>Status</th></tr></thead><tbody>'+
+    data.map(r=>`<tr>
+      <td class="mono">${r.checkIn?r.checkIn.substring(0,10):'—'}</td>
+      <td><b>${r.nama}</b></td>
+      <td>${r.namaCustomer||'—'}</td>
+      <td class="mono">${r.checkIn?r.checkIn.substring(11):'—'}</td>
+      <td class="mono">${r.checkOut?r.checkOut.substring(11):'—'}</td>
+      <td style="text-align:right" class="mono">${r.durasi?r.durasi+'m':'—'}</td>
+      <td>${r.status==='AKTIF'?'<span style="color:var(--green);font-weight:600">● Aktif</span>':'<span style="color:var(--muted)">✓</span>'}</td>
+    </tr>`).join('')+'</tbody></table>';
+}
     <button class="btn" onclick="loadAbsensi()" style="padding:6px 10px;font-size:12px"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
   </div>
   <div class="section-label">Status Capster</div>
