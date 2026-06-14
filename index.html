@@ -578,16 +578,178 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
 </main></div>
 
 <div id="section-absensi" class="section"><main>
-  <div class="controls">
-    <select id="absensi-outlet" onchange="loadAbsensi()" style="font-size:14px!important;padding:7px 10px;-webkit-appearance:none;appearance:none">
-      <option value="">BOW BARBERSHOP</option><option value="jelambar">BOW JELAMBAR</option>
-    </select>
-    <div class="date-filter"><label>Dari</label><input type="date" id="absensi-dari" onchange="loadAbsensi()"/><label>s/d</label><input type="date" id="absensi-sampai" onchange="loadAbsensi()"/><button class="btn btn-reset" onclick="resetAbsensiFilter()">✕</button></div>
-    <button class="btn" onclick="loadAbsensi()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+  <!-- Sub-tab: Status / Harian / Izin / Shift -->
+  <div class="sub-nav">
+    <button class="sub-tab active" id="stab-abs-status"  onclick="switchAbsensiTab('status')">Status Real-time</button>
+    <button class="sub-tab"        id="stab-abs-harian"  onclick="switchAbsensiTab('harian')">Input Harian</button>
+    <button class="sub-tab"        id="stab-abs-rekap"   onclick="switchAbsensiTab('rekap')">Rekap Bulanan</button>
+    <button class="sub-tab"        id="stab-abs-izin"    onclick="switchAbsensiTab('izin')">Izin</button>
+    <button class="sub-tab"        id="stab-abs-shift"   onclick="switchAbsensiTab('shift')">Master Shift</button>
   </div>
-  <div class="section-label">Status Capster</div>
-  <div class="capster-grid" id="absensi-status-grid"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
-  <div class="card"><div class="card-head"><div class="card-title">Riwayat Absensi</div><span id="absensi-tgl" class="mono" style="color:var(--hint)"></span></div><div class="tbl-wrap"><div id="absensi-riw-tbl"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
+
+  <!-- TAB: STATUS REAL-TIME -->
+  <div id="abs-tab-status">
+    <div class="controls">
+      <select id="absensi-outlet" onchange="loadAbsensi()" style="font-size:14px!important;padding:7px 10px;-webkit-appearance:none;appearance:none">
+        <option value="">BOW BARBERSHOP</option><option value="jelambar">BOW JELAMBAR</option>
+      </select>
+      <div class="date-filter"><label>Dari</label><input type="date" id="absensi-dari" onchange="loadAbsensi()"/><label>s/d</label><input type="date" id="absensi-sampai" onchange="loadAbsensi()"/><button class="btn btn-reset" onclick="resetAbsensiFilter()">✕</button></div>
+      <button class="btn" onclick="loadAbsensi()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+    </div>
+    <div class="section-label">Status Capster</div>
+    <div class="capster-grid" id="absensi-status-grid"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
+    <div class="card"><div class="card-head"><div class="card-title">Riwayat Absensi</div><span id="absensi-tgl" class="mono" style="color:var(--hint)"></span></div><div class="tbl-wrap"><div id="absensi-riw-tbl"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
+  </div>
+
+  <!-- TAB: INPUT HARIAN -->
+  <div id="abs-tab-harian" style="display:none">
+    <div class="controls">
+      <select id="abs-h-outlet" onchange="loadAbsensiHarian()" style="-webkit-appearance:none;appearance:none;padding:7px 10px">
+        <option value="">BOW BARBERSHOP</option><option value="BOW JELAMBAR">BOW JELAMBAR</option>
+      </select>
+      <button class="btn" onclick="loadAbsensiHarian()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+    </div>
+
+    <!-- Form input absensi -->
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-head"><div class="card-title">Input Kehadiran Capster</div></div>
+      <div class="card-body" style="padding:1rem">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Capster *</label>
+            <select class="modal-select" id="abs-capster-sel" style="width:100%"><option value="">-- Pilih Capster --</option></select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Shift *</label>
+            <select class="modal-select" id="abs-shift-sel" style="width:100%" onchange="previewDendaAbsensi()"><option value="">-- Pilih Shift --</option></select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Jam Masuk *</label>
+            <input class="modal-input" type="time" id="abs-jam-masuk" style="width:100%" onchange="previewDendaAbsensi()" oninput="previewDendaAbsensi()"/>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Catatan</label>
+            <input class="modal-input" type="text" id="abs-catatan" placeholder="Opsional..." style="width:100%"/>
+          </div>
+        </div>
+        <!-- Preview denda realtime -->
+        <div id="abs-denda-preview" style="display:none;padding:10px;border-radius:var(--rs);margin-bottom:10px;font-size:13px"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="submitAbsensiMasuk()" style="flex:1;padding:10px">Simpan Masuk</button>
+          <button class="btn btn-danger" onclick="submitAbsensiAlpha()" style="flex:1;padding:10px">Alpha</button>
+        </div>
+        <div id="abs-input-result" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <!-- List absensi hari ini -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Absensi Hari Ini</div>
+        <span id="abs-today-count" style="font-size:11px;color:var(--muted)"></span>
+      </div>
+      <div class="tbl-wrap"><div id="abs-harian-tbl"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+    </div>
+  </div>
+
+  <!-- TAB: REKAP BULANAN -->
+  <div id="abs-tab-rekap" style="display:none">
+    <div class="controls">
+      <select id="abs-rekap-outlet" onchange="loadAbsensiRekap()" style="-webkit-appearance:none;appearance:none;padding:7px 10px">
+        <option value="">BOW BARBERSHOP</option><option value="BOW JELAMBAR">BOW JELAMBAR</option>
+      </select>
+      <select id="abs-rekap-bln" onchange="loadAbsensiRekap()" style="-webkit-appearance:none;appearance:none;padding:7px 10px">
+        <option value="">Bulan Ini</option>
+      </select>
+      <button class="btn" onclick="exportAbsensiCSV()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
+    </div>
+    <div id="abs-rekap-tbl"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
+  </div>
+
+  <!-- TAB: IZIN -->
+  <div id="abs-tab-izin" style="display:none">
+    <div class="controls">
+      <select id="abs-izin-outlet" onchange="loadIzinList()" style="-webkit-appearance:none;appearance:none;padding:7px 10px">
+        <option value="">BOW BARBERSHOP</option><option value="BOW JELAMBAR">BOW JELAMBAR</option>
+      </select>
+      <select id="abs-izin-status" onchange="loadIzinList()" style="-webkit-appearance:none;appearance:none;padding:7px 10px">
+        <option value="">Semua Status</option>
+        <option value="PENDING">Menunggu</option>
+        <option value="ACC">Disetujui</option>
+        <option value="TOLAK">Ditolak</option>
+      </select>
+      <button class="btn btn-primary" onclick="openModalAjukanIzin()" style="padding:7px 12px">+ Ajukan Izin</button>
+    </div>
+    <div class="card"><div class="card-head"><div class="card-title">Daftar Izin</div></div>
+    <div class="tbl-wrap"><div id="abs-izin-tbl"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
+  </div>
+
+  <!-- TAB: MASTER SHIFT -->
+  <div id="abs-tab-shift" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <div class="section-label" style="margin-bottom:0">Master Shift</div>
+      <button class="btn btn-primary" onclick="openModalTambahShift()" style="padding:7px 12px">+ Tambah Shift</button>
+    </div>
+    <div class="card"><div class="tbl-wrap"><div id="abs-shift-tbl"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
+  </div>
+
+</main></div>
+
+<div id="section-gaji" class="section"><main>
+  <div class="sub-nav">
+    <button class="sub-tab active" id="stab-gaji-generate" onclick="switchGajiTab('generate')">Generate Gaji</button>
+    <button class="sub-tab"        id="stab-gaji-rekap"    onclick="switchGajiTab('rekap')">Rekap Bulanan</button>
+  </div>
+
+  <!-- TAB: GENERATE GAJI -->
+  <div id="gaji-tab-generate">
+    <div class="controls">
+      <select id="gaji-outlet" onchange="loadGajiCapsterList()" style="-webkit-appearance:none;appearance:none;padding:7px 10px">
+        <option value="">BOW BARBERSHOP</option>
+        <option value="BOW JELAMBAR">BOW JELAMBAR</option>
+      </select>
+      <select id="gaji-bulan" onchange="loadRekapGaji()" style="-webkit-appearance:none;appearance:none;padding:7px 10px">
+        <option value="">Bulan Ini</option>
+      </select>
+    </div>
+
+    <!-- Form generate per capster -->
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-head"><div class="card-title">Generate Rekap Gaji</div></div>
+      <div class="card-body" style="padding:1rem">
+        <div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Pilih Capster</label>
+            <select class="modal-select" id="gaji-capster-sel" style="width:100%">
+              <option value="">-- Pilih Capster --</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="generateGaji()" style="padding:10px 16px;white-space:nowrap">
+            Hitung Gaji
+          </button>
+        </div>
+        <div id="gaji-generate-result" style="margin-top:1rem"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: REKAP BULANAN -->
+  <div id="gaji-tab-rekap" style="display:none">
+    <div class="controls">
+      <select id="gaji-rekap-outlet" onchange="loadRekapGaji()" style="-webkit-appearance:none;appearance:none;padding:7px 10px">
+        <option value="">BOW BARBERSHOP</option>
+        <option value="BOW JELAMBAR">BOW JELAMBAR</option>
+      </select>
+      <select id="gaji-rekap-bulan" style="-webkit-appearance:none;appearance:none;padding:7px 10px" onchange="loadRekapGaji()">
+        <option value="">Bulan Ini</option>
+      </select>
+      <button class="btn" onclick="exportGajiCSV()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export</button>
+    </div>
+    <div id="gaji-rekap-tbl"><div class="empty"><span class="spinner"></span>Memuat...</div></div>
+  </div>
+
 </main></div>
 
 <div id="section-laporan" class="section"><main>
@@ -637,7 +799,7 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
 const BASE='https://kasbot-backend-java-production-184e.up.railway.app';
 const MAX_FAIL=5;
 const ROLE_TABS={
-  ADMIN:['pos','komisi','expense','absensi','laporan','notifikasi','closing','kunjungan','aset','master'],
+  ADMIN:['pos','komisi','expense','absensi','gaji','laporan','notifikasi','closing','kunjungan','aset','master'],
   KASIR:['pos','komisi','expense','notifikasi','closing'],
   CAPSTER:[]
 };
@@ -646,6 +808,7 @@ const TAB_CFG={
   komisi:{l:'Komisi',s:'Komisi',i:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-4H9l3-3 3 3h-2v4z"/></svg>'},
   expense:{l:'Kas',s:'Kas',i:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>'},
   absensi:{l:'Absen',s:'Absen',i:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'},
+  gaji:{l:'Gaji',s:'Gaji',i:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>'},
   laporan:{l:'Laporan',s:'Laporan',i:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>'},
   notifikasi:{l:'Notif',s:'Notif',notif:true,i:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>'},
   master:{l:'Master',s:'Master',i:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'},
@@ -950,6 +1113,7 @@ function switchTab(t){
   if(t==='pos'){if(!posData)loadPOS();startLiveCapsterTimer();}
   else{stopLiveCapsterTimer();}
   if(t==='komisi'){komisiData=null;rekapKomisiDetail=null;loadKomisi();}
+  if(t==='gaji'){loadGajiCapsterList();loadRekapGaji();}
   if(t==='expense')loadExpense();if(t==='absensi')loadAbsensi();
   if(t==='laporan')loadLaporan();if(t==='notifikasi')loadNotifikasi();if(t==='master')loadMasterData();
   if(t==='closing')loadClosing();if(t==='kunjungan')loadKunjungan();if(t==='aset')loadAset();
@@ -1410,6 +1574,630 @@ async function verifikasiKodeTransaksi(){
       el.innerHTML=`<div style="background:#fff5f5;border:1px solid var(--red);border-radius:var(--rs);padding:12px;font-size:13px;color:var(--red)">${r.error||'Kode tidak ditemukan'}</div>`;
     }
   }catch{el.innerHTML='<div style="color:var(--red);padding:10px;font-size:13px">Koneksi gagal</div>';}
+}
+
+/* ═══════════════════════════════════════
+   PENGGAJIAN
+═══════════════════════════════════════ */
+var gajiData = null;
+
+function switchGajiTab(t){
+  ['generate','rekap'].forEach(function(x){
+    var el  = document.getElementById('gaji-tab-'+x);
+    var btn = document.getElementById('stab-gaji-'+x);
+    if(el)  el.style.display  = x===t ? 'block' : 'none';
+    if(btn) btn.className = 'sub-tab' + (x===t ? ' active' : '');
+  });
+  if(t==='generate') loadGajiCapsterList();
+  if(t==='rekap')    loadRekapGaji();
+}
+
+async function loadGajiCapsterList(){
+  var outlet = v('gaji-outlet');
+  var op = outlet ? '?outlet='+encodeURIComponent(outlet) : '';
+  try{
+    var d = await apiFetch(BASE+'/api/capster/list'+op);
+    var sel = document.getElementById('gaji-capster-sel');
+    if(sel && d.data){
+      sel.innerHTML = '<option value="">-- Pilih Capster --</option>'
+        + d.data.map(function(c){
+            return '<option value="'+c.nama+'">'+c.nama+'</option>';
+          }).join('');
+    }
+  }catch{}
+}
+
+async function generateGaji(){
+  var capster = v('gaji-capster-sel');
+  var outlet  = v('gaji-outlet');
+  var bulan   = v('gaji-bulan');
+  var el      = document.getElementById('gaji-generate-result');
+  if(!capster){ toast('Pilih capster dulu', true); return; }
+
+  el.innerHTML = '<div style="text-align:center;padding:16px"><span class="spinner"></span> Menghitung...</div>';
+  try{
+    var r = await apiPost(BASE+'/api/gaji/generate', {
+      outlet: outlet||'', capster, bulan: bulan||'', dibuatOleh: CU.nama
+    });
+    if(!r.success){ el.innerHTML='<div style="color:var(--red);padding:10px">'+( r.error||'Gagal')+'</div>'; return; }
+    renderGajiResult(r, el);
+    loadRekapGaji();
+  }catch{
+    el.innerHTML = '<div style="color:var(--red);padding:10px">Koneksi gagal</div>';
+  }
+}
+
+function renderGajiResult(r, el){
+  var kerajinanColor = r.dapatKerajinan ? 'var(--green)' : 'var(--muted)';
+  var kerajinanText  = r.dapatKerajinan
+    ? '+ '+fmt(r.kerajinan)+' (memenuhi syarat)'
+    : 'Rp 0 — '+(r.alasanNoKerajinan||'tidak memenuhi syarat');
+
+  el.innerHTML =
+    '<div style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:4px">'
+    // Header
+    +'<div style="background:var(--green);color:#fff;padding:12px 16px;font-weight:700;font-size:14px">'
+    +'Rekap Gaji — '+r.capster+' ('+r.bulan+')'
+    +'</div>'
+    // Body
+    +'<div style="padding:14px 16px">'
+    // Kehadiran
+    +'<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Kehadiran</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
+    +gajiCard('Hari Masuk',   r.hariMasuk,   'var(--green)')
+    +gajiCard('Hari Alpha',   r.hariAlpha,   'var(--red)')
+    +gajiCard('Jumlah Telat', r.jumlahTelat, r.jumlahTelat>2?'var(--red)':'var(--text)')
+    +'</div>'
+    // Gaji
+    +'<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Perhitungan Gaji</div>'
+    +'<div style="background:var(--surface);border-radius:var(--rs);padding:12px;font-size:13px">'
+    +gajiRow('Gaji Bulanan',  fmt(r.gajiBulanan),  '')
+    +gajiRow('Hari Kalender', r.hariKalender+' hari', '')
+    +gajiRow('Gaji Pokok',    fmt(r.gajiPokok),    'var(--green)', true)
+    +'<div style="height:1px;background:var(--border);margin:8px 0"></div>'
+    +gajiRow('Denda Telat ('+r.jumlahTelat+'x)', '- '+fmt(r.totalDenda), r.totalDenda>0?'var(--red)':'var(--muted)')
+    +gajiRow('Potongan Alpha ('+r.hariAlpha+' hari)', '- '+fmt(r.potAlpha), r.potAlpha>0?'var(--red)':'var(--muted)')
+    +gajiRow('Uang Kerajinan', kerajinanText, kerajinanColor)
+    +'<div style="height:1px;background:var(--border);margin:8px 0"></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700">'
+    +'<span>Total Gaji Bersih</span>'
+    +'<span style="color:var(--green)">'+fmt(r.totalGaji)+'</span>'
+    +'</div>'
+    +'</div>'
+    // Tombol finalisasi
+    +'<div style="display:flex;gap:8px;margin-top:12px">'
+    +'<button class="btn btn-primary" style="flex:1;padding:10px" onclick="finalisasiGaji(\''+r.id+'\')">'
+    +(r.status==='FINAL'?'Update':'Finalisasi')
+    +'</button>'
+    +'<button class="btn" style="padding:10px 14px" onclick="generateGaji()">Hitung Ulang</button>'
+    +'</div>'
+    +'</div>'
+    +'</div>';
+}
+
+function gajiCard(label, value, color){
+  return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:10px;text-align:center">'
+    +'<div style="font-size:10px;color:var(--muted);margin-bottom:4px">'+label+'</div>'
+    +'<div style="font-size:18px;font-weight:700;color:'+color+'">'+value+'</div>'
+    +'</div>';
+}
+function gajiRow(label, value, color, bold){
+  return '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px">'
+    +'<span style="color:var(--muted)">'+label+'</span>'
+    +'<span style="'+(bold?'font-weight:600;':'')+'color:'+(color||'var(--text)')+'">'+value+'</span>'
+    +'</div>';
+}
+
+async function finalisasiGaji(id){
+  var outlet = v('gaji-outlet');
+  var catatan = window.prompt('Catatan (opsional):', '');
+  if(catatan === null) return;
+  try{
+    var r = await apiPost(BASE+'/api/gaji/update', {
+      outlet: outlet||'', id, status:'FINAL', catatan, editOleh: CU.nama
+    });
+    toast(r.success ? 'Gaji difinalisasi' : '❌ '+(r.error||'Gagal'), !r.success);
+    if(r.success) loadRekapGaji();
+  }catch{ toast('Koneksi gagal', true); }
+}
+
+async function loadRekapGaji(){
+  var outlet = v('gaji-rekap-outlet')||v('gaji-outlet')||'';
+  var bulan  = v('gaji-rekap-bulan')||v('gaji-bulan')||'';
+  var el     = document.getElementById('gaji-rekap-tbl');
+  if(el) el.innerHTML = '<div class="empty"><span class="spinner"></span>Memuat...</div>';
+  try{
+    var op = '?outlet='+encodeURIComponent(outlet)+(bulan?'&bulan='+encodeURIComponent(bulan):'');
+    var d  = await apiFetch(BASE+'/api/gaji'+op);
+    gajiData = d;
+    var data = d.data||[];
+    if(!data.length){ el.innerHTML='<div class="empty">Belum ada rekap gaji bulan ini.<br>Generate gaji per capster di tab "Generate Gaji"</div>'; return; }
+
+    var totalGaji = data.reduce(function(s,c){ return s+(c.totalGaji||0); }, 0);
+    var html = '<div class="card"><div class="card-head">'
+      +'<div class="card-title">Rekap Gaji — '+(d.bulan||'Bulan Ini')+'</div>'
+      +'<div style="font-size:12px;color:var(--muted)">Total: <b style="color:var(--green)">'+fmt(totalGaji)+'</b></div>'
+      +'</div>'
+      +'<div class="tbl-wrap"><table><thead><tr>'
+      +'<th>Capster</th>'
+      +'<th style="text-align:center">Masuk</th>'
+      +'<th style="text-align:center">Alpha</th>'
+      +'<th style="text-align:center">Telat</th>'
+      +'<th style="text-align:right">Denda</th>'
+      +'<th style="text-align:right">Gaji Pokok</th>'
+      +'<th style="text-align:right">Kerajinan</th>'
+      +'<th style="text-align:right">Total Bersih</th>'
+      +'<th>Status</th>'
+      +'</tr></thead><tbody>'
+      +data.map(function(c){
+        var stColor = c.status==='FINAL'
+          ? 'background:#e0f5ec;color:var(--green)'
+          : 'background:#fff3cd;color:#856404';
+        return '<tr>'
+          +'<td><b>'+c.capster+'</b></td>'
+          +'<td style="text-align:center" class="mono">'+c.hariMasuk+'</td>'
+          +'<td style="text-align:center" class="mono red">'+c.hariAlpha+'</td>'
+          +'<td style="text-align:center" class="mono" style="color:'+(c.jumlahTelat>2?'var(--red)':'')+'">'+c.jumlahTelat+'</td>'
+          +'<td style="text-align:right" class="mono">'+(c.totalDenda>0?'<span class="red">-'+fmt(c.totalDenda)+'</span>':'—')+'</td>'
+          +'<td style="text-align:right" class="mono green">'+fmt(c.gajiPokok)+'</td>'
+          +'<td style="text-align:right" class="mono">'+(c.kerajinan>0?'<span style="color:var(--green)">+'+fmt(c.kerajinan)+'</span>':'—')+'</td>'
+          +'<td style="text-align:right" class="mono green"><b>'+fmt(c.totalGaji)+'</b></td>'
+          +'<td><span class="badge" style="'+stColor+'">'+c.status+'</span></td>'
+          +'</tr>';
+      }).join('')
+      +'<tr style="background:var(--surface);font-weight:700;border-top:2px solid var(--border)">'
+      +'<td>TOTAL</td>'
+      +'<td colspan="6"></td>'
+      +'<td style="text-align:right" class="mono green">'+fmt(totalGaji)+'</td>'
+      +'<td></td>'
+      +'</tr>'
+      +'</tbody></table></div></div>';
+    el.innerHTML = html;
+  }catch(e){ el.innerHTML='<div class="empty">Error: '+e.message+'</div>'; }
+}
+
+function exportGajiCSV(){
+  if(!gajiData||!gajiData.data) return;
+  var sep = '\n';
+  var header = 'Capster,Hari Masuk,Hari Alpha,Jumlah Telat,Total Denda,Gaji Pokok,Kerajinan,Total Bersih,Status';
+  var rows = gajiData.data.map(function(c){
+    return [c.capster,c.hariMasuk,c.hariAlpha,c.jumlahTelat,
+            c.totalDenda,c.gajiPokok,c.kerajinan,c.totalGaji,c.status].join(',');
+  });
+  var csv = '\uFEFF' + header + sep + rows.join(sep);
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download = 'rekap-gaji-'+(gajiData.bulan||'bulan-ini').replace(' ','-')+'.csv';
+  a.click();
+}
+
+/* ═══════════════════════════════════════
+   ABSENSI HARIAN — Sub-tab navigation
+═══════════════════════════════════════ */
+var absTab = 'status';
+var shiftData = [];
+var absensiHarianData = [];
+var absensiRekapData = null;
+
+function switchAbsensiTab(t){
+  absTab = t;
+  ['status','harian','rekap','izin','shift'].forEach(function(x){
+    var el = document.getElementById('abs-tab-'+x);
+    var btn = document.getElementById('stab-abs-'+x);
+    if(el) el.style.display = x===t ? 'block' : 'none';
+    if(btn) btn.className = 'sub-tab' + (x===t ? ' active' : '');
+  });
+  if(t==='harian')  { loadShifts(); loadAbsensiHarian(); loadCapsterForAbsensi(); }
+  if(t==='rekap')   { loadAbsensiRekap(); }
+  if(t==='izin')    { loadIzinList(); }
+  if(t==='shift')   { loadShiftList(); }
+}
+
+/* ─── LOAD CAPSTER UNTUK DROPDOWN ─────────────────────────────── */
+async function loadCapsterForAbsensi(){
+  var outletEl = document.getElementById('abs-h-outlet');
+  var op = outletEl ? '?outlet='+encodeURIComponent(outletEl.value) : '';
+  try{
+    var d = await apiFetch(BASE+'/api/capster/list'+op);
+    var sel = document.getElementById('abs-capster-sel');
+    if(sel && d.data){
+      sel.innerHTML = '<option value="">-- Pilih Capster --</option>'
+        + d.data.map(function(c){ return '<option value="'+c.nama+'">'+c.nama+'</option>'; }).join('');
+    }
+  }catch{}
+}
+
+/* ─── LOAD SHIFTS UNTUK DROPDOWN ──────────────────────────────── */
+async function loadShifts(){
+  var outletEl = document.getElementById('abs-h-outlet');
+  var outletVal = outletEl ? outletEl.value : '';
+  var op = outletVal ? '?outlet='+encodeURIComponent(outletVal) : '';
+  try{
+    var d = await apiFetch(BASE+'/api/shift'+op);
+    shiftData = Array.isArray(d) ? d : (d.data||d||[]);
+    var sel = document.getElementById('abs-shift-sel');
+    if(sel){
+      sel.innerHTML = '<option value="">-- Pilih Shift --</option>'
+        + shiftData.map(function(s){
+            return '<option value="'+s.namaShift+'">'+s.namaShift
+              +' ('+s.jamMasuk+' - '+s.jamPulang+')</option>';
+          }).join('');
+    }
+    // Update preview denda kalau jam masuk sudah diisi
+    previewDendaAbsensi();
+  }catch{}
+}
+
+/* ─── PREVIEW DENDA REALTIME ──────────────────────────────────── */
+function previewDendaAbsensi(){
+  var jamMasuk  = v('abs-jam-masuk');
+  var namaShift = v('abs-shift-sel');
+  var preview   = document.getElementById('abs-denda-preview');
+  if(!preview) return;
+  if(!jamMasuk || !namaShift){ preview.style.display='none'; return; }
+
+  var shift = shiftData.find(function(s){ return s.namaShift === namaShift; });
+  if(!shift){ preview.style.display='none'; return; }
+
+  // Hitung selisih
+  var wajib  = shift.jamMasuk.split(':');
+  var aktual = jamMasuk.split(':');
+  var menitWajib  = parseInt(wajib[0])*60  + parseInt(wajib[1]);
+  var menitAktual = parseInt(aktual[0])*60 + parseInt(aktual[1]);
+  var selisih     = menitAktual - menitWajib;
+  var grace       = parseInt(shift.gracePeriod)||5;
+  var dendaPer15  = parseInt(shift.dendaPer15)||10000;
+
+  preview.style.display = 'block';
+  if(selisih <= 0){
+    preview.style.background = '#e0f5ec'; preview.style.color = 'var(--green)';
+    preview.style.border = '1px solid var(--green)';
+    preview.textContent = 'Tepat waktu atau lebih awal';
+  } else if(selisih <= grace){
+    preview.style.background = '#e0f5ec'; preview.style.color = 'var(--green)';
+    preview.style.border = '1px solid var(--green)';
+    preview.textContent = 'Dalam grace period (' + selisih + ' menit) — Tidak kena denda';
+  } else {
+    var menitTelat = selisih - grace;
+    var kelipatan  = Math.ceil(menitTelat / 15);
+    var denda      = kelipatan * dendaPer15;
+    preview.style.background = '#fff8e1'; preview.style.color = '#7a5000';
+    preview.style.border = '1px solid #f0a500';
+    preview.textContent = 'Telat ' + menitTelat + ' menit → Denda ' + fmt(denda);
+  }
+}
+
+/* ─── SUBMIT ABSENSI MASUK ─────────────────────────────────────── */
+async function submitAbsensiMasuk(){
+  var capster  = v('abs-capster-sel');
+  var shift    = v('abs-shift-sel');
+  var jamMasuk = v('abs-jam-masuk');
+  var catatan  = v('abs-catatan');
+  var outlet   = v('abs-h-outlet');
+  var el       = document.getElementById('abs-input-result');
+
+  if(!capster||!shift||!jamMasuk){
+    toast('Capster, shift, dan jam masuk wajib diisi', true); return;
+  }
+  el.innerHTML = '<div style="text-align:center;padding:8px"><span class="spinner"></span></div>';
+  try{
+    var r = await apiPost(BASE+'/api/absensi/harian/masuk', {
+      outlet: outlet||'', capster, shift, jamMasuk, catatan,
+      inputOleh: CU.nama
+    });
+    if(r.success){
+      var statusColor = r.status==='HADIR' ? 'var(--green)' : '#f0a500';
+      el.innerHTML = '<div style="background:#e0f5ec;border:1px solid var(--green);border-radius:var(--rs);padding:12px;font-size:13px">'
+        +'<div style="font-weight:700;color:var(--green);margin-bottom:6px">Absensi tersimpan</div>'
+        +'<div><b>'+capster+'</b> — '+shift+'</div>'
+        +'<div>Jam Masuk: '+jamMasuk+' | Status: <span style="font-weight:700;color:'+statusColor+'">'+r.status+'</span></div>'
+        +(r.denda>0?'<div style="color:var(--red);font-weight:600;margin-top:4px">Denda: '+fmt(r.denda)+'</div>':'')
+        +'</div>';
+      // Reset form
+      document.getElementById('abs-capster-sel').value='';
+      document.getElementById('abs-shift-sel').value='';
+      document.getElementById('abs-jam-masuk').value='';
+      document.getElementById('abs-catatan').value='';
+      document.getElementById('abs-denda-preview').style.display='none';
+      loadAbsensiHarian();
+    }else{
+      el.innerHTML = '<div style="background:#fff5f5;border:1px solid var(--red);border-radius:var(--rs);padding:10px;font-size:13px;color:var(--red)">'+(r.error||'Gagal')+'</div>';
+    }
+  }catch{
+    el.innerHTML = '<div style="color:var(--red);padding:8px;font-size:13px">Koneksi gagal</div>';
+  }
+}
+
+/* ─── SUBMIT ALPHA ─────────────────────────────────────────────── */
+async function submitAbsensiAlpha(){
+  var capster = v('abs-capster-sel');
+  var shift   = v('abs-shift-sel');
+  var outlet  = v('abs-h-outlet');
+  var catatan = v('abs-catatan');
+  var el      = document.getElementById('abs-input-result');
+  if(!capster){ toast('Pilih capster dulu', true); return; }
+  if(!confirm('Tandai '+capster+' sebagai ALPHA hari ini?')) return;
+  try{
+    var r = await apiPost(BASE+'/api/absensi/harian/alpha', {
+      outlet: outlet||'', capster, shift: shift||'Pagi', catatan, inputOleh: CU.nama
+    });
+    if(r.success){
+      el.innerHTML = '<div style="background:#fff5f5;border:1px solid var(--red);border-radius:var(--rs);padding:12px;font-size:13px">'
+        +'<div style="font-weight:700;color:var(--red);margin-bottom:4px">ALPHA dicatat</div>'
+        +'<div><b>'+capster+'</b> — Potongan gaji: '+fmt(r.potonganAlpha||0)+'</div>'
+        +'</div>';
+      loadAbsensiHarian();
+    }else toast(r.error||'Gagal', true);
+  }catch{ toast('Koneksi gagal', true); }
+}
+
+/* ─── LOAD ABSENSI HARIAN ──────────────────────────────────────── */
+async function loadAbsensiHarian(){
+  var outlet  = v('abs-h-outlet');
+  var today   = new Date().toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta',day:'2-digit',month:'2-digit',year:'numeric'});
+  var el      = document.getElementById('abs-harian-tbl');
+  var cnt     = document.getElementById('abs-today-count');
+  if(el) el.innerHTML = '<div class="empty"><span class="spinner"></span>Memuat...</div>';
+  try{
+    var op = (outlet?'&outlet='+encodeURIComponent(outlet):'');
+    var d  = await apiFetch(BASE+'/api/absensi/harian?tanggal='+encodeURIComponent(today)+op);
+    absensiHarianData = d.data||[];
+    if(cnt) cnt.textContent = absensiHarianData.length+' capster';
+    renderAbsensiHarianTbl(absensiHarianData);
+  }catch{ if(el) el.innerHTML='<div class="empty">Error</div>'; }
+}
+
+function renderAbsensiHarianTbl(data){
+  var el = document.getElementById('abs-harian-tbl');
+  if(!el) return;
+  if(!data||!data.length){ el.innerHTML='<div class="empty">Belum ada absensi hari ini</div>'; return; }
+  var isAdmin = CU&&CU.role==='ADMIN';
+  var stColor = {
+    HADIR:'background:#e0f5ec;color:var(--green)',
+    TELAT:'background:#fff8e1;color:#7a5000',
+    ALPHA:'background:#fff5f5;color:var(--red)',
+    IZIN_ACC:'background:#dbeafe;color:var(--blue)',
+    IZIN_TOLAK:'background:#f3f3f1;color:var(--muted)'
+  };
+  el.innerHTML = '<table><thead><tr>'
+    +'<th>Capster</th><th>Shift</th><th>Masuk Wajib</th><th>Masuk Aktual</th>'
+    +'<th>Pulang</th><th style="text-align:right">Telat</th>'
+    +'<th style="text-align:right">Denda</th><th>Status</th>'
+    +(isAdmin?'<th>Aksi</th>':'')
+    +'</tr></thead><tbody>'
+    +data.map(function(r){
+      var statusBadge = '<span class="badge" style="'+(stColor[r.status]||'')+'">'+r.status+'</span>';
+      var aksiCell = '';
+      if(isAdmin){
+        aksiCell = '<td style="display:flex;gap:3px">'
+          +(r.jamPulang==='—'||!r.jamPulang
+            ?'<button class="btn" style="padding:3px 7px;font-size:11px" onclick="openModalJamPulang(\'' + r.id + '\')">Pulang</button>'
+            :'')
+          +'<button class="btn" style="padding:3px 7px;font-size:11px" onclick="openModalEditAbsensiH(\'' + r.id + '\',\'' + r.jamMasukAktual + '\',\'' + (r.jamPulang||'') + '\',\'' + r.status + '\')">Edit</button>'
+          +'</td>';
+      }
+      return '<tr>'
+        +'<td><b>'+r.capster+'</b></td>'
+        +'<td style="font-size:11px">'+r.shift+'</td>'
+        +'<td class="mono">'+r.jamMasukWajib+'</td>'
+        +'<td class="mono">'+(r.jamMasukAktual==='—'?'<span style="color:var(--red)">—</span>':r.jamMasukAktual)+'</td>'
+        +'<td class="mono">'+(r.jamPulang||'—')+'</td>'
+        +'<td style="text-align:right" class="mono">'+(r.menitTelat>0?'<span style="color:#f0a500">'+r.menitTelat+' mnt</span>':'—')+'</td>'
+        +'<td style="text-align:right" class="mono">'+(r.denda>0?'<span class="red">'+fmt(r.denda)+'</span>':'—')+'</td>'
+        +'<td>'+statusBadge+'</td>'
+        +aksiCell
+        +'</tr>';
+    }).join('')
+    +'</tbody></table>';
+}
+
+/* ─── MODAL JAM PULANG ─────────────────────────────────────────── */
+var _absIdPulang = '';
+function openModalJamPulang(id){
+  _absIdPulang = id;
+  var now = new Date().toLocaleTimeString('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit',hour12:false});
+  document.getElementById('abs-jam-pulang-input').value = now;
+  openModal('modal-abs-pulang');
+}
+async function submitJamPulang(){
+  var jamPulang = v('abs-jam-pulang-input');
+  var outlet    = v('abs-h-outlet');
+  if(!jamPulang){ toast('Jam pulang wajib', true); return; }
+  try{
+    var r = await apiPost(BASE+'/api/absensi/harian/pulang',{
+      outlet:outlet||'', id:_absIdPulang, jamPulang, inputOleh:CU.nama
+    });
+    toast(r.success?'Jam pulang tersimpan':'❌ '+(r.error||'Gagal'), !r.success);
+    if(r.success){ closeModal('modal-abs-pulang'); loadAbsensiHarian(); }
+  }catch{ toast('Koneksi gagal', true); }
+}
+
+/* ─── MODAL EDIT ABSENSI ───────────────────────────────────────── */
+var _absEditId = '';
+function openModalEditAbsensiH(id, jamMasuk, jamPulang, status){
+  _absEditId = id;
+  document.getElementById('abs-edit-jam-masuk').value = jamMasuk||'';
+  document.getElementById('abs-edit-jam-pulang').value = jamPulang==='—'?'':jamPulang||'';
+  document.getElementById('abs-edit-status').value = status||'HADIR';
+  openModal('modal-abs-edit');
+}
+async function submitEditAbsensiH(){
+  var outlet   = v('abs-h-outlet');
+  var jamMasuk = v('abs-edit-jam-masuk');
+  var jamPulang= v('abs-edit-jam-pulang');
+  var status   = v('abs-edit-status');
+  var catatan  = v('abs-edit-catatan');
+  try{
+    var r = await apiPost(BASE+'/api/absensi/harian/edit',{
+      outlet:outlet||'', id:_absEditId, jamMasuk, jamPulang, status, catatan, editOleh:CU.nama
+    });
+    toast(r.success?'Absensi diupdate':'❌ '+(r.error||'Gagal'), !r.success);
+    if(r.success){ closeModal('modal-abs-edit'); loadAbsensiHarian(); }
+  }catch{ toast('Koneksi gagal', true); }
+}
+
+/* ─── REKAP BULANAN ────────────────────────────────────────────── */
+async function loadAbsensiRekap(){
+  var outlet = v('abs-rekap-outlet');
+  var bulan  = v('abs-rekap-bln');
+  var el     = document.getElementById('abs-rekap-tbl');
+  if(el) el.innerHTML = '<div class="empty"><span class="spinner"></span>Memuat...</div>';
+  try{
+    var op = (outlet?'&outlet='+encodeURIComponent(outlet):'')+(bulan?'&bulan='+encodeURIComponent(bulan):'');
+    var d  = await apiFetch(BASE+'/api/absensi/harian?'+op.replace(/^&/,''));
+    absensiRekapData = d;
+    var rekap = d.rekap||[];
+    if(!rekap.length){ el.innerHTML='<div class="empty">Belum ada data</div>'; return; }
+    el.innerHTML = '<div class="card"><div class="tbl-wrap"><table><thead><tr>'
+      +'<th>Capster</th><th style="text-align:center">Hadir</th><th style="text-align:center">Telat</th>'
+      +'<th style="text-align:center">Alpha</th><th style="text-align:center">Izin Acc</th>'
+      +'<th style="text-align:right">Total Denda</th><th style="text-align:right">Total Potongan</th>'
+      +'</tr></thead><tbody>'
+      +rekap.map(function(c){
+        return '<tr>'
+          +'<td><b>'+c.capster+'</b></td>'
+          +'<td style="text-align:center" class="mono green">'+c.hadir+'</td>'
+          +'<td style="text-align:center" class="mono" style="color:#f0a500">'+c.telat+'</td>'
+          +'<td style="text-align:center" class="mono red">'+c.alpha+'</td>'
+          +'<td style="text-align:center" class="mono blue">'+c.izinAcc+'</td>'
+          +'<td style="text-align:right" class="mono red">'+fmt(c.totalDenda)+'</td>'
+          +'<td style="text-align:right" class="mono red">'+fmt(c.totalPotongan)+'</td>'
+          +'</tr>';
+      }).join('')
+      +'</tbody></table></div></div>';
+  }catch{ el.innerHTML='<div class="empty">Error</div>'; }
+}
+
+function exportAbsensiCSV(){
+  if(!absensiRekapData||!absensiRekapData.data) return;
+  var bom = '\uFEFF';
+  var sep = '\n';
+  var header = 'Tanggal,Capster,Shift,Jam Masuk Wajib,Jam Masuk Aktual,Jam Pulang,Menit Telat,Denda,Gaji Harian,Potongan Alpha,Status';
+  var rows = absensiRekapData.data.map(function(r){
+    return [r.tanggal,r.capster,r.shift,r.jamMasukWajib,r.jamMasukAktual,
+            r.jamPulang||'',r.menitTelat,r.denda,r.gajiHarian,r.potonganAlpha,r.status].join(',');
+  });
+  var csv = bom + header + sep + rows.join(sep);
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download = 'absensi-' + new Date().toISOString().slice(0,7) + '.csv';
+  a.click();
+}
+
+/* ─── IZIN ──────────────────────────────────────────────────────── */
+async function loadIzinList(){
+  var outlet = v('abs-izin-outlet');
+  var status = v('abs-izin-status');
+  var el     = document.getElementById('abs-izin-tbl');
+  if(el) el.innerHTML = '<div class="empty"><span class="spinner"></span>Memuat...</div>';
+  try{
+    var op = '?outlet='+encodeURIComponent(outlet||'')+'&status='+encodeURIComponent(status||'');
+    var d  = await apiFetch(BASE+'/api/izin'+op);
+    var data = Array.isArray(d)?d:(d.data||d||[]);
+    if(!data.length){ el.innerHTML='<div class="empty">Tidak ada data izin</div>'; return; }
+    var isAdmin = CU&&CU.role==='ADMIN';
+    var stColor = {PENDING:'background:#fff3cd;color:#856404',ACC:'background:#e0f5ec;color:var(--green)',TOLAK:'background:#fff5f5;color:var(--red)'};
+    el.innerHTML = '<table><thead><tr>'
+      +'<th>Capster</th><th>Tgl Izin</th><th>Alasan</th><th>Status</th><th>Diajukan</th>'
+      +(isAdmin?'<th>Aksi</th>':'')
+      +'</tr></thead><tbody>'
+      +data.map(function(r){
+        var aksi = isAdmin&&r.status==='PENDING'
+          ?'<td><div style="display:flex;gap:4px">'
+            +'<button class="btn btn-primary" style="padding:3px 7px;font-size:11px" data-id="'+r.id+'" onclick="prosesIzinBtn(this,true)">ACC</button>'
+            +'<button class="btn btn-danger" style="padding:3px 7px;font-size:11px" data-id="'+r.id+'" onclick="prosesIzinBtn(this,false)">Tolak</button>'
+            +'</div></td>'
+          :isAdmin?'<td style="font-size:11px;color:var(--muted)">'+(r.diprosesByAdmin||'—')+'</td>':'';
+        return '<tr>'
+          +'<td><b>'+r.capster+'</b></td>'
+          +'<td class="mono">'+r.tanggalIzin+'</td>'
+          +'<td style="font-size:12px">'+r.alasan+'</td>'
+          +'<td><span class="badge" style="'+(stColor[r.status]||'')+'">'+r.status+'</span>'
+            +(r.catatanAdmin?'<div style="font-size:10px;color:var(--muted)">'+r.catatanAdmin+'</div>':'')+'</td>'
+          +'<td class="mono" style="font-size:11px">'+r.diajukan.substring(0,10)+'</td>'
+          +aksi
+          +'</tr>';
+      }).join('')+'</tbody></table>';
+  }catch{ el.innerHTML='<div class="empty">Error</div>'; }
+}
+
+function openModalAjukanIzin(){
+  document.getElementById('izin-capster').value = CU.role==='CAPSTER'?CU.nama:'';
+  document.getElementById('izin-tgl').value = '';
+  document.getElementById('izin-alasan').value = '';
+  openModal('modal-izin');
+}
+
+async function submitIzin(){
+  var capster = v('izin-capster');
+  var tgl     = v('izin-tgl');
+  var alasan  = v('izin-alasan');
+  var outlet  = v('abs-izin-outlet');
+  if(!capster||!tgl||!alasan){ toast('Semua field wajib diisi', true); return; }
+  // Convert date input (yyyy-mm-dd) ke format dd/mm/yyyy
+  var tglParts = tgl.split('-');
+  var tglFormatted = tglParts[2]+'/'+tglParts[1]+'/'+tglParts[0];
+  try{
+    var r = await apiPost(BASE+'/api/izin/ajukan',{
+      outlet:outlet||'', capster, tanggalIzin:tglFormatted, alasan
+    });
+    toast(r.success?'Izin berhasil diajukan':'❌ '+(r.error||'Gagal'), !r.success);
+    if(r.success){ closeModal('modal-izin'); loadIzinList(); }
+  }catch{ toast('Koneksi gagal', true); }
+}
+
+function prosesIzinBtn(btn, disetujui){
+  var id = btn.getAttribute('data-izin-id');
+  prosesIzin(id, disetujui);
+}
+async function prosesIzin(id, disetujui){
+  var catatan = window.prompt(disetujui?'Catatan (opsional):':'Alasan penolakan:','');
+  if(catatan===null) return;
+  var outlet = v('abs-izin-outlet');
+  try{
+    var r = await apiPost(BASE+'/api/izin/proses',{
+      outlet:outlet||'', id, admin:CU.nama, disetujui, catatan
+    });
+    toast(r.success?'Izin '+(disetujui?'disetujui':'ditolak'):'❌ '+(r.error||'Gagal'), !r.success);
+    if(r.success) loadIzinList();
+  }catch{ toast('Koneksi gagal', true); }
+}
+
+/* ─── MASTER SHIFT ─────────────────────────────────────────────── */
+async function loadShiftList(){
+  var outlet = v('abs-h-outlet')||'';
+  var el = document.getElementById('abs-shift-tbl');
+  if(el) el.innerHTML = '<div class="empty"><span class="spinner"></span>Memuat...</div>';
+  try{
+    var op = outlet ? '?outlet='+encodeURIComponent(outlet) : '';
+    var d  = await apiFetch(BASE+'/api/shift'+op);
+    shiftData = Array.isArray(d)?d:(d.data||d||[]);
+    if(!shiftData.length){ el.innerHTML='<div class="empty">Belum ada shift. Tambah shift dulu.</div>'; return; }
+    var rows = shiftData.map(function(s){
+      return '<tr>'
+        +'<td style="font-size:11px">'+s.outlet+'</td>'
+        +'<td><b>'+s.namaShift+'</b></td>'
+        +'<td class="mono">'+s.jamMasuk+'</td>'
+        +'<td class="mono">'+s.jamPulang+'</td>'
+        +'<td style="text-align:center" class="mono">'+s.gracePeriod+'</td>'
+        +'<td style="text-align:right" class="mono">'+fmt(s.dendaPer15)+'</td>'
+        +'<td><div style="display:flex;gap:3px">'
+          +'<button class="btn" style="padding:3px 7px;font-size:11px" '
+          +'data-ri="'+s.rowIndex+'" data-nama="'+s.namaShift+'" '
+          +'data-masuk="'+s.jamMasuk+'" data-pulang="'+s.jamPulang+'" '
+          +'data-grace="'+s.gracePeriod+'" data-denda="'+s.dendaPer15+'" '
+          +'onclick="editShiftBtn(this)">Edit</button>'
+          +'<button class="btn btn-danger" style="padding:3px 7px;font-size:11px" '
+          +'data-ri="'+s.rowIndex+'" onclick="hapusShiftBtn(this)">Hapus</button>'
+        +'</div></td>'
+        +'</tr>';
+    }).join('');
+    el.innerHTML = '<table><thead><tr>'
+      +'<th>Outlet</th><th>Nama Shift</th><th>Jam Masuk</th><th>Jam Pulang</th>'
+      +'<th style="text-align:center">Grace (mnt)</th><th style="text-align:right">Denda/15mnt</th>'
+      +'<th>Aksi</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table>';
+  }catch(e){ el.innerHTML='<div class="empty">Error: '+e.message+'</div>'; }
 }
 
 /* ═══════════════════════════════════════
@@ -2500,6 +3288,103 @@ function exportKomisiLintasBulanCSV(){
         🔗 Buka di Tab Baru
       </a>
       <button onclick="closeModal('modal-foto-request')" style="flex:1;background:rgba(255,255,255,.1);border:none;color:#fff;padding:10px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:500">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL JAM PULANG -->
+<div id="modal-abs-pulang" class="modal-overlay" onclick="closeModal('modal-abs-pulang')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-head"><div class="modal-title">Input Jam Pulang</div><button class="modal-close" onclick="closeModal('modal-abs-pulang')">✕</button></div>
+    <div class="modal-body">
+      <label class="modal-label">Jam Pulang *</label>
+      <input class="modal-input" type="time" id="abs-jam-pulang-input"/>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('modal-abs-pulang')">Batal</button>
+      <button class="modal-confirm" onclick="submitJamPulang()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT ABSENSI -->
+<div id="modal-abs-edit" class="modal-overlay" onclick="closeModal('modal-abs-edit')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-head"><div class="modal-title">Edit Absensi</div><button class="modal-close" onclick="closeModal('modal-abs-edit')">✕</button></div>
+    <div class="modal-body">
+      <label class="modal-label">Jam Masuk Aktual</label>
+      <input class="modal-input" type="time" id="abs-edit-jam-masuk"/>
+      <label class="modal-label">Jam Pulang</label>
+      <input class="modal-input" type="time" id="abs-edit-jam-pulang"/>
+      <label class="modal-label">Status</label>
+      <select class="modal-select" id="abs-edit-status">
+        <option value="HADIR">HADIR</option>
+        <option value="TELAT">TELAT</option>
+        <option value="ALPHA">ALPHA</option>
+        <option value="IZIN_ACC">IZIN ACC</option>
+        <option value="IZIN_TOLAK">IZIN TOLAK</option>
+      </select>
+      <label class="modal-label">Catatan</label>
+      <input class="modal-input" type="text" id="abs-edit-catatan" placeholder="Opsional..."/>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('modal-abs-edit')">Batal</button>
+      <button class="modal-confirm" onclick="submitEditAbsensiH()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AJUKAN IZIN -->
+<div id="modal-izin" class="modal-overlay" onclick="closeModal('modal-izin')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-head"><div class="modal-title">Ajukan Izin</div><button class="modal-close" onclick="closeModal('modal-izin')">✕</button></div>
+    <div class="modal-body">
+      <label class="modal-label">Nama Capster *</label>
+      <input class="modal-input" type="text" id="izin-capster" placeholder="Nama capster..." autocomplete="off"/>
+      <label class="modal-label">Tanggal Izin *</label>
+      <input class="modal-input" type="date" id="izin-tgl"/>
+      <label class="modal-label">Alasan *</label>
+      <textarea class="modal-input" id="izin-alasan" placeholder="Alasan izin..." rows="3" style="resize:vertical"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('modal-izin')">Batal</button>
+      <button class="modal-confirm" onclick="submitIzin()">Ajukan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MASTER SHIFT -->
+<div id="modal-shift" class="modal-overlay" onclick="closeModal('modal-shift')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-head"><div class="modal-title" id="modal-shift-title">Tambah Shift</div><button class="modal-close" onclick="closeModal('modal-shift')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="shift-row" value="0"/>
+      <label class="modal-label">Nama Shift *</label>
+      <input class="modal-input" type="text" id="shift-nama" placeholder="cth: Pagi / Siang" autocomplete="off"/>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label class="modal-label">Jam Masuk *</label>
+          <input class="modal-input" type="time" id="shift-jam-masuk"/>
+        </div>
+        <div>
+          <label class="modal-label">Jam Pulang *</label>
+          <input class="modal-input" type="time" id="shift-jam-pulang"/>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label class="modal-label">Grace Period (menit)</label>
+          <input class="modal-input" type="number" id="shift-grace" value="5" min="0" inputmode="numeric"/>
+        </div>
+        <div>
+          <label class="modal-label">Denda per 15 menit (Rp)</label>
+          <input class="modal-input" type="number" id="shift-denda" value="10000" min="0" inputmode="numeric"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('modal-shift')">Batal</button>
+      <button class="modal-confirm" onclick="submitShift()">Simpan</button>
     </div>
   </div>
 </div>
