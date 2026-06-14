@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="mobile-web-app-capable" content="yes"/>
@@ -25,12 +25,12 @@
   --nav-h:56px;--bnav-h:64px;
 }
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;height:100%}
-body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100%;min-height:100dvh;font-size:14px;line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100%;min-height:100vh;min-height:100dvh;font-size:14px;line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overscroll-behavior-y:none}
 .green{color:var(--green)}.red{color:var(--red)}.blue{color:var(--blue)}.orange{color:var(--orange)}
 .mono{font-family:'DM Mono',ui-monospace,monospace;font-size:11px}
 .empty{text-align:center;padding:2.5rem 1rem;color:var(--hint);font-size:13px}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--muted);border-radius:50%;animation:spin .6s linear infinite;vertical-align:-3px;margin-right:6px;flex-shrink:0}
-@keyframes spin{to{transform:rotate(360deg)}}
+@-webkit-keyframes spin{to{transform:rotate(360deg)}}@keyframes spin{to{transform:rotate(360deg)}}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
 table{width:100%;border-collapse:collapse;min-width:0}
 th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--hint);padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
@@ -114,7 +114,7 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
 .login-btn:active{opacity:.85}.login-btn:disabled{opacity:.5;cursor:not-allowed}
 .modal-overlay{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;-webkit-overflow-scrolling:touch}
 .modal-overlay.open{display:flex}
-.modal-box{background:var(--surface);border-radius:16px 16px 0 0;padding:0 max(1.25rem,var(--sal)) max(1.25rem,var(--sab)) max(1.25rem,var(--sal));width:100%;max-width:100%;max-height:92dvh;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 -4px 32px rgba(0,0,0,.15)}
+.modal-box{background:var(--surface);border-radius:16px 16px 0 0;padding:0 max(1.25rem,var(--sal)) max(1.25rem,var(--sab)) max(1.25rem,var(--sal));width:100%;max-width:100%;max-height:92vh;max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 -4px 32px rgba(0,0,0,.15)}
 .modal-drag{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 16px}
 .modal-title{font-size:16px;font-weight:600;margin-bottom:14px}
 .modal-box label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;margin-top:10px}
@@ -146,8 +146,19 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
 .cp-btn-ci{background:var(--green);margin-bottom:8px}.cp-btn-co{background:var(--red)}
 .cp-btn-ci:active,.cp-btn-co:active{opacity:.8}.cp-btn-ci:disabled,.cp-btn-co:disabled{opacity:.4;cursor:not-allowed}
 .capster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:1.5rem}
-.capster-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.9rem}
+.capster-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.9rem;-webkit-tap-highlight-color:transparent}
 .capster-card.aktif{border-color:var(--green);background:#f0faf6}
+.live-capster-wrap{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem}
+.live-capster-card{display:flex;align-items:center;gap:10px;background:var(--surface);border:1.5px solid var(--green);border-radius:var(--r);padding:.65rem .9rem;flex:0 0 auto;min-width:160px;max-width:220px;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.live-capster-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--green)}
+.live-capster-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1D9E75,#17875f);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;color:#fff;font-weight:700}
+.live-capster-info{min-width:0;flex:1}
+.live-capster-name{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-capster-ci{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:1px}
+.live-capster-cust{font-size:11px;color:var(--green);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-pulse{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse-green 1.5s infinite}
+@-webkit-keyframes pulse-green{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}@keyframes pulse-green{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.live-capster-empty{font-size:13px;color:var(--hint);padding:.75rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);width:100%}
 .capster-name{font-weight:600;font-size:14px;margin-bottom:6px}
 .notif-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.9rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px;flex-wrap:wrap}
 .notif-name{font-weight:600;font-size:14px}.notif-meta{font-size:12px;color:var(--muted);margin-top:2px}
@@ -174,7 +185,7 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
 }
 @media(min-width:900px){main{padding:2rem 1.5rem}#bottom-nav{display:none!important}#admin-header{display:flex}#header-tabs{display:flex}.grid-3{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:600px) and (max-width:899px){#bottom-nav{display:none!important}#admin-header{display:flex}main{padding:1.5rem 1.25rem}.main-tab{font-size:11px;padding:4px 9px}.grid-3{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:599px){:root{--nav-h:52px}#admin-header{display:none!important}#bottom-nav{display:block}main{padding:1rem .875rem;padding-bottom:calc(var(--bnav-h) + max(1rem,var(--sab)) + .5rem)}.grid-3{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr 1fr}.metric-value{font-size:16px}.metric{padding:.75rem .875rem}th,td{padding:8px 10px;font-size:12px}.chart-wrap{height:100px}.capster-grid{grid-template-columns:1fr 1fr}.lr-grid{grid-template-columns:1fr 1fr}.card-head{padding:.6rem .875rem}#last-update{display:none}.controls{gap:6px}.date-filter{padding:4px 6px}.date-filter input[type=date]{max-width:120px;font-size:12px!important}}
+@media(max-width:599px){:root{--nav-h:52px}#admin-header{display:none!important}#bottom-nav{display:block}main{padding:1rem .875rem;padding-bottom:calc(var(--bnav-h) + max(1rem,var(--sab)) + .5rem)}.grid-3{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr 1fr}.metric-value{font-size:16px}.metric{padding:.75rem .875rem}th,td{padding:8px 10px;font-size:12px}.chart-wrap{height:100px}.capster-grid{grid-template-columns:1fr 1fr}.lr-grid{grid-template-columns:1fr 1fr}.card-head{padding:.6rem .875rem}#last-update{display:none}.controls{gap:6px}.date-filter{padding:4px 6px}.date-filter input[type=date]{max-width:120px;font-size:12px!important}.live-capster-wrap{gap:6px}.live-capster-card{min-width:calc(50% - 3px);max-width:100%}.live-capster-avatar{width:32px;height:32px;font-size:12px}}
 .foto-upload-wrap{margin-top:8px}
 .foto-upload-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;border-radius:var(--rs);border:1.5px dashed var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;transition:.15s;touch-action:manipulation;min-height:48px}
 .foto-upload-btn:hover,.foto-upload-btn:active{background:#f0faf6;border-color:var(--green);color:var(--green)}
@@ -236,7 +247,7 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
       <div style="padding:1rem">
         <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Masukkan kode struk dari kasir untuk verifikasi transaksi kamu. Kode komisi hanya dihitung jika transaksi terverifikasi.</div>
         <div style="display:flex;gap:8px">
-          <input class="modal-input" type="text" id="verifNota" placeholder="TRX-xxxxxxxxxx" autocomplete="off" autocapitalize="characters" style="flex:1;padding:10px 12px;text-transform:uppercase;font-family:'DM Mono',monospace;font-size:13px!important" onkeydown="if(event.key==='Enter')verifikasiKodeTransaksi()"/>
+          <input class="modal-input" type="text" id="verifNota" placeholder="TRX-xxxxxxxxxx" autocomplete="off" autocapitalize="characters" style="flex:1;padding:10px 12px;text-transform:uppercase;font-family:'DM Mono',monospace" onkeydown="if(event.key==='Enter')verifikasiKodeTransaksi()"/>
           <button class="btn btn-primary" onclick="verifikasiKodeTransaksi()" style="padding:10px 14px;flex-shrink:0">Cek</button>
         </div>
         <div id="verifResult" style="margin-top:10px"></div>
@@ -353,9 +364,21 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
 
 <!-- SECTIONS -->
 <div id="section-pos" class="section"><main>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px">
     <div class="section-label" style="margin-bottom:0">Penjualan</div>
     <button class="btn btn-primary" onclick="openModalPos()" style="min-height:38px">+ Transaksi Baru</button>
+  </div>
+  <!-- LIVE CAPSTER STATUS -->
+  <div style="margin-bottom:1rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">💈 Capster Bertugas</div>
+      <button class="btn" onclick="loadLiveCapster()" style="padding:3px 8px;font-size:11px" title="Refresh">
+        <svg viewBox="0 0 24 24" style="width:11px;height:11px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+    </div>
+    <div class="live-capster-wrap" id="live-capster-wrap">
+      <div class="live-capster-empty"><span class="spinner"></span> Memuat...</div>
+    </div>
   </div>
   <div class="controls">
     <div class="date-filter"><label>Dari</label><input type="date" id="pos-dari" onchange="renderPOSFiltered()"/><label>s/d</label><input type="date" id="pos-sampai" onchange="renderPOSFiltered()"/><button class="btn btn-reset" onclick="resetFilter('pos-dari','pos-sampai',renderPOSFiltered)">✕</button></div>
@@ -436,7 +459,7 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
     <div class="card-body" style="padding:1rem">
       <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Admin atau kasir bisa input kode transaksi di sini. TRX otomatis tercatat ke sheet <b>Rekap Komisi</b>.</div>
       <div style="display:flex;gap:8px;margin-bottom:10px">
-        <input class="modal-input" type="text" id="komisi-verif-input" placeholder="TRX-xxxxxxxxxx" autocomplete="off" style="flex:1;text-transform:uppercase;font-family:'DM Mono',monospace;font-size:13px;padding:10px 12px" onkeydown="if(event.key==='Enter')verifikasiTrxDiKomisi()"/>
+        <input class="modal-input" type="text" id="komisi-verif-input" placeholder="TRX-xxxxxxxxxx" autocomplete="off" style="flex:1;text-transform:uppercase;font-family:'DM Mono',monospace;padding:10px 12px" onkeydown="if(event.key==='Enter')verifikasiTrxDiKomisi()"/>
         <button class="btn btn-primary" onclick="verifikasiTrxDiKomisi()" style="padding:10px 16px;flex-shrink:0">Cek & Verifikasi</button>
       </div>
       <div id="komisi-verif-result"></div>
@@ -838,7 +861,7 @@ async function apiPost(url,body){
 ═══════════════════════════════════════ */
 function initApp(){loadAll();setInterval(loadAll,5*60*1000)}
 function switchOutlet(){
-  outlet=$('outlet-sel').value;posData=null;komisiData=null;rekapKomisiDetail=null;kbData=[];pcData=[];
+  outlet=$('outlet-sel').value;posData=null;komisiData=null;rekapKomisiDetail=null;kbData=[];pcData=[];loadLiveCapster();
   loadAll();if(tab==='master')loadMasterData();if(tab==='notifikasi')loadNotifikasi()
 }
 function switchTab(t){
@@ -850,7 +873,8 @@ function switchTab(t){
     if(bn)bn.className='bnav-item'+(x===t?' active':'')
   });
   window.scrollTo({top:0,behavior:'auto'});
-  if(t==='pos'&&!posData)loadPOS();
+  if(t==='pos'){if(!posData)loadPOS();startLiveCapsterTimer();}
+  else{stopLiveCapsterTimer();}
   if(t==='komisi'){komisiData=null;rekapKomisiDetail=null;loadKomisi();}
   if(t==='expense')loadExpense();if(t==='absensi')loadAbsensi();
   if(t==='laporan')loadLaporan();if(t==='notifikasi')loadNotifikasi();if(t==='master')loadMasterData();
@@ -1348,8 +1372,27 @@ async function loadAbsensi(){
 }
 function resetAbsensiFilter(){$('absensi-dari').value='';$('absensi-sampai').value='';loadAbsensi()}
 function renderAbsensiStatus(data){
-  const el=$('absensi-status-grid');if(!data.success||!data.data||!data.data.length){el.innerHTML='<div class="empty">Tidak ada capster</div>';return}
-  el.innerHTML=data.data.map(c=>{const a=c.checkedIn;return`<div class="capster-card ${a?'aktif':''}"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div class="capster-name">💈 ${c.nama}</div><span class="badge ${a?'badge-aktif2':'badge-off2'}">${a?'🟢':'🔴'}</span></div><div style="font-size:11px;color:var(--hint);font-family:'DM Mono',monospace">${a?'CI: '+(c.waktuCi?c.waktuCi.substring(11):'—'):'Belum CI'}</div></div>`}).join('')
+  var el=$('absensi-status-grid');
+  if(!data.success||!data.data||!data.data.length){el.innerHTML='<div class="empty">Tidak ada capster</div>';return}
+  el.innerHTML=data.data.map(function(c){
+    var a=c.checkedIn;
+    var inisial=c.nama.substring(0,2).toUpperCase();
+    var bgAvatar=a?'linear-gradient(135deg,#1D9E75,#17875f)':'#e5e5e1';
+    var clAvatar=a?'#fff':'#6b6b65';
+    var bgDot=a?'var(--green)':'#ccc';
+    var animDot=a?'animation:pulse-green 1.5s infinite':'';
+    var ciText=a?('CI: '+(c.waktuCi?c.waktuCi.substring(11,16):'--')):'Belum CI';
+    return '<div class="capster-card '+(a?'aktif':'')+'" style="display:flex;align-items:center;gap:10px;padding:.75rem">'
+      +'<div style="width:38px;height:38px;border-radius:50%;background:'+bgAvatar+';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:'+clAvatar+';flex-shrink:0">'+inisial+'</div>'
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;gap:6px">'
+          +'<div class="capster-name" style="margin-bottom:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.nama+'</div>'
+          +'<div style="width:8px;height:8px;border-radius:50%;background:'+bgDot+';flex-shrink:0;'+animDot+'"></div>'
+        +'</div>'
+        +'<div style="font-size:10px;color:var(--muted);font-family:monospace;margin-top:2px">'+ciText+'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('')
 }
 function renderAbsensiRiwayat(){
   const el=$('absensi-riw-tbl'),data=absensiAll;
@@ -1884,6 +1927,68 @@ async function submitGantiPin(){
     if(btnEl){btnEl.disabled=false;btnEl.textContent='🔐 Ganti PIN';}
   }
 }
+
+/* ═══════════════════════════════════════
+   LIVE CAPSTER STATUS — di tab Jual
+   Auto-refresh setiap 30 detik
+═══════════════════════════════════════ */
+let liveCapsterTimer = null;
+
+async function loadLiveCapster(){
+  const el = document.getElementById('live-capster-wrap');
+  if(!el) return;
+  try{
+    const op = outlet ? '?outlet='+encodeURIComponent(outlet) : '';
+    const d = await apiFetch(BASE+'/api/absensi/status'+op);
+    if(!d.success||!d.data){
+      el.innerHTML='<div class="live-capster-empty">Gagal memuat status capster</div>';
+      return;
+    }
+    const aktif = d.data.filter(c=>c.checkedIn);
+    if(!aktif.length){
+      el.innerHTML='<div class="live-capster-empty">Tidak ada capster yang sedang bertugas</div>';
+      return;
+    }
+    // Ambil juga riwayat hari ini untuk tahu customer terakhir
+    let custMap = {};
+    try{
+      const rv = await apiFetch(BASE+'/api/absensi/riwayat'+op);
+      if(rv.success&&rv.data){
+        // Ambil customer terakhir per capster yang masih AKTIF
+        rv.data.filter(r=>r.status==='AKTIF').forEach(r=>{
+          custMap[r.nama] = r.namaCustomer||'';
+        });
+      }
+    }catch{}
+
+    el.innerHTML = aktif.map(c=>{
+      const inisial = c.nama.substring(0,2).toUpperCase();
+      const ci = c.waktuCi ? c.waktuCi.substring(11,16) : '—';
+      const cust = custMap[c.nama] || '';
+      return '<div class="live-capster-card">'
+        +'<div class="live-capster-avatar">'+inisial+'</div>'
+        +'<div class="live-capster-info">'
+          +'<div class="live-capster-name">'+c.nama+'</div>'
+          +'<div class="live-capster-ci">CI: '+ci+'</div>'
+          +(cust ? '<div class="live-capster-cust">'+cust+'</div>' : '')
+        +'</div>'
+        +'<div class="live-pulse"></div>'
+        +'</div>';
+    }).join('');
+  }catch{
+    el.innerHTML='<div class="live-capster-empty">Koneksi gagal</div>';
+  }
+}
+
+function startLiveCapsterTimer(){
+  loadLiveCapster();
+  if(liveCapsterTimer) clearInterval(liveCapsterTimer);
+  liveCapsterTimer = setInterval(loadLiveCapster, 30000);
+}
+function stopLiveCapsterTimer(){
+  if(liveCapsterTimer){ clearInterval(liveCapsterTimer); liveCapsterTimer=null; }
+}
+
 
 /* ═══════════════════════════════════════
    SEARCH TRX LINTAS BULAN
