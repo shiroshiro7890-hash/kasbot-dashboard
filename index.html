@@ -205,7 +205,7 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
     <div class="login-form" id="lform-staff">
       <div class="login-err" id="lerr-staff"></div>
       <input class="login-input" type="text" id="linput-userid" placeholder="User ID (contoh: BUDI01)" autocomplete="username" autocapitalize="characters" onkeydown="if(event.key==='Enter')document.getElementById('linput-pin').focus()"/>
-      <div class="pw-wrap"><input class="login-input" type="password" id="linput-pin" placeholder="PIN (4-6 digit)" maxlength="6" autocomplete="current-password" inputmode="numeric" onkeydown="if(event.key==='Enter')doLoginStaff()"/><button class="pw-toggle" type="button" onclick="togglePw('linput-pin',this)">👁️</button></div>
+      <div class="pw-wrap"><input class="login-input" type="password" id="linput-pin" placeholder="PIN (6 digit)" maxlength="6" minlength="6" autocomplete="current-password" inputmode="numeric" onkeydown="if(event.key==='Enter')doLoginStaff()"/><button class="pw-toggle" type="button" onclick="togglePw('linput-pin',this)">👁️</button></div>
       <button class="login-btn" onclick="doLoginStaff()">Masuk</button>
     </div>
   </div>
@@ -374,6 +374,22 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
     </div>
     <div class="tbl-wrap"><div id="pos-trx-tbl"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
   </div>
+  <!-- SEARCH TRX LINTAS BULAN -->
+  <div class="card" style="margin-bottom:1.25rem">
+    <div class="card-head">
+      <div class="card-title">🔍 Search TRX Lintas Bulan</div>
+      <span id="search-lintas-count" style="font-size:11px;color:var(--muted)"></span>
+    </div>
+    <div class="card-body" style="padding:1rem">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Cari transaksi dari 6 bulan terakhir berdasarkan nama customer, No HP, capster, atau No Nota.</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input class="modal-input" type="text" id="search-lintas-input" placeholder="Nama customer / HP / No Nota / Capster..." autocomplete="off" style="flex:1;padding:10px 12px;font-size:14px" onkeydown="if(event.key==='Enter')searchTRXLintasBulan()"/>
+        <button class="btn btn-primary" onclick="searchTRXLintasBulan()" style="padding:10px 16px;flex-shrink:0">Cari</button>
+      </div>
+      <div id="search-lintas-result"></div>
+    </div>
+  </div>
+
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem">
     <div class="card" style="margin-bottom:0"><div class="card-head"><div class="card-title">🏆 Produk Terlaris</div></div><div class="tbl-wrap"><div id="analisis-top"><div class="empty"><span class="spinner"></span></div></div></div></div>
     <div class="card" style="margin-bottom:0"><div class="card-head"><div class="card-title">📉 Produk Tidak Laris</div></div><div class="tbl-wrap"><div id="analisis-bot"><div class="empty"><span class="spinner"></span></div></div></div></div>
@@ -453,6 +469,23 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
 
   <!-- TOTAL per capster -->
   <div class="card"><div class="card-head"><div class="card-title">Total per Capster</div></div><div class="tbl-wrap"><div id="komisi-capster-summary"><div class="empty"><span class="spinner"></span></div></div></div></div>
+
+  <!-- REKAP KOMISI LINTAS BULAN -->
+  <div class="card" style="margin-bottom:1.25rem">
+    <div class="card-head">
+      <div class="card-title">📅 Rekap Komisi Lintas Bulan</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <select id="komisi-lintas-bln" style="font-size:12px;padding:4px 8px;-webkit-appearance:none;appearance:none;border:1px solid var(--border);border-radius:var(--rs)">
+          <option value="3">3 Bulan</option>
+          <option value="6">6 Bulan</option>
+          <option value="12">12 Bulan</option>
+        </select>
+        <button class="btn btn-primary" onclick="loadKomisiLintasBulan()" style="padding:6px 12px;font-size:12px">Tampilkan</button>
+        <button class="btn" onclick="exportKomisiLintasBulanCSV()" style="padding:6px 10px;font-size:12px"><svg viewBox="0 0 24 24" style="width:13px;height:13px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+      </div>
+    </div>
+    <div id="komisi-lintas-result"><div class="empty" style="padding:1.5rem">Pilih rentang bulan dan klik Tampilkan</div></div>
+  </div>
 </main></div>
 
 <div id="section-expense" class="section"><main>
@@ -635,6 +668,7 @@ function doLoginAdmin(){
 async function doLoginStaff(){
   const uid=v('linput-userid').trim().toUpperCase(),pin=v('linput-pin').trim(),err=$('lerr-staff');
   if(!uid||!pin){err.textContent='User ID dan PIN wajib.';err.style.display='block';return;}
+  if(pin.length<6){err.textContent='PIN harus 6 digit.';err.style.display='block';return;}
   try{
     const r=await fetch(BASE+'/api/auth/login',{method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -1374,7 +1408,7 @@ async function submitModalMaster(){
     let r;
     if(masterMode==='tp'){const nm=g('f-nm');if(!nm){toast('❌ Nama produk wajib',true);return}r=await apiPost(BASE+'/api/produk/tambah',{outlet:out,nama:nm,harga:parseInt(g('f-hg'))||0,kategori:g('f-kat'),addedBy:CU.nama})}
     else if(masterMode==='ep'){const nm=g('f-nm');if(!nm){toast('❌ Nama produk wajib',true);return}r=await apiPost(BASE+'/api/produk/edit',{outlet:out,rowIndex:masterRow,nama:nm,harga:parseInt(g('f-hg'))||0,kategori:g('f-kat'),editedBy:CU.nama})}
-    else if(masterMode==='tc'){const nm=g('f-nm'),uid=g('f-uid').toUpperCase(),pin=g('f-pin');if(!nm||!uid||!pin){toast('❌ Nama, User ID, PIN wajib',true);return}r=await apiPost(BASE+'/api/capster/tambah',{outlet:out,nama:nm,userId:uid,pin,role:g('f-role'),komisiLayanan:gn('f-kl'),komisiProduk:gn('f-kp'),komisiPaket:gn('f-kpkt'),addedBy:CU.nama})}
+    else if(masterMode==='tc'){const nm=g('f-nm'),uid=g('f-uid').toUpperCase(),pin=g('f-pin');if(!nm||!uid||!pin){toast('❌ Nama, User ID, PIN wajib',true);return}if(pin.length<6){toast('❌ PIN harus 6 digit',true);return}r=await apiPost(BASE+'/api/capster/tambah',{outlet:out,nama:nm,userId:uid,pin,role:g('f-role'),komisiLayanan:gn('f-kl'),komisiProduk:gn('f-kp'),komisiPaket:gn('f-kpkt'),addedBy:CU.nama})}
     else if(masterMode==='ec'){const nm=g('f-nm'),uid=g('f-uid').toUpperCase();if(!nm||!uid){toast('❌ Nama dan User ID wajib',true);return}r=await apiPost(BASE+'/api/capster/edit',{outlet:out,rowIndex:masterRow,nama:nm,userId:uid,pin:g('f-pin'),role:g('f-role'),komisiLayanan:gn('f-kl'),komisiProduk:gn('f-kp'),komisiPaket:gn('f-kpkt'),editedBy:CU.nama})}
     if(r&&r.success){toast('✅ '+r.message);closeModal('modal-master');if(masterMode.startsWith('t')||masterMode.startsWith('e')){if(masterMode.endsWith('p'))loadProduk();else loadCapsterMaster()}}
     else toast('❌ '+(r?r.error:'Gagal'),true)
@@ -1741,6 +1775,126 @@ async function exportLaporanPDF(){
   }catch(e){console.error(e);toast('❌ Gagal buat PDF: '+e.message,true);}
   finally{if(btn){btn.textContent='📥 Export PDF';btn.disabled=false;}}
 }
+
+/* ═══════════════════════════════════════
+   SEARCH TRX LINTAS BULAN
+═══════════════════════════════════════ */
+let searchLintasData = null;
+async function searchTRXLintasBulan(){
+  const q = (document.getElementById('search-lintas-input').value || '').trim();
+  const el = document.getElementById('search-lintas-result');
+  const cnt = document.getElementById('search-lintas-count');
+  if(!q){toast('Masukkan kata kunci pencarian', true);return;}
+  if(q.length < 2){toast('Minimal 2 karakter', true);return;}
+  el.innerHTML='<div class="empty"><span class="spinner"></span>Mencari di 6 bulan terakhir...</div>';
+  if(cnt)cnt.textContent='';
+  try{
+    const op = outlet ? '&outlet='+encodeURIComponent(outlet) : '';
+    const d = await apiFetch(BASE+'/api/penjualan/search?q='+encodeURIComponent(q)+op);
+    searchLintasData = d;
+    if(!d.success){el.innerHTML='<div class="empty">'+( d.error||'Error')+'</div>';return;}
+    if(!d.data||!d.data.length){
+      el.innerHTML='<div class="empty">Tidak ditemukan hasil untuk "'+q+'"</div>';
+      if(cnt)cnt.textContent='0 hasil';
+      return;
+    }
+    if(cnt)cnt.textContent=d.total+' hasil ditemukan';
+    const canEdit = CU?.role==='ADMIN'||CU?.role==='KASIR';
+    const pctMap={};
+    if(komisiData&&komisiData.data){komisiData.data.forEach(c=>{pctMap[c.capster||c.nama]=c.komisiPct||0;});}
+    el.innerHTML='<div class="tbl-wrap"><table><thead><tr>'
+      +'<th>Nota</th><th>Tgl</th><th>Bulan</th><th>Capster</th><th>Customer</th><th>HP</th><th>Produk</th>'
+      +'<th style="text-align:right">Total</th><th>Metode</th>'+(canEdit?'<th></th>':'')
+      +'</tr></thead><tbody>'
+      +d.data.map(r=>`<tr>
+        <td class="mono" style="font-size:10px">${r.id||'—'}</td>
+        <td class="mono" style="font-size:11px">${r.waktu?r.waktu.substring(0,10):'—'}</td>
+        <td style="font-size:11px;color:var(--muted)">${r.bulan||'—'}</td>
+        <td>${r.capster||'—'}</td>
+        <td><b>${r.customer||'—'}</b></td>
+        <td class="mono" style="font-size:11px">${r.hp||'—'}</td>
+        <td style="font-size:11px">${r.produk||'—'}</td>
+        <td style="text-align:right" class="mono green">${fmt(r.total)}</td>
+        <td style="font-size:11px">${r.metode||'—'}</td>
+        ${canEdit?`<td><button class="btn" style="padding:2px 6px;font-size:11px" onclick="openEditTrx('${r.id}','${(r.customer||'').replace(/'/g,"\'")}','${r.hp||''}')">✏️</button></td>`:''}
+      </tr>`).join('')
+      +'</tbody></table></div>';
+  }catch{el.innerHTML='<div class="empty">Koneksi gagal</div>';}
+}
+
+/* ═══════════════════════════════════════
+   REKAP KOMISI LINTAS BULAN
+═══════════════════════════════════════ */
+let komisiLintasData = null;
+async function loadKomisiLintasBulan(){
+  const el = document.getElementById('komisi-lintas-result');
+  const bulan = parseInt(document.getElementById('komisi-lintas-bln').value)||3;
+  el.innerHTML='<div class="empty"><span class="spinner"></span>Memuat '+bulan+' bulan terakhir...</div>';
+  try{
+    const op = outlet ? '&outlet='+encodeURIComponent(outlet) : '';
+    const d = await apiFetch(BASE+'/api/komisi/lintas-bulan?bulan='+bulan+op);
+    komisiLintasData = d;
+    if(!d.success){el.innerHTML='<div class="empty">'+(d.error||'Error')+'</div>';return;}
+
+    const s = d.summary||{};
+    const bulanList = (d.bulanDiproses||[]).join(', ');
+    const byCapster = d.byCapster||[];
+
+    if(!byCapster.length){el.innerHTML='<div class="empty">Tidak ada data komisi untuk periode ini</div>';return;}
+
+    el.innerHTML=
+      // Summary metrics
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:1rem;border-bottom:1px solid var(--border)">'
+      +'<div class="metric"><div class="metric-label">Total Omzet</div><div class="metric-value green">'+fmt(s.totalOmzet||0)+'</div></div>'
+      +'<div class="metric"><div class="metric-label">Total Komisi</div><div class="metric-value green">'+fmt(s.totalKomisi||0)+'</div></div>'
+      +'<div class="metric"><div class="metric-label">Total TRX</div><div class="metric-value">'+(s.totalTrx||0)+' trx</div></div>'
+      +'</div>'
+      // Info bulan
+      +'<div style="padding:8px 1rem;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">📅 Periode: '+bulanList+'</div>'
+      // Tabel per capster
+      +'<div class="tbl-wrap"><table><thead><tr>'
+      +'<th>Capster</th><th style="text-align:right">TRX</th><th style="text-align:right">Omzet</th>'
+      +'<th style="text-align:right">Komisi</th><th style="text-align:right">Rata-rata/Trx</th>'
+      +'</tr></thead><tbody>'
+      +byCapster.map(c=>`<tr>
+        <td><b>${c.capster||c.nama}</b></td>
+        <td style="text-align:right" class="mono">${c.transaksi||0}</td>
+        <td style="text-align:right" class="mono">${fmt(c.omzet||0)}</td>
+        <td style="text-align:right" class="mono green"><b>${fmt(c.komisi||0)}</b></td>
+        <td style="text-align:right" class="mono">${fmt((c.transaksi||0)>0?Math.round((c.omzet||0)/(c.transaksi||1)):0)}</td>
+      </tr>`).join('')
+      // Baris total
+      +`<tr style="background:var(--surface);font-weight:700;border-top:2px solid var(--border)">
+        <td>TOTAL</td>
+        <td style="text-align:right" class="mono">${s.totalTrx||0}</td>
+        <td style="text-align:right" class="mono green">${fmt(s.totalOmzet||0)}</td>
+        <td style="text-align:right" class="mono green">${fmt(s.totalKomisi||0)}</td>
+        <td></td>
+      </tr>`
+      +'</tbody></table></div>';
+  }catch{el.innerHTML='<div class="empty">Koneksi gagal</div>';}
+}
+
+function exportKomisiLintasBulanCSV(){
+  if(!komisiLintasData||!komisiLintasData.byCapster){toast('Load data dulu',true);return;}
+  const bom='﻿';
+  const bulan = komisiLintasData.bulanDiproses||[];
+  const header='Capster,Transaksi,Omzet,Komisi';
+  const rows = komisiLintasData.byCapster.map(c=>
+    [c.capster||c.nama, c.transaksi||0, c.omzet||0, c.komisi||0].join(',')
+  );
+  const s = komisiLintasData.summary||{};
+  rows.push(['TOTAL',s.totalTrx||0,s.totalOmzet||0,s.totalKomisi||0].join(','));
+  const csv = bom + '# Periode: '+bulan.join(' | ')+'
+'+header+'
+'+rows.join('
+');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='komisi-lintas-bulan-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
 </script>
 
 <!-- SECTION CLOSING HARIAN -->
