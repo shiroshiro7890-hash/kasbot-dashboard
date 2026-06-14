@@ -229,7 +229,7 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
       <button class="cp-btn-ci" id="cp-btn-ci" onclick="openModal('modal-customer')">⬆️ Check In</button>
       <button class="cp-btn-co" id="cp-btn-co" onclick="doCapsterCheckOut()" disabled>⬇️ Check Out</button>
     </div>
-    <!-- Verifikasi Kode Transaksi -->
+    <!-- Verifikasi Kode Transaksi (Capster) -->
     <div class="card" style="margin-bottom:1rem">
       <div class="card-head"><div class="card-title">🔑 Verifikasi Kode Transaksi</div></div>
       <div style="padding:1rem">
@@ -367,7 +367,6 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
     <div class="card" style="margin-bottom:0"><div class="card-head"><div class="card-title">Per Metode</div></div><div class="tbl-wrap"><div id="pos-metode-tbl"><div class="empty"><span class="spinner"></span></div></div></div></div>
     <div class="card" style="margin-bottom:0"><div class="card-head"><div class="card-title">Per Produk</div></div><div class="tbl-wrap"><div id="pos-produk-tbl"><div class="empty"><span class="spinner"></span></div></div></div></div>
   </div>
-
   <div class="card">
     <div class="card-head">
       <div class="card-title">Transaksi</div>
@@ -375,7 +374,6 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
     </div>
     <div class="tbl-wrap"><div id="pos-trx-tbl"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
   </div>
-  <!-- ANALISIS PRODUK -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem">
     <div class="card" style="margin-bottom:0"><div class="card-head"><div class="card-title">🏆 Produk Terlaris</div></div><div class="tbl-wrap"><div id="analisis-top"><div class="empty"><span class="spinner"></span></div></div></div></div>
     <div class="card" style="margin-bottom:0"><div class="card-head"><div class="card-title">📉 Produk Tidak Laris</div></div><div class="tbl-wrap"><div id="analisis-bot"><div class="empty"><span class="spinner"></span></div></div></div></div>
@@ -386,12 +384,23 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
   </div>
 </main></div>
 
+<!-- ══════════════════════════════════════
+     SECTION KOMISI — versi baru dengan:
+     1. select bulan komisi
+     2. filter capster
+     3. tabel detail TRX verified dari Rekap Komisi
+     4. verifikasi TRX auto-simpan ke Rekap Komisi
+════════════════════════════════════════ -->
 <div id="section-komisi" class="section"><main>
   <div class="controls">
     <div style="display:flex;gap:5px">
       <button class="btn" id="kb-btn" onclick="switchKomisiMode('bulanan')" style="background:var(--green);color:#fff;border-color:var(--green)">Bulanan</button>
       <button class="btn" id="kh-btn" onclick="switchKomisiMode('harian')">Harian</button>
     </div>
+    <!-- PATCH: select bulan komisi -->
+    <select id="sel-komisi-bln" onchange="loadKomisi()" style="-webkit-appearance:none;appearance:none;font-size:13px;padding:6px 10px">
+      <option value="">Bulan Ini</option>
+    </select>
     <div class="date-filter"><label>Dari</label><input type="date" id="komisi-dari" onchange="renderKomisiFiltered()"/><label>s/d</label><input type="date" id="komisi-sampai" onchange="renderKomisiFiltered()"/><button class="btn btn-reset" onclick="resetFilter('komisi-dari','komisi-sampai',renderKomisiFiltered)">✕</button></div>
     <button class="btn" onclick="exportKomisiCSV()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
   </div>
@@ -402,11 +411,11 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
     <div id="komisi-notif-list" style="color:#7a5000"></div>
   </div>
 
-  <!-- FORM INPUT VERIFIKASI TRX (untuk admin/kasir bantu capster) -->
+  <!-- FORM VERIFIKASI TRX (admin/kasir bantu capster) -->
   <div class="card" style="margin-bottom:1.25rem">
     <div class="card-head"><div class="card-title">🔑 Input / Verifikasi Kode TRX</div></div>
     <div class="card-body" style="padding:1rem">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Admin atau kasir bisa input kode transaksi di sini jika capster sedang sibuk atau ramai.</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Admin atau kasir bisa input kode transaksi di sini. TRX otomatis tercatat ke sheet <b>Rekap Komisi</b>.</div>
       <div style="display:flex;gap:8px;margin-bottom:10px">
         <input class="modal-input" type="text" id="komisi-verif-input" placeholder="TRX-xxxxxxxxxx" autocomplete="off" style="flex:1;text-transform:uppercase;font-family:'DM Mono',monospace;font-size:13px;padding:10px 12px" onkeydown="if(event.key==='Enter')verifikasiTrxDiKomisi()"/>
         <button class="btn btn-primary" onclick="verifikasiTrxDiKomisi()" style="padding:10px 16px;flex-shrink:0">Cek & Verifikasi</button>
@@ -414,12 +423,35 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
       <div id="komisi-verif-result"></div>
     </div>
   </div>
+
   <div class="grid-3">
     <div class="metric"><div class="metric-label">Total Omzet</div><div class="metric-value green" id="komisi-omzet">—</div></div>
     <div class="metric"><div class="metric-label">Total Komisi</div><div class="metric-value green" id="komisi-total-k">—</div></div>
     <div class="metric"><div class="metric-label">Capster</div><div class="metric-value" id="komisi-jml-cap">—</div></div>
   </div>
-  <div class="card"><div class="card-head"><div class="card-title">Rekap Komisi</div></div><div class="tbl-wrap"><div id="komisi-tbl"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
+
+  <!-- REKAP per capster -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Rekap Komisi per Capster</div>
+      <!-- PATCH: filter capster -->
+      <select id="komisi-filter-capster" onchange="renderKomisiDetail()" style="font-size:12px;padding:4px 8px;-webkit-appearance:none;appearance:none">
+        <option value="">Semua Capster</option>
+      </select>
+    </div>
+    <div class="tbl-wrap"><div id="komisi-tbl"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+  </div>
+
+  <!-- DETAIL TRX VERIFIED dari Rekap Komisi sheet -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">📋 Detail TRX Verified (Rekap Komisi)</div>
+      <span id="komisi-detail-count" style="font-size:11px;color:var(--muted)"></span>
+    </div>
+    <div class="tbl-wrap"><div id="komisi-detail-tbl"><div class="empty">—</div></div></div>
+  </div>
+
+  <!-- TOTAL per capster -->
   <div class="card"><div class="card-head"><div class="card-title">Total per Capster</div></div><div class="tbl-wrap"><div id="komisi-capster-summary"><div class="empty"><span class="spinner"></span></div></div></div></div>
 </main></div>
 
@@ -510,25 +542,35 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
 </main></div>
 
 <script>
-/* CONFIG */
+/* ═══════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════ */
 const BASE='https://kasbot-backend-java-production-184e.up.railway.app';
 const MAX_FAIL=5;
-// API key & password TIDAK ada di frontend — semua via session token
-const ROLE_TABS={ADMIN:['pos','komisi','expense','absensi','laporan','notifikasi','closing','kunjungan','aset','master'],KASIR:['pos','komisi','expense','notifikasi','closing'],CAPSTER:[]};
-const TAB_CFG={pos:{l:'🏪 Jual',s:'Jual'},komisi:{l:'💈 Komisi',s:'Komisi'},expense:{l:'💰 Kas',s:'Kas'},absensi:{l:'📋 Absen',s:'Absen'},laporan:{l:'📊 Laporan',s:'Laporan'},notifikasi:{l:'🔔 Notif',s:'Notif',notif:true},master:{l:'⚙️ Master',s:'Master'},
-  closing:{l:'🔐 Closing',s:'Closing'},
-  kunjungan:{l:'👥 Kunjungan',s:'Kunjungan'},
-  aset:{l:'🏭 Aset',s:'Aset'}
+const ROLE_TABS={
+  ADMIN:['pos','komisi','expense','absensi','laporan','notifikasi','closing','kunjungan','aset','master'],
+  KASIR:['pos','komisi','expense','notifikasi','closing'],
+  CAPSTER:[]
+};
+const TAB_CFG={
+  pos:{l:'🏪 Jual',s:'Jual'},komisi:{l:'💈 Komisi',s:'Komisi'},expense:{l:'💰 Kas',s:'Kas'},
+  absensi:{l:'📋 Absen',s:'Absen'},laporan:{l:'📊 Laporan',s:'Laporan'},
+  notifikasi:{l:'🔔 Notif',s:'Notif',notif:true},master:{l:'⚙️ Master',s:'Master'},
+  closing:{l:'🔐 Closing',s:'Closing'},kunjungan:{l:'👥 Kunjungan',s:'Kunjungan'},aset:{l:'🏭 Aset',s:'Aset'}
 };
 
-/* STATE */
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
 let CU=null,outlet='',tab='pos',fails=0;
-let posData=null,komisiData=null,kbData=[],pcData=[];
+let posData=null,komisiData=null,rekapKomisiDetail=null,kbData=[],pcData=[];
 let komisiMode='bulanan',absensiAll=[];
 let selProd=null,strukData=null;
 let masterMode='',masterRow=0,masterTab='produk';
 
-/* UTILS */
+/* ═══════════════════════════════════════
+   UTILS
+═══════════════════════════════════════ */
 const fmt=n=>'Rp '+Math.round(Number(n)||0).toLocaleString('id-ID');
 const parseTgl=s=>{if(!s||s.includes('TOTAL'))return null;const p=s.split('/');return p.length===3?new Date(+p[2],+p[1]-1,+p[0]):null};
 const bKey=d=>d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0');
@@ -565,7 +607,9 @@ function filterD(data,field,di,si){
 }
 function isoToSlash(iso){if(!iso)return'';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`}
 
-/* LOGIN */
+/* ═══════════════════════════════════════
+   LOGIN
+═══════════════════════════════════════ */
 function switchLoginTab(t){
   ['admin','staff'].forEach(x=>{
     $('ltab-'+x).className='login-tab'+(x===t?' active':'');
@@ -606,12 +650,12 @@ async function doLoginStaff(){
 }
 function logoutUser(){sessionStorage.removeItem('kb_u');CU=null;location.reload();}
 
-/* INIT DASH */
+/* ═══════════════════════════════════════
+   INIT DASH
+═══════════════════════════════════════ */
 function initDash(){
   const role=CU.role,tabs=ROLE_TABS[role]||['pos'];
-  /* desktop tabs */
   $('header-tabs').innerHTML=tabs.map(t=>`<button class="main-tab${t===tabs[0]?' active':''}" id="mtab-${t}" onclick="switchTab('${t}')">${TAB_CFG[t].l}${TAB_CFG[t].notif?'<span class="notif-badge" id="nb-d">0</span>':''}</button>`).join('');
-  /* bottom nav (max 5) */
   $('bnav-inner').innerHTML=tabs.slice(0,5).map(t=>`<div class="bnav-item${t===tabs[0]?' active':''}" id="bn-${t}" onclick="switchTab('${t}')"><span class="bnav-icon">${TAB_CFG[t].l.split(' ')[0]}${TAB_CFG[t].notif?'<span class="bnav-badge" id="nb-m">0</span>':''}</span><span class="bnav-label">${TAB_CFG[t].s}</span></div>`).join('');
   $('admin-header').style.display='flex';
   const rc={ADMIN:'badge-admin',KASIR:'badge-kasir',CAPSTER:'badge-capster'};
@@ -619,15 +663,18 @@ function initDash(){
   fillBulanSel();switchTab(tabs[0]);initApp()
 }
 
+/* PATCH: fillBulanSel includes sel-komisi-bln */
 function fillBulanSel(){
   const bi=['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'],now=new Date();
-  ['sel-laporan-bln','sel-cp-bln'].forEach(id=>{
+  ['sel-laporan-bln','sel-cp-bln','sel-komisi-bln'].forEach(id=>{
     const el=$(id);if(!el)return;el.innerHTML='<option value="">Bulan Ini</option>';
     for(let i=0;i<6;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const val=bi[d.getMonth()+1]+' '+d.getFullYear();const o=document.createElement('option');o.value=val;o.textContent=val;el.appendChild(o)}
   })
 }
 
-/* CAPSTER PAGE */
+/* ═══════════════════════════════════════
+   CAPSTER PAGE
+═══════════════════════════════════════ */
 function showCpPage(u){
   $('capster-page').style.display='block';
   $('cp-hdr-name').innerHTML=`<span class="badge badge-capster" style="font-size:10px">CAPSTER</span> ${u.nama}`;
@@ -665,7 +712,7 @@ async function submitEditAbsensi(){
   catch{toast('❌ Koneksi gagal',true)}
 }
 async function loadCpHistory(){
-  const nama=CU?.nama||'',bulan=v('sel-cp-bln'),op_out=CU?.outlet?`?outlet=${encodeURIComponent(CU.outlet)}`:'';
+  const nama=CU?.nama||'',bulan=v('sel-cp-bln');
   try{
     const d=await apiFetch(BASE+'/api/capster-history?nama='+encodeURIComponent(nama)+'&bulan='+encodeURIComponent(bulan)+(CU?.outlet?'&outlet='+encodeURIComponent(CU.outlet):''));
     if(!d.success)return;
@@ -691,12 +738,16 @@ async function doCapsterCheckOut(){
   catch{toast('❌ Koneksi gagal',true)}
 }
 
-/* INIT ON LOAD */
+/* ═══════════════════════════════════════
+   INIT ON LOAD
+═══════════════════════════════════════ */
 const _su=sessionStorage.getItem('kb_u');
 if(_su){try{CU=JSON.parse(_su);$('login-overlay').style.display='none';CU.role==='CAPSTER'?showCpPage(CU):initDash()}catch{sessionStorage.removeItem('kb_u')}}
 else{setTimeout(()=>$('linput-admin').focus(),200)}
 
-/* API */
+/* ═══════════════════════════════════════
+   API HELPERS
+═══════════════════════════════════════ */
 async function apiFetch(url){
   try{return(await fetch(url)).json();}
   catch{return{success:false,error:'Koneksi gagal'};}
@@ -707,10 +758,12 @@ async function apiPost(url,body){
   }catch{return{success:false,error:'Koneksi gagal'};}
 }
 
-/* APP INIT */
+/* ═══════════════════════════════════════
+   APP INIT
+═══════════════════════════════════════ */
 function initApp(){loadAll();setInterval(loadAll,5*60*1000)}
 function switchOutlet(){
-  outlet=$('outlet-sel').value;posData=null;komisiData=null;kbData=[];pcData=[];
+  outlet=$('outlet-sel').value;posData=null;komisiData=null;rekapKomisiDetail=null;kbData=[];pcData=[];
   loadAll();if(tab==='master')loadMasterData();if(tab==='notifikasi')loadNotifikasi()
 }
 function switchTab(t){
@@ -722,7 +775,8 @@ function switchTab(t){
     if(bn)bn.className='bnav-item'+(x===t?' active':'')
   });
   window.scrollTo({top:0,behavior:'auto'});
-  if(t==='pos'&&!posData)loadPOS();if(t==='komisi'&&!komisiData)loadKomisi();
+  if(t==='pos'&&!posData)loadPOS();
+  if(t==='komisi'){komisiData=null;rekapKomisiDetail=null;loadKomisi();}
   if(t==='expense')loadExpense();if(t==='absensi')loadAbsensi();
   if(t==='laporan')loadLaporan();if(t==='notifikasi')loadNotifikasi();if(t==='master')loadMasterData();
   if(t==='closing')loadClosing();if(t==='kunjungan')loadKunjungan();if(t==='aset')loadAset();
@@ -734,7 +788,9 @@ function loadAll(){
   const lu=$('last-update');if(lu)lu.textContent=new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit'})
 }
 
-/* POS */
+/* ═══════════════════════════════════════
+   POS
+═══════════════════════════════════════ */
 async function loadPOS(){
   try{const op=outlet?`?outlet=${encodeURIComponent(outlet)}`:'';const d=await apiFetch(BASE+'/api/penjualan'+op);if(!d.success)throw 0;posData=d;renderPOSFiltered()}
   catch{$('pos-omzet').textContent='Error'}
@@ -753,55 +809,14 @@ function renderPOSChart(by){
   const mx=Math.max(...keys.map(k=>by[k]),1);
   el.innerHTML=keys.map(k=>{const h=Math.max(Math.round((by[k]/mx)*120),2);return`<div class="bar-group"><div class="bars"><div class="bar" style="height:${h}px;background:var(--green)" title="${fmt(by[k])}"></div></div><div class="bar-lbl">${k.split('/')[0]}</div></div>`}).join('')
 }
-function renderPOSMetode(by){const el=$('pos-metode-tbl'),e=Object.entries(by||{}).sort((a,b)=>b[1]-a[1]);if(!e.length){el.innerHTML='<div class="empty">—</div>';return}el.innerHTML='<table><thead><tr><th>Metode</th><th style="text-align:right">Total</th></tr></thead><tbody>'+e.map(([m,v])=>`<tr><td>${m}</td><td style="text-align:right" class="mono green">${fmt(v)}</td></tr>`).join('')+'</tbody></table>'}
-function renderPOSProduk(by){const el=$('pos-produk-tbl'),e=Object.entries(by||{}).sort((a,b)=>b[1]-a[1]);if(!e.length){el.innerHTML='<div class="empty">—</div>';return}el.innerHTML='<table><thead><tr><th>Produk</th><th style="text-align:right">Total</th></tr></thead><tbody>'+e.map(([p,v])=>`<tr><td>${p}</td><td style="text-align:right" class="mono green">${fmt(v)}</td></tr>`).join('')+'</tbody></table>'}
-function renderPOSCapster(data){
-  const el=$('pos-capster-tbl');if(!data||!data.length){el.innerHTML='<div class="empty">—</div>';return}
-  // Ambil % komisi dari komisiData
-  const pctMap={};
-  if(komisiData&&komisiData.data){komisiData.data.forEach(c=>{pctMap[c.capster||c.nama]=c.komisiPct||0;});}
-  const cm={};
-  data.forEach(t=>{
-    const c=t.capster||'—';
-    if(!cm[c])cm[c]={t:0,v:0,k:0,pct:pctMap[c]||0};
-    cm[c].t++;cm[c].v+=t.total;
-    cm[c].k+=Math.round((t.total||0)*(pctMap[c]||0));
-  });
-  const rows=Object.entries(cm).sort((a,b)=>b[1].v-a[1].v);
-  // Total semua
-  const totTrx=rows.reduce((s,[,v])=>s+v.t,0);
-  const totOmzet=rows.reduce((s,[,v])=>s+v.v,0);
-  const totKomisi=rows.reduce((s,[,v])=>s+v.k,0);
-  el.innerHTML='<table><thead><tr>'
-    +'<th>Capster</th>'
-    +'<th style="text-align:right">Trx</th>'
-    +'<th style="text-align:right">Omzet</th>'
-    +'<th style="text-align:right">Komisi</th>'
-    +'<th style="text-align:right">Rata-rata</th>'
-    +'</tr></thead><tbody>'
-    +rows.map(([c,v])=>`<tr>
-      <td><b>${c}</b></td>
-      <td style="text-align:right" class="mono">${v.t}</td>
-      <td style="text-align:right" class="mono green">${fmt(v.v)}</td>
-      <td style="text-align:right" class="mono" style="color:#1D9E75">${v.k>0?fmt(v.k):'<span style="color:var(--muted)">—</span>'}</td>
-      <td style="text-align:right" class="mono">${fmt(v.t>0?Math.round(v.v/v.t):0)}</td>
-    </tr>`).join('')
-    +`<tr style="background:var(--surface);font-weight:700;border-top:2px solid var(--border)">
-      <td>TOTAL</td>
-      <td style="text-align:right" class="mono">${totTrx}</td>
-      <td style="text-align:right" class="mono green">${fmt(totOmzet)}</td>
-      <td style="text-align:right" class="mono green">${fmt(totKomisi)}</td>
-      <td style="text-align:right" class="mono">${fmt(totTrx>0?Math.round(totOmzet/totTrx):0)}</td>
-    </tr>`
-    +'</tbody></table>'
-}
+function renderPOSMetode(by){const el=$('pos-metode-tbl'),e=Object.entries(by||{}).sort((a,b)=>b[1]-a[1]);if(!e.length){el.innerHTML='<div class="empty">—</div>';return}el.innerHTML='<table><thead><tr><th>Metode</th><th style="text-align:right">Total</th></tr></thead><tbody>'+e.map(([m,v2])=>`<tr><td>${m}</td><td style="text-align:right" class="mono green">${fmt(v2)}</td></tr>`).join('')+'</tbody></table>'}
+function renderPOSProduk(by){const el=$('pos-produk-tbl'),e=Object.entries(by||{}).sort((a,b)=>b[1]-a[1]);if(!e.length){el.innerHTML='<div class="empty">—</div>';return}el.innerHTML='<table><thead><tr><th>Produk</th><th style="text-align:right">Total</th></tr></thead><tbody>'+e.map(([p,v2])=>`<tr><td>${p}</td><td style="text-align:right" class="mono green">${fmt(v2)}</td></tr>`).join('')+'</tbody></table>'}
 function renderPOSTrxTbl(data,q=''){
   const el=$('pos-trx-tbl'),fd=q?data.filter(r=>(r.customer||'').toLowerCase().includes(q)||(r.hp||'').includes(q)):data;
   if(!fd||!fd.length){el.innerHTML='<div class="empty">Tidak ada data</div>';return}
   const canEdit=CU?.role==='ADMIN'||CU?.role==='KASIR';
   const pctMap={};
   if(komisiData&&komisiData.data){komisiData.data.forEach(c=>{pctMap[c.capster||c.nama]=c.komisiPct||0;});}
-  // Hitung total bawah
   const totOmzet=fd.reduce((s,r)=>s+(r.total||0),0);
   const totKomisi=fd.reduce((s,r)=>{const pct=pctMap[r.capster]||0;return s+Math.round((r.total||0)*pct);},0);
   el.innerHTML='<table><thead><tr><th>Nota</th><th>Tgl</th><th>Capster</th><th>Customer</th><th>Produk</th><th style="text-align:right">Total</th><th style="text-align:right">Komisi</th><th>Mtd</th>'+(canEdit?'<th></th>':'')+'</tr></thead><tbody>'+
@@ -899,11 +914,9 @@ ${it?`<div style="display:flex;justify-content:space-between"><span>Tunai</span>
 <div style="border-top:1px dashed #000;margin:3px 0"></div>
 <div style="text-align:center">Terima kasih! 🙏</div></div>`;
   el.style.display='block';
-  // Tunggu DOM render dulu baru print (penting untuk mobile browser)
   requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{
       window.print();
-      // Sembunyikan lagi setelah print dialog muncul
       setTimeout(()=>{el.style.display='none'},1000);
     });
   });
@@ -916,16 +929,49 @@ function kirimWA(){
   window.open(`https://wa.me/${wh}?text=${encodeURIComponent(teks)}`,'_blank')
 }
 
-/* KOMISI */
+/* ═══════════════════════════════════════
+   KOMISI — PATCH LENGKAP
+   • loadKomisi: kirim param bulan dari sel-komisi-bln
+   • renderKomisiFiltered: isi dropdown capster
+   • loadRekapKomisiDetail: GET /api/komisi/rekap
+   • renderKomisiDetail: filter per capster
+   • verifikasiTrxDiKomisi: langsung ke backend, auto-refresh
+   • exportKomisiCSV: dari rekapKomisiDetail
+═══════════════════════════════════════ */
 async function loadKomisi(){
   try{
+    const bulan=v('sel-komisi-bln');
     const op=outlet?`&outlet=${encodeURIComponent(outlet)}`:'';
-    const d=await apiFetch(BASE+'/api/penjualan/komisi?mode='+komisiMode+op);
+    const blnParam=bulan?`&bulan=${encodeURIComponent(bulan)}`:'';
+    const d=await apiFetch(BASE+'/api/penjualan/komisi?mode='+komisiMode+op+blnParam);
     komisiData=d;
     renderKomisiFiltered();
+    // Muat detail rekap komisi dari sheet Rekap Komisi
+    await loadRekapKomisiDetail();
     cekCapsterBelumVerif();
   }catch{}
 }
+
+/* PATCH: loadRekapKomisiDetail — GET /api/komisi/rekap */
+async function loadRekapKomisiDetail(){
+  try{
+    const bulan=v('sel-komisi-bln');
+    const op=outlet?`&outlet=${encodeURIComponent(outlet)}`:'';
+    const blnParam=bulan?`&bulan=${encodeURIComponent(bulan)}`:'';
+    const d=await apiFetch(BASE+'/api/komisi/rekap?mode='+komisiMode+op+blnParam);
+    if(d.success){
+      rekapKomisiDetail=d.transaksi||[];
+    }else{
+      rekapKomisiDetail=[];
+    }
+    renderKomisiDetail();
+  }catch{
+    rekapKomisiDetail=[];
+    renderKomisiDetail();
+  }
+}
+
+/* PATCH: renderKomisiFiltered — isi dropdown capster dari data */
 function renderKomisiFiltered(){
   if(!komisiData)return;
   const{dari,sampai}=gdf('komisi-dari','komisi-sampai');
@@ -941,25 +987,29 @@ function renderKomisiFiltered(){
   $('komisi-total-k').textContent=fmt(tot_k);
   $('komisi-jml-cap').textContent=data.length+' capster';
 
-  // Tabel Rekap Komisi (detail per capster)
+  // PATCH: isi dropdown filter capster
+  const selCap=$('komisi-filter-capster');
+  if(selCap){
+    const prev=selCap.value;
+    selCap.innerHTML='<option value="">Semua Capster</option>'+
+      data.map(c=>`<option value="${c.capster||c.nama}"${(c.capster||c.nama)===prev?' selected':''}>${c.capster||c.nama}</option>`).join('');
+  }
+
+  // Tabel rekap per capster
   const el=$('komisi-tbl');
   if(!data.length){el.innerHTML='<div class="empty">Tidak ada data</div>';}
   else{
-    el.innerHTML='<table><thead><tr><th>Capster</th><th style="text-align:right">Trx</th><th style="text-align:right">Omzet</th><th style="text-align:right">%</th><th style="text-align:right">Komisi</th></tr></thead><tbody>'
+    el.innerHTML='<table><thead><tr><th>Capster</th><th style="text-align:right">Trx Verified</th><th style="text-align:right">Omzet</th><th style="text-align:right">%</th><th style="text-align:right">Komisi</th></tr></thead><tbody>'
       +data.map(c=>`<tr><td><b>${c.capster||c.nama}</b></td><td style="text-align:right" class="mono">${c.transaksi||0}</td><td style="text-align:right" class="mono">${fmt(c.omzet)}</td><td style="text-align:right" class="mono">${((c.komisiPct||0)*100).toFixed(0)}%</td><td style="text-align:right" class="mono green"><b>${fmt(c.komisi)}</b></td></tr>`).join('')
       +'</tbody></table>';
   }
 
-  // Tabel Total per Capster (ringkasan dengan baris TOTAL)
+  // Tabel total per capster
   const el2=$('komisi-capster-summary');
   if(!data.length){el2.innerHTML='<div class="empty">Tidak ada data</div>';return;}
   const sorted=data.slice().sort((a,b)=>(b.omzet||0)-(a.omzet||0));
   el2.innerHTML='<table><thead><tr>'
-    +'<th>Capster</th>'
-    +'<th style="text-align:right">Trx</th>'
-    +'<th style="text-align:right">Omzet</th>'
-    +'<th style="text-align:right">Komisi</th>'
-    +'<th style="text-align:right">Rata-rata</th>'
+    +'<th>Capster</th><th style="text-align:right">Trx</th><th style="text-align:right">Omzet</th><th style="text-align:right">Komisi</th><th style="text-align:right">Rata-rata</th>'
     +'</tr></thead><tbody>'
     +sorted.map(c=>`<tr>
       <td><b>${c.capster||c.nama}</b></td>
@@ -977,58 +1027,81 @@ function renderKomisiFiltered(){
     </tr>`
     +'</tbody></table>';
 }
-/* VERIFIKASI TRX DI TAB KOMISI */
+
+/* PATCH: renderKomisiDetail — tabel detail TRX verified dari sheet */
+function renderKomisiDetail(){
+  const el=$('komisi-detail-tbl'),cnt=$('komisi-detail-count');
+  if(!rekapKomisiDetail||!rekapKomisiDetail.length){
+    el.innerHTML='<div class="empty">Belum ada TRX terverifikasi</div>';
+    if(cnt)cnt.textContent='';return;
+  }
+  const filterCap=v('komisi-filter-capster');
+  const data=filterCap
+    ? rekapKomisiDetail.filter(t=>(t.capster||'').toLowerCase()===filterCap.toLowerCase())
+    : rekapKomisiDetail;
+  if(cnt)cnt.textContent=data.length+' TRX verified';
+  if(!data.length){el.innerHTML='<div class="empty">Tidak ada TRX untuk capster ini</div>';return;}
+  el.innerHTML='<table><thead><tr>'
+    +'<th>Nota</th><th>Waktu</th><th>Capster</th><th>Customer</th><th>Produk</th>'
+    +'<th style="text-align:right">Total</th><th>Metode</th>'
+    +'<th style="text-align:right">% Komisi</th><th style="text-align:right">Komisi</th>'
+    +'<th>Waktu Verif</th>'
+    +'</tr></thead><tbody>'
+    +data.map(t=>`<tr>
+      <td class="mono" style="font-size:10px">${t.noNota||'—'}</td>
+      <td class="mono" style="font-size:11px">${t.waktuTrx?t.waktuTrx.substring(0,10):'—'}</td>
+      <td><b>${t.capster||'—'}</b></td>
+      <td>${t.customer||'—'}</td>
+      <td style="font-size:11px">${t.produk||'—'}</td>
+      <td style="text-align:right" class="mono green">${fmt(t.total||0)}</td>
+      <td style="font-size:11px">${t.metodeBayar||'—'}</td>
+      <td style="text-align:right" class="mono">${t.komisiPct?Math.round(t.komisiPct*100)+'%':'—'}</td>
+      <td style="text-align:right" class="mono green"><b>${fmt(t.komisiNominal||0)}</b></td>
+      <td class="mono" style="font-size:10px">${t.waktuVerif?t.waktuVerif.substring(11,16):'—'}</td>
+    </tr>`).join('')
+    +'</tbody></table>';
+}
+
+/* PATCH: verifikasiTrxDiKomisi — langsung POST ke /api/komisi/verifikasi, auto-simpan ke Rekap Komisi */
 async function verifikasiTrxDiKomisi(){
   const kode=v('komisi-verif-input').trim().toUpperCase();
   const el=$('komisi-verif-result');
   if(!kode){toast('Masukkan kode TRX',true);return;}
-  el.innerHTML='<div style="text-align:center;padding:10px"><span class="spinner"></span></div>';
+  el.innerHTML='<div style="text-align:center;padding:10px"><span class="spinner"></span>Memverifikasi...</div>';
   try{
-    // Cari di posData dulu
-    let r=null;
-    if(posData&&posData.data){
-      const found=posData.data.find(x=>x.id===kode);
-      if(found){
-        let pct=0;
-        if(komisiData&&komisiData.data){
-          const cd=komisiData.data.find(c=>(c.capster||c.nama)===found.capster);
-          if(cd)pct=cd.komisiPct||0;
-        }
-        r={success:true,verified:true,noNota:found.id,capster:found.capster,
-           produk:found.produk,total:found.total,customer:found.customer,
-           waktu:found.waktu,metode:found.metode,
-           komisiPct:pct,komisi:Math.round((found.total||0)*pct)};
-      }
-    }
-    // Fallback ke API
-    if(!r){
-      r=await apiPost(BASE+'/api/komisi/verifikasi',{outlet:outlet||'',capster:'',noNota:kode});
-    }
+    // Langsung POST ke backend — backend yang cari & simpan ke Rekap Komisi
+    const r=await apiPost(BASE+'/api/komisi/verifikasi',{outlet:outlet||'',capster:'',noNota:kode});
     if(r&&r.success&&r.verified){
       const kom=r.komisi||0;
       const pctStr=r.komisiPct?Math.round(r.komisiPct*100):0;
-      el.innerHTML=`<div style="background:#e0f5ec;border:1px solid var(--green);border-radius:var(--rs);padding:12px;font-size:13px">
-        <div style="font-weight:700;color:var(--green);margin-bottom:8px">✅ Transaksi Ditemukan</div>
+      const sudahVerif=r.sudahVerified===true;
+      el.innerHTML=`<div style="background:${sudahVerif?'#fff8e1':'#e0f5ec'};border:1px solid ${sudahVerif?'#f0a500':'var(--green)'};border-radius:var(--rs);padding:12px;font-size:13px">
+        <div style="font-weight:700;color:${sudahVerif?'#7a5000':'var(--green)'};margin-bottom:8px">${sudahVerif?'⚠️ Sudah pernah diverifikasi':'✅ Transaksi Terverifikasi!'}</div>
         <div><b>No Nota:</b> ${r.noNota}</div>
         <div><b>Capster:</b> ${r.capster||'—'}</div>
         <div><b>Produk:</b> ${r.produk||'—'}</div>
         <div><b>Customer:</b> ${r.customer||'—'}</div>
         <div><b>Total:</b> <span class="mono green">${fmt(r.total)}</span></div>
         <div><b>Waktu:</b> ${r.waktu||'—'}</div>
-        ${kom>0?`<div style="margin-top:10px;padding:10px;background:#d4edda;border-radius:var(--rs);text-align:center">
+        ${!sudahVerif&&kom>0?`<div style="margin-top:10px;padding:10px;background:#d4edda;border-radius:var(--rs);text-align:center">
           <div style="font-size:11px;color:#085041;margin-bottom:2px">Komisi capster dari transaksi ini</div>
           <div style="font-size:22px;font-weight:700;color:#085041">${fmt(kom)}</div>
           <div style="font-size:11px;color:#085041">(${pctStr}% dari ${fmt(r.total)})</div>
+          <div style="font-size:11px;color:#085041;margin-top:4px">✅ Sudah dicatat ke Rekap Komisi</div>
         </div>`:''}
         <button class="btn" style="margin-top:10px;width:100%;padding:8px" onclick="$('komisi-verif-input').value='';$('komisi-verif-result').innerHTML='';$('komisi-verif-input').focus()">Verifikasi TRX lain</button>
       </div>`;
+      // Auto-refresh dashboard komisi setelah berhasil verifikasi
+      if(!sudahVerif){
+        setTimeout(()=>{komisiData=null;rekapKomisiDetail=null;loadKomisi();},800);
+      }
     }else{
       el.innerHTML=`<div style="background:#fff5f5;border:1px solid var(--red);border-radius:var(--rs);padding:12px;font-size:13px;color:var(--red)">${(r&&r.error)||'Kode tidak ditemukan'}</div>`;
     }
   }catch{el.innerHTML='<div style="color:var(--red);padding:10px;font-size:13px">Koneksi gagal</div>';}
 }
 
-/* CEK TRX PENDING BELUM DIVERIFIKASI */
+/* CEK CAPSTER BELUM VERIF */
 async function cekCapsterBelumVerif(){
   const notifEl=$('komisi-notif-belum-verif');
   const listEl=$('komisi-notif-list');
@@ -1036,26 +1109,14 @@ async function cekCapsterBelumVerif(){
   try{
     const op=outlet?'?outlet='+encodeURIComponent(outlet):'';
     const trxData=posData||(await apiFetch(BASE+'/api/penjualan'+op));
-
-    // TRX hari ini yang masih PENDING (belum diverif)
-    const todayStr=new Date().toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta',
-      day:'2-digit',month:'2-digit',year:'numeric'});
-    const [d,m,y]=todayStr.split('/');
+    const todayStr=new Date().toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta',day:'2-digit',month:'2-digit',year:'numeric'});
+    const[d,m,y]=todayStr.split('/');
     const todayPrefix=`${y}-${m}-${d}`;
-
     const pending=(trxData&&trxData.data||[]).filter(t=>
-      t.waktu&&t.waktu.startsWith(todayPrefix)&&
-      (!t.komisiStatus||t.komisiStatus==='PENDING')
+      t.waktu&&t.waktu.startsWith(todayPrefix)&&(!t.komisiStatus||t.komisiStatus==='PENDING')
     );
-
-    // Kelompok per capster
     const byCapster={};
-    pending.forEach(t=>{
-      const c=t.capster||'—';
-      if(!byCapster[c])byCapster[c]=[];
-      byCapster[c].push(t);
-    });
-
+    pending.forEach(t=>{const c=t.capster||'—';if(!byCapster[c])byCapster[c]=[];byCapster[c].push(t);});
     const entries=Object.entries(byCapster);
     if(entries.length>0){
       notifEl.style.display='block';
@@ -1070,9 +1131,7 @@ async function cekCapsterBelumVerif(){
           </button>
         </div>`
       ).join('');
-    }else{
-      notifEl.style.display='none';
-    }
+    }else{notifEl.style.display='none';}
   }catch(e){console.log('cekCapsterBelumVerif:',e);}
 }
 
@@ -1080,15 +1139,70 @@ function switchKomisiMode(mode){
   komisiMode=mode;
   $('kb-btn').style.cssText=mode==='bulanan'?'background:var(--green);color:#fff;border-color:var(--green)':'';
   $('kh-btn').style.cssText=mode==='harian'?'background:var(--green);color:#fff;border-color:var(--green)':'';
-  komisiData=null;loadKomisi()
-}
-function exportKomisiCSV(){
-  if(!komisiData||!komisiData.data)return;
-  const csv='Capster,Transaksi,Omzet,Komisi\n'+komisiData.data.map(c=>`${c.capster||c.nama},${c.transaksi||0},${c.omzet||0},${c.komisi||0}`).join('\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='komisi-'+new Date().toISOString().slice(0,10)+'.csv';a.click()
+  komisiData=null;rekapKomisiDetail=null;loadKomisi()
 }
 
-/* EXPENSE */
+/* PATCH: exportKomisiCSV dari rekapKomisiDetail (detail per TRX) */
+function exportKomisiCSV(){
+  // Kalau ada detail rekap komisi, export detail. Kalau tidak, export summary.
+  if(rekapKomisiDetail&&rekapKomisiDetail.length){
+    const bom='\uFEFF'; // BOM untuk Excel UTF-8
+    const filterCap=v('komisi-filter-capster');
+    const data=filterCap
+      ?rekapKomisiDetail.filter(t=>(t.capster||'').toLowerCase()===filterCap.toLowerCase())
+      :rekapKomisiDetail;
+    const header='No Nota,Waktu TRX,Capster,Customer,Produk,Total,Metode,% Komisi,Nominal Komisi,Waktu Verif';
+    const rows=data.map(t=>
+      [t.noNota||'',t.waktuTrx||'',(t.capster||'').replace(/,/g,' '),
+       (t.customer||'').replace(/,/g,' '),(t.produk||'').replace(/,/g,' '),
+       t.total||0,t.metodeBayar||'',
+       t.komisiPct?Math.round(t.komisiPct*100)+'%':'',
+       t.komisiNominal||0,t.waktuVerif||''].join(',')
+    );
+    const csv=bom+header+'\n'+rows.join('\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='rekap-komisi-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  }else if(komisiData&&komisiData.data){
+    const bom='\uFEFF';
+    const csv=bom+'Capster,Transaksi,Omzet,Komisi\n'+komisiData.data.map(c=>`${c.capster||c.nama},${c.transaksi||0},${c.omzet||0},${c.komisi||0}`).join('\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='komisi-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  }else{toast('Tidak ada data untuk diexport',true);}
+}
+
+/* VERIFIKASI KODE TRANSAKSI (Halaman Capster) */
+async function verifikasiKodeTransaksi(){
+  const kode=v('verifNota').trim().toUpperCase();
+  const el=$('verifResult');
+  if(!kode){toast('Masukkan kode transaksi',true);return;}
+  el.innerHTML='<div style="text-align:center;padding:10px"><span class="spinner"></span></div>';
+  try{
+    const r=await apiPost(BASE+'/api/komisi/verifikasi',{outlet:CU.outlet||'',capster:CU.nama,noNota:kode});
+    if(r.success&&r.verified){
+      const komisiNominal=r.komisi||0;
+      const komisiPct=r.komisiPct?Math.round(r.komisiPct*100):0;
+      const sudahVerif=r.sudahVerified===true;
+      const komisiHtml=komisiNominal>0&&!sudahVerif
+        ?`<div style="margin-top:10px;padding:10px;background:#d4edda;border-radius:var(--rs);text-align:center">
+            <div style="font-size:11px;color:#085041;margin-bottom:2px">Komisi kamu dari transaksi ini</div>
+            <div style="font-size:20px;font-weight:700;color:#085041">${fmt(komisiNominal)}</div>
+            <div style="font-size:11px;color:#085041">(${komisiPct}% dari ${fmt(r.total)})</div>
+            <div style="font-size:11px;color:#085041;margin-top:4px">✅ Sudah dicatat ke Rekap Komisi</div>
+          </div>` : '';
+      el.innerHTML=`<div style="background:${sudahVerif?'#fff8e1':'#e0f5ec'};border:1px solid ${sudahVerif?'#f0a500':'var(--green)'};border-radius:var(--rs);padding:12px;font-size:13px">
+        <div style="font-weight:700;color:${sudahVerif?'#7a5000':'var(--green)'};margin-bottom:8px">${sudahVerif?'⚠️ TRX ini sudah pernah diverifikasi':'✅ Transaksi Terverifikasi!'}</div>
+        <div><b>No Nota:</b> ${r.noNota}</div><div><b>Produk:</b> ${r.produk}</div>
+        <div><b>Customer:</b> ${r.customer||'—'}</div>
+        <div><b>Total:</b> <span class="mono green">${fmt(r.total)}</span></div>
+        <div><b>Waktu:</b> ${r.waktu}</div>${komisiHtml}
+      </div>`;
+    }else{
+      el.innerHTML=`<div style="background:#fff5f5;border:1px solid var(--red);border-radius:var(--rs);padding:12px;font-size:13px;color:var(--red)">${r.error||'Kode tidak ditemukan'}</div>`;
+    }
+  }catch{el.innerHTML='<div style="color:var(--red);padding:10px;font-size:13px">Koneksi gagal</div>';}
+}
+
+/* ═══════════════════════════════════════
+   EXPENSE
+═══════════════════════════════════════ */
 let expTab='kasbesar';
 function switchExpenseTab(t){expTab=t;$('expense-kb').style.display=t==='kasbesar'?'block':'none';$('expense-pc').style.display=t==='petty'?'block':'none';$('stab-kb').className='sub-tab'+(t==='kasbesar'?' active':'');$('stab-pc').className='sub-tab'+(t==='petty'?' active':'')}
 async function loadExpense(){await Promise.all([loadKasBesar(),loadPettyCash()])}
@@ -1140,7 +1254,9 @@ function exportExpenseCSV(type){
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=type+'-'+new Date().toISOString().slice(0,10)+'.csv';a.click()
 }
 
-/* ABSENSI */
+/* ═══════════════════════════════════════
+   ABSENSI
+═══════════════════════════════════════ */
 async function loadAbsensi(){
   const out=v('absensi-outlet'),dari=v('absensi-dari'),sampai=v('absensi-sampai');
   const tglEl=$('absensi-tgl');
@@ -1167,8 +1283,9 @@ function renderAbsensiRiwayat(){
     data.map(r=>`<tr><td class="mono">${r.checkIn?r.checkIn.substring(0,10):'—'}</td><td><b>${r.nama}</b></td><td>${r.namaCustomer||'—'}</td><td class="mono">${r.checkIn?r.checkIn.substring(11):'—'}</td><td class="mono">${r.checkOut?r.checkOut.substring(11):'—'}</td><td style="text-align:right" class="mono">${r.durasi?r.durasi+'m':'—'}</td><td>${r.status==='AKTIF'?'<span style="color:var(--green);font-weight:600">●</span>':'<span style="color:var(--muted)">✓</span>'}</td></tr>`).join('')+'</tbody></table>'
 }
 
-/* LAPORAN */
-function isoToSlash(iso){if(!iso)return'';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`}
+/* ═══════════════════════════════════════
+   LAPORAN
+═══════════════════════════════════════ */
 async function loadLaporan(){
   const bln=v('sel-laporan-bln'),{dari,sampai}=gdf('laporan-dari','laporan-sampai');
   let lbl=bln||'Bulan Ini';if(dari&&sampai)lbl=isoToSlash(dari)+' — '+isoToSlash(sampai);else if(dari)lbl='Dari '+isoToSlash(dari);else if(sampai)lbl='s/d '+isoToSlash(sampai);
@@ -1189,7 +1306,9 @@ async function loadLaporan(){
   }catch{}
 }
 
-/* NOTIFIKASI */
+/* ═══════════════════════════════════════
+   NOTIFIKASI
+═══════════════════════════════════════ */
 async function loadNotifikasi(){
   const el=$('notif-list');el.innerHTML='<div class="empty"><span class="spinner"></span>Memuat...</div>';
   try{
@@ -1205,7 +1324,9 @@ async function loadNotifikasi(){
   }catch{el.innerHTML='<div class="empty">Error</div>'}
 }
 
-/* MASTER */
+/* ═══════════════════════════════════════
+   MASTER
+═══════════════════════════════════════ */
 function switchMasterTab(t){
   masterTab=t;
   ['produk','capster-list','log'].forEach(x=>$('master-'+x).style.display='none');
@@ -1262,7 +1383,9 @@ async function submitModalMaster(){
 async function hapusProduk(ri){if(!confirm('Nonaktifkan produk?'))return;try{const r=await apiPost(BASE+'/api/produk/hapus',{outlet:outlet||'',rowIndex:ri,deletedBy:CU.nama});toast(r.success?'✅ Dinonaktifkan':'❌ '+(r.error||'Gagal'),!r.success);if(r.success)loadProduk()}catch{toast('❌ Gagal',true)}}
 async function hapusCap(ri){if(!confirm('Nonaktifkan staff?'))return;try{const r=await apiPost(BASE+'/api/capster/hapus',{outlet:outlet||'',rowIndex:ri,deletedBy:CU.nama});toast(r.success?'✅ Dinonaktifkan':'❌ '+(r.error||'Gagal'),!r.success);if(r.success)loadCapsterMaster()}catch{toast('❌ Gagal',true)}}
 
-/* SWIPE GESTURE (mobile tab switch) */
+/* ═══════════════════════════════════════
+   SWIPE GESTURE (mobile tab switch)
+═══════════════════════════════════════ */
 (()=>{let sx=0,sy=0;
 document.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
 document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
@@ -1271,7 +1394,9 @@ if(Math.abs(dx)>70&&Math.abs(dy)<50&&Math.abs(dx)>Math.abs(dy)*2){
   if(dx<0&&idx<tabs.length-1)switchTab(tabs[idx+1]);else if(dx>0&&idx>0)switchTab(tabs[idx-1])
 }},{passive:true})})();
 
-/* ANALISIS */
+/* ═══════════════════════════════════════
+   ANALISIS
+═══════════════════════════════════════ */
 let analisisData=null;
 async function loadAnalisis(){
   try{
@@ -1292,92 +1417,9 @@ function renderTren6Bulan(tren){
   el.innerHTML='<div style="display:flex;align-items:flex-end;gap:6px;height:100px">'+tren.map(t=>{const h=Math.max(Math.round((t.omzet/maxO)*90),2);const bln=t.bulan.split(' ')[0].substring(0,3);return'<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%"><div style="flex:1;display:flex;align-items:flex-end;width:100%"><div style="height:'+h+'px;width:100%;background:var(--green);border-radius:3px 3px 0 0" title="'+fmt(t.omzet)+'"></div></div><div style="font-size:9px;color:var(--hint);font-family:\'DM Mono\',monospace">'+bln+'</div></div>';}).join('')+'</div><div style="display:flex;margin-top:8px">'+tren.map(t=>'<div style="flex:1;text-align:center;font-size:10px;color:var(--muted)">'+t.transaksi+' trx</div>').join('')+'</div>';
 }
 
-/* VERIFIKASI KODE KOMISI */
-async function verifikasiKodeTransaksi(){
-  const kode=v('verifNota').trim().toUpperCase();
-  const el=$('verifResult');
-  if(!kode){toast('Masukkan kode transaksi',true);return;}
-  el.innerHTML='<div style="text-align:center;padding:10px"><span class="spinner"></span></div>';
-  try{
-    const r=await apiPost(BASE+'/api/komisi/verifikasi',{outlet:CU.outlet||'',capster:CU.nama,noNota:kode});
-    if(r.success&&r.verified){
-      // Hitung komisi dari pct yang dikembalikan backend
-      const komisiNominal=r.komisi||0;
-      const komisiPct=r.komisiPct?Math.round(r.komisiPct*100):0;
-      const komisiHtml=komisiNominal>0
-        ?'<div style="margin-top:10px;padding:10px;background:#d4edda;border-radius:var(--rs);text-align:center"><div style="font-size:11px;color:#085041;margin-bottom:2px">Komisi kamu dari transaksi ini</div><div style="font-size:20px;font-weight:700;color:#085041">'+fmt(komisiNominal)+'</div><div style="font-size:11px;color:#085041">('+komisiPct+'% dari '+fmt(r.total)+')</div></div>'
-        :'';
-      el.innerHTML='<div style="background:#e0f5ec;border:1px solid var(--green);border-radius:var(--rs);padding:12px;font-size:13px"><div style="font-weight:700;color:var(--green);margin-bottom:8px">✅ Transaksi Terverifikasi!</div><div><b>No Nota:</b> '+r.noNota+'</div><div><b>Produk:</b> '+r.produk+'</div><div><b>Customer:</b> '+(r.customer||'—')+'</div><div><b>Total:</b> <span class="mono green">'+fmt(r.total)+'</span></div><div><b>Waktu:</b> '+r.waktu+'</div>'+komisiHtml+'</div>';
-    } else {
-      el.innerHTML='<div style="background:#fff5f5;border:1px solid var(--red);border-radius:var(--rs);padding:12px;font-size:13px;color:var(--red)">'+(r.error||'Kode tidak ditemukan')+'</div>';
-    }
-  }catch{el.innerHTML='<div style="color:var(--red);padding:10px;font-size:13px">Koneksi gagal</div>';}
-}
-
-/* VERIFIKASI TRX KASIR/ADMIN */
-function openModalVerifKasir(){
-  $('verifKasirNota').value='';
-  $('verifKasirResult').innerHTML='';
-  openModal('modal-verif-kasir');
-  setTimeout(()=>$('verifKasirNota').focus(),300);
-}
-
-async function verifikasiTrxKasir(){
-  const kode=v('verifKasirNota').trim().toUpperCase();
-  const el=$('verifKasirResult');
-  if(!kode){toast('Masukkan kode transaksi',true);return;}
-  el.innerHTML='<div style="text-align:center;padding:10px"><span class="spinner"></span></div>';
-  try{
-    // Cari di posData dulu (sudah loaded)
-    let found=null;
-    if(posData&&posData.data){found=posData.data.find(r=>r.id===kode);}
-    if(!found){
-      // Fallback: panggil API verifikasi
-      const r=await apiPost(BASE+'/api/komisi/verifikasi',{outlet:outlet||'',capster:'',noNota:kode});
-      if(r.success&&r.verified){
-        const komisiPct=r.komisiPct||0;
-        const komisiNom=r.komisi||Math.round((r.total||0)*komisiPct);
-        const pctStr=Math.round(komisiPct*100);
-        el.innerHTML=buildVerifResult(r,komisiNom,pctStr);return;
-      } else {
-        el.innerHTML='<div style="background:#fff5f5;border:1px solid var(--red);border-radius:var(--rs);padding:12px;font-size:13px;color:var(--red)">'+(r.error||'Kode tidak ditemukan')+'</div>';return;
-      }
-    }
-    // Hitung komisi dari komisiData
-    let komisiPct=0;
-    if(komisiData&&komisiData.data){
-      const cd=komisiData.data.find(c=>(c.capster||c.nama)===found.capster);
-      if(cd)komisiPct=cd.komisiPct||0;
-    }
-    const komisiNom=Math.round((found.total||0)*komisiPct);
-    const pctStr=Math.round(komisiPct*100);
-    const r2={noNota:found.id,capster:found.capster,produk:found.produk,total:found.total,customer:found.customer,waktu:found.waktu,metode:found.metode};
-    el.innerHTML=buildVerifResult(r2,komisiNom,pctStr);
-  }catch{el.innerHTML='<div style="color:var(--red);padding:10px;font-size:13px">Koneksi gagal</div>';}
-}
-
-function buildVerifResult(r,komisiNom,pctStr){
-  const komisiHtml=komisiNom>0
-    ?`<div style="margin-top:10px;padding:10px;background:#d4edda;border-radius:var(--rs);text-align:center">
-        <div style="font-size:11px;color:#085041;margin-bottom:2px">Komisi capster dari transaksi ini</div>
-        <div style="font-size:22px;font-weight:700;color:#085041">${fmt(komisiNom)}</div>
-        <div style="font-size:11px;color:#085041">(${pctStr}% dari ${fmt(r.total)})</div>
-      </div>`
-    :'';
-  return `<div style="background:#e0f5ec;border:1px solid var(--green);border-radius:var(--rs);padding:12px;font-size:13px">
-    <div style="font-weight:700;color:var(--green);margin-bottom:8px">✅ Transaksi Ditemukan</div>
-    <div><b>No Nota:</b> ${r.noNota}</div>
-    <div><b>Capster:</b> ${r.capster||'—'}</div>
-    <div><b>Produk:</b> ${r.produk||'—'}</div>
-    <div><b>Customer:</b> ${r.customer||'—'}</div>
-    <div><b>Total:</b> <span class="mono green">${fmt(r.total)}</span></div>
-    <div><b>Metode:</b> ${r.metode||'—'}</div>
-    <div><b>Waktu:</b> ${r.waktu||'—'}</div>
-    ${komisiHtml}
-  </div>`;
-}
-
-/* CLOSING HARIAN */
+/* ═══════════════════════════════════════
+   CLOSING HARIAN
+═══════════════════════════════════════ */
 let closingTunaiToday=0;
 function LocalDate_WIB(){
   const d=new Date(),wib=new Date(d.toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));
@@ -1385,7 +1427,6 @@ function LocalDate_WIB(){
 }
 async function loadClosing(){
   try{
-    const op=outlet?'?outlet='+encodeURIComponent(outlet):'';
     const today=LocalDate_WIB();
     const d=await apiFetch(BASE+'/api/closing?tanggal='+today+(outlet?'&outlet='+encodeURIComponent(outlet):''));
     renderClosingTable(d.data||[]);
@@ -1447,7 +1488,9 @@ async function doApproveClosing(approve){
   }catch{toast('Koneksi gagal',true);}
 }
 
-/* KUNJUNGAN CUSTOMER */
+/* ═══════════════════════════════════════
+   KUNJUNGAN CUSTOMER
+═══════════════════════════════════════ */
 let kunjunganData=[];
 async function loadKunjungan(){
   $('kunjungan-table').innerHTML='<div class="empty"><span class="spinner"></span>Memuat...</div>';
@@ -1458,7 +1501,7 @@ async function loadKunjungan(){
     if(!d.success){$('kunjungan-table').innerHTML='<div class="empty">Error</div>';return;}
     kunjunganData=d.data||[];
     $('kj-total').textContent=d.total+' customer';
-    const totalK=kunjunganData.reduce(function(s,c){return s+(c.kunjungan||0);},0);
+    const totalK=kunjunganData.reduce((s,c)=>s+(c.kunjungan||0),0);
     $('kj-sum').textContent=totalK+' kunjungan';
     $('kj-avg').textContent=d.total>0?(totalK/d.total).toFixed(1)+'x / cust':'—';
     renderKunjunganTable();
@@ -1468,18 +1511,20 @@ function renderKunjunganTable(){
   const el=$('kunjungan-table');
   if(!kunjunganData.length){el.innerHTML='<div class="empty">Tidak ada data kunjungan</div>';return;}
   el.innerHTML='<table><thead><tr><th>Rank</th><th>Customer</th><th>No HP</th><th style="text-align:right">Kunjungan</th><th style="text-align:right">Total Spend</th><th>Terakhir</th><th></th></tr></thead><tbody>'+
-    kunjunganData.map(function(c,i){return'<tr><td style="font-weight:700">'+( i+1)+'</td><td><b>'+c.customer+'</b></td><td class="mono">'+(c.hp||'—')+'</td><td style="text-align:right"><span style="font-weight:700;font-size:16px;color:var(--green)">'+c.kunjungan+'</span><span style="font-size:11px;color:var(--muted)">x</span></td><td style="text-align:right" class="mono green">'+fmt(c.totalSpend)+'</td><td class="mono" style="font-size:11px">'+(c.lastVisit?c.lastVisit.substring(0,10):'—')+'</td><td><button class="btn" style="padding:3px 8px;font-size:11px" onclick="showKunjunganDetail('+i+')">Detail</button></td></tr>';}).join('')+'</tbody></table>';
+    kunjunganData.map((c,i)=>'<tr><td style="font-weight:700">'+(i+1)+'</td><td><b>'+c.customer+'</b></td><td class="mono">'+(c.hp||'—')+'</td><td style="text-align:right"><span style="font-weight:700;font-size:16px;color:var(--green)">'+c.kunjungan+'</span><span style="font-size:11px;color:var(--muted)">x</span></td><td style="text-align:right" class="mono green">'+fmt(c.totalSpend)+'</td><td class="mono" style="font-size:11px">'+(c.lastVisit?c.lastVisit.substring(0,10):'—')+'</td><td><button class="btn" style="padding:3px 8px;font-size:11px" onclick="showKunjunganDetail('+i+')">Detail</button></td></tr>').join('')+'</tbody></table>';
 }
 function showKunjunganDetail(idx){
   const c=kunjunganData[idx];if(!c)return;
   $('kj-detail-title').textContent='Detail: '+c.customer;
   const bulanList=c.bulanKunjungan||[];
   $('kj-detail-body').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"><div class="metric"><div class="metric-label">Total Kunjungan</div><div class="metric-value green">'+c.kunjungan+'x</div></div><div class="metric"><div class="metric-label">Total Spend</div><div class="metric-value">'+fmt(c.totalSpend)+'</div></div></div><div style="font-size:12px;color:var(--muted);margin-bottom:8px">HP: '+(c.hp||'—')+' | Terakhir: '+(c.lastVisit?c.lastVisit.substring(0,10):'—')+'</div><div style="font-size:13px;font-weight:600;margin-bottom:8px">Per Bulan:</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+
-    (bulanList.length?bulanList.map(function(b){return'<div style="background:#e0f5ec;color:var(--green);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600">'+b.bulan+': '+b.kunjungan+'x</div>';}).join(''):'<div style="color:var(--hint);font-size:13px">Tidak ada data per bulan</div>')+'</div>';
+    (bulanList.length?bulanList.map(b=>'<div style="background:#e0f5ec;color:var(--green);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600">'+b.bulan+': '+b.kunjungan+'x</div>').join(''):'<div style="color:var(--hint);font-size:13px">Tidak ada data per bulan</div>')+'</div>';
   openModal('modal-kunjungan-detail');
 }
 
-/* ASET */
+/* ═══════════════════════════════════════
+   ASET
+═══════════════════════════════════════ */
 let asetList=[],asetMode='',asetRow=0;
 async function loadAset(){
   const status=v('aset-filter-status');
@@ -1488,8 +1533,8 @@ async function loadAset(){
     const d=await apiFetch(BASE+'/api/aset'+op);
     asetList=d.data||[];
     $('aset-total').textContent=asetList.length;
-    $('aset-aktif').textContent=asetList.filter(function(a){return a.status==='AKTIF';}).length;
-    $('aset-rusak').textContent=asetList.filter(function(a){return a.status==='RUSAK'||a.status==='DIGANTI';}).length;
+    $('aset-aktif').textContent=asetList.filter(a=>a.status==='AKTIF').length;
+    $('aset-rusak').textContent=asetList.filter(a=>a.status==='RUSAK'||a.status==='DIGANTI').length;
     renderAsetTable();loadRequestBarang();
   }catch{$('aset-table').innerHTML='<div class="empty">Error</div>';}
 }
@@ -1497,46 +1542,45 @@ function renderAsetTable(){
   const el=$('aset-table');
   if(!asetList.length){el.innerHTML='<div class="empty">Belum ada aset terdaftar</div>';return;}
   el.innerHTML='<table><thead><tr><th>Nama</th><th>Kategori</th><th>Kondisi</th><th>Status</th><th>Tgl Beli</th><th>Tgl Update</th><th style="text-align:right">Harga</th><th>Catatan</th><th></th></tr></thead><tbody>'+
-    asetList.map(function(a){
+    asetList.map(a=>{
       const stColor=a.status==='AKTIF'?'background:#e0f5ec;color:var(--green)':a.status==='RUSAK'?'background:#fff5f5;color:var(--red)':a.status==='DIGANTI'?'background:#fff3cd;color:#856404':'background:#f3f3f1;color:var(--muted)';
       const kondColor=a.kondisi==='BAIK'?'background:#e0f5ec;color:var(--green)':a.kondisi==='SEDANG'?'background:#fff3cd;color:#856404':'background:#fff5f5;color:var(--red)';
-      return'<tr><td><b>'+a.nama+'</b>'+(a.fotoUrl?'<br><a href="'+a.fotoUrl+'" target="_blank" style="font-size:10px;color:var(--blue)">Foto</a>':'')+'</td><td style="font-size:11px">'+(a.kategori||'—')+'</td><td><span class="badge" style="'+kondColor+'">'+(a.kondisi||'BAIK')+'</span></td><td><span class="badge" style="'+stColor+'">'+a.status+'</span></td><td class="mono" style="font-size:11px">'+(a.tanggalBeli||'—')+'</td><td class="mono" style="font-size:11px">'+(a.tanggalUpdate||'—')+'</td><td style="text-align:right" class="mono">'+(a.harga?fmt(a.harga):'—')+'</td><td style="font-size:11px;max-width:120px">'+(a.catatan||'—')+'</td><td><button class="btn" style="padding:3px 7px;font-size:11px" onclick="openModalUpdateAset('+a.rowIndex+',\''+( a.kondisi||'BAIK')+'\',\''+a.status+'\',\''+( a.catatan||'').replace(/\'/g,"\\'")+'\')">Update</button></td></tr>';
+      return'<tr><td><b>'+a.nama+'</b>'+(a.fotoUrl?'<br><a href="'+a.fotoUrl+'" target="_blank" style="font-size:10px;color:var(--blue)">Foto</a>':'')+'</td><td style="font-size:11px">'+(a.kategori||'—')+'</td><td><span class="badge" style="'+kondColor+'">'+(a.kondisi||'BAIK')+'</span></td><td><span class="badge" style="'+stColor+'">'+a.status+'</span></td><td class="mono" style="font-size:11px">'+(a.tanggalBeli||'—')+'</td><td class="mono" style="font-size:11px">'+(a.tanggalUpdate||'—')+'</td><td style="text-align:right" class="mono">'+(a.harga?fmt(a.harga):'—')+'</td><td style="font-size:11px;max-width:120px">'+(a.catatan||'—')+'</td><td><button class="btn" style="padding:3px 7px;font-size:11px" onclick="openModalUpdateAset('+a.rowIndex+',\''+(a.kondisi||'BAIK')+'\',\''+a.status+'\',\''+(a.catatan||'').replace(/\'/g,"\\'")+'\')" >Update</button></td></tr>';
     }).join('')+'</tbody></table>';
 }
 function openModalTambahAset(){
   asetMode='tambah';asetRow=0;$('mm-aset-title').textContent='Tambah Aset';
-  $('mm-aset-body').innerHTML=mi('a-nama','Nama Aset *','text','Gunting Rambut','','autocomplete="off"')+mi('a-kat','Kategori','text','Alat Potong','','autocomplete="off"')+'<label>Kondisi</label><select class="modal-select" id="a-kondisi" style="margin-top:4px"><option value="BAIK">Baik</option><option value="SEDANG">Sedang</option><option value="RUSAK">Rusak</option></select>'+mi('a-tglbeli','Tanggal Beli','date','','','')+mi('a-harga','Harga (Rp)','number','','','inputmode="numeric"')+mi('a-catatan','Catatan','text','','','autocomplete="off"')+'<label>Foto Aset (opsional)</label>'+'<div class="foto-upload-wrap" id="aset-foto-wrap">'+'<input type="file" id="aset-foto-input" accept="image/*" capture="environment" style="display:none" onchange="onFotoSelected(this,\'aset\')" />'+'<button type="button" class="foto-upload-btn" id="aset-foto-btn" onclick="document.getElementById(\'aset-foto-input\').click()">📷 Ambil / Pilih Foto dari Galeri</button>'+'<div class="foto-preview" id="aset-foto-preview"><img id="aset-foto-img" src="" alt="preview"/><button class="foto-preview-del" onclick="hapusFoto(\'aset\')">✕</button></div>'+'<div class="foto-upload-hint">Foto langsung terupload ke Cloudinary saat submit</div>'+'</div>';
+  $('mm-aset-body').innerHTML=mi('a-nama','Nama Aset *','text','Gunting Rambut','','autocomplete="off"')+mi('a-kat','Kategori','text','Alat Potong','','autocomplete="off"')+'<label>Kondisi</label><select class="modal-select" id="a-kondisi" style="margin-top:4px"><option value="BAIK">Baik</option><option value="SEDANG">Sedang</option><option value="RUSAK">Rusak</option></select>'+mi('a-tglbeli','Tanggal Beli','date','','','')+mi('a-harga','Harga (Rp)','number','','','inputmode="numeric"')+mi('a-catatan','Catatan','text','','','autocomplete="off"')+'<label>Foto Aset (opsional)</label><div class="foto-upload-wrap" id="aset-foto-wrap"><input type="file" id="aset-foto-input" accept="image/*" capture="environment" style="display:none" onchange="onFotoSelected(this,\'aset\')" /><button type="button" class="foto-upload-btn" id="aset-foto-btn" onclick="document.getElementById(\'aset-foto-input\').click()">📷 Ambil / Pilih Foto dari Galeri</button><div class="foto-preview" id="aset-foto-preview"><img id="aset-foto-img" src="" alt="preview"/><button class="foto-preview-del" onclick="hapusFoto(\'aset\')">✕</button></div><div class="foto-upload-hint">Foto langsung terupload ke Cloudinary saat submit</div></div>';
   openModal('modal-aset');
 }
 function openModalUpdateAset(rowIndex,kondisi,status,catatan){
   asetMode='update';asetRow=rowIndex;$('mm-aset-title').textContent='Update Aset';
-  $('mm-aset-body').innerHTML='<label>Kondisi</label><select class="modal-select" id="a-kondisi" style="margin-top:4px"><option value="BAIK"'+(kondisi==='BAIK'?' selected':'')+'>Baik</option><option value="SEDANG"'+(kondisi==='SEDANG'?' selected':'')+'>Sedang</option><option value="RUSAK"'+(kondisi==='RUSAK'?' selected':'')+'>Rusak</option></select><label>Status</label><select class="modal-select" id="a-status" style="margin-top:4px"><option value="AKTIF"'+(status==='AKTIF'?' selected':'')+'>Aktif / Dipakai</option><option value="RUSAK"'+(status==='RUSAK'?' selected':'')+'>Rusak</option><option value="DIGANTI"'+(status==='DIGANTI'?' selected':'')+'>Sudah Diganti</option><option value="HILANG"'+(status==='HILANG'?' selected':'')+'>Hilang</option></select>'+mi('a-catatan','Catatan','text','',catatan,'autocomplete="off"')+'<label>Update Foto (opsional)</label>'+'<div class="foto-upload-wrap" id="aset-foto-wrap">'+'<input type="file" id="aset-foto-input" accept="image/*" capture="environment" style="display:none" onchange="onFotoSelected(this,\'aset\')" />'+'<button type="button" class="foto-upload-btn" id="aset-foto-btn" onclick="document.getElementById(\'aset-foto-input\').click()">📷 Ambil / Pilih Foto dari Galeri</button>'+'<div class="foto-preview" id="aset-foto-preview"><img id="aset-foto-img" src="" alt="preview"/><button class="foto-preview-del" onclick="hapusFoto(\'aset\')">✕</button></div>'+'<div class="foto-upload-hint">Foto langsung terupload ke Cloudinary saat submit</div>'+'</div>';
+  $('mm-aset-body').innerHTML='<label>Kondisi</label><select class="modal-select" id="a-kondisi" style="margin-top:4px"><option value="BAIK"'+(kondisi==='BAIK'?' selected':'')+'>Baik</option><option value="SEDANG"'+(kondisi==='SEDANG'?' selected':'')+'>Sedang</option><option value="RUSAK"'+(kondisi==='RUSAK'?' selected':'')+'>Rusak</option></select><label>Status</label><select class="modal-select" id="a-status" style="margin-top:4px"><option value="AKTIF"'+(status==='AKTIF'?' selected':'')+'>Aktif / Dipakai</option><option value="RUSAK"'+(status==='RUSAK'?' selected':'')+'>Rusak</option><option value="DIGANTI"'+(status==='DIGANTI'?' selected':'')+'>Sudah Diganti</option><option value="HILANG"'+(status==='HILANG'?' selected':'')+'>Hilang</option></select>'+mi('a-catatan','Catatan','text','',catatan,'autocomplete="off"')+'<label>Update Foto (opsional)</label><div class="foto-upload-wrap" id="aset-foto-wrap"><input type="file" id="aset-foto-input" accept="image/*" capture="environment" style="display:none" onchange="onFotoSelected(this,\'aset\')" /><button type="button" class="foto-upload-btn" id="aset-foto-btn" onclick="document.getElementById(\'aset-foto-input\').click()">📷 Ambil / Pilih Foto dari Galeri</button><div class="foto-preview" id="aset-foto-preview"><img id="aset-foto-img" src="" alt="preview"/><button class="foto-preview-del" onclick="hapusFoto(\'aset\')">✕</button></div><div class="foto-upload-hint">Foto langsung terupload ke Cloudinary saat submit</div></div>';
   openModal('modal-aset');
 }
 async function submitModalAset(){
-  const g=function(id){return($(id)||{value:''}).value.trim();};
+  const g=id=>($(id)||{value:''}).value.trim();
   try{
-    var r;
+    let r;
     if(asetMode==='tambah'){
       const nama=g('a-nama');if(!nama){toast('Nama aset wajib',true);return;}
-      r=await apiPost(BASE+'/api/aset/tambah',{outlet:outlet||'',nama:nama,kategori:g('a-kat'),kondisi:g('a-kondisi')||'BAIK',tanggalBeli:g('a-tglbeli'),harga:parseInt(g('a-harga'))||0,catatan:g('a-catatan'),fotoUrl:g('req-foto'),addedBy:CU.nama});
-    } else {
-      r=await apiPost(BASE+'/api/aset/update',{outlet:outlet||'',rowIndex:asetRow,kondisi:g('a-kondisi'),status:g('a-status'),catatan:g('a-catatan'),fotoUrl:g('a-foto'),updatedBy:CU.nama});
+      r=await apiPost(BASE+'/api/aset/tambah',{outlet:outlet||'',nama,kategori:g('a-kat'),kondisi:g('a-kondisi')||'BAIK',tanggalBeli:g('a-tglbeli'),harga:parseInt(g('a-harga'))||0,catatan:g('a-catatan'),fotoUrl:'',addedBy:CU.nama});
+    }else{
+      r=await apiPost(BASE+'/api/aset/update',{outlet:outlet||'',rowIndex:asetRow,kondisi:g('a-kondisi'),status:g('a-status'),catatan:g('a-catatan'),fotoUrl:'',updatedBy:CU.nama});
     }
     if(r&&r.success){toast('Aset '+(asetMode==='tambah'?'ditambahkan':'diupdate'));closeModal('modal-aset');loadAset();}
     else toast((r&&r.error)||'Gagal',true);
   }catch{toast('Koneksi gagal',true);}
 }
 
-/* REQUEST BARANG */
+/* ═══════════════════════════════════════
+   REQUEST BARANG
+═══════════════════════════════════════ */
 async function loadRequestBarang(){
   const status=v('req-filter-status');
   const capsterF=(CU&&CU.role==='CAPSTER')?CU.nama:'';
   const op=(outlet?'?outlet='+encodeURIComponent(outlet)+'&':'?')+(status?'status='+status+'&':'')+(capsterF?'capster='+encodeURIComponent(capsterF):'');
-  try{
-    const d=await apiFetch(BASE+'/api/request'+op);
-    renderRequestTable(d.data||[]);
-  }catch{$('request-table').innerHTML='<div class="empty">Error</div>';}
+  try{const d=await apiFetch(BASE+'/api/request'+op);renderRequestTable(d.data||[]);}catch{$('request-table').innerHTML='<div class="empty">Error</div>';}
 }
 function renderRequestTable(data){
   const el=$('request-table');
@@ -1544,21 +1588,19 @@ function renderRequestTable(data){
   const isAdmin=CU&&CU.role==='ADMIN';
   const stColor={PENDING:'background:#fff3cd;color:#856404',APPROVED:'background:#e0f5ec;color:var(--green)',REJECTED:'background:#fff5f5;color:var(--red)'};
   el.innerHTML='<table><thead><tr><th>Capster</th><th>Barang</th><th>Jml</th><th>Alasan</th><th>Status</th><th>Waktu</th>'+(isAdmin?'<th>Aksi</th>':'')+'</tr></thead><tbody>'+
-    data.map(function(r){
-      return'<tr><td><b>'+r.capster+'</b></td><td>'+r.namaBarang+(r.fotoUrl?'<br><a href="'+r.fotoUrl+'" target="_blank" style="font-size:10px;color:var(--blue)">Foto</a>':'')+'</td><td class="mono">'+r.jumlah+'</td><td style="font-size:11px;max-width:120px">'+(r.alasan||'—')+'</td><td><span class="badge" style="'+(stColor[r.status]||'')+'">'+r.status+'</span>'+(r.adminNote?'<div style="font-size:10px;color:var(--muted);margin-top:2px">'+r.adminNote+'</div>':'')+'</td><td class="mono" style="font-size:11px">'+(r.waktuRequest?r.waktuRequest.substring(0,10):'—')+'</td>'+(isAdmin&&r.status==='PENDING'?'<td><div style="display:flex;gap:3px"><button class="btn btn-primary" style="padding:3px 7px;font-size:11px" onclick="doResponseRequest('+r.rowIndex+',\'APPROVED\')">OK</button><button class="btn btn-danger" style="padding:3px 7px;font-size:11px" onclick="doResponseRequest('+r.rowIndex+',\'REJECTED\')">Tolak</button></div></td>':isAdmin?'<td>—</td>':'')+'</tr>';
-    }).join('')+'</tbody></table>';
+    data.map(r=>'<tr><td><b>'+r.capster+'</b></td><td>'+r.namaBarang+(r.fotoUrl?'<br><a href="'+r.fotoUrl+'" target="_blank" style="font-size:10px;color:var(--blue)">Foto</a>':'')+'</td><td class="mono">'+r.jumlah+'</td><td style="font-size:11px;max-width:120px">'+(r.alasan||'—')+'</td><td><span class="badge" style="'+(stColor[r.status]||'')+'">'+r.status+'</span>'+(r.adminNote?'<div style="font-size:10px;color:var(--muted);margin-top:2px">'+r.adminNote+'</div>':'')+'</td><td class="mono" style="font-size:11px">'+(r.waktuRequest?r.waktuRequest.substring(0,10):'—')+'</td>'+(isAdmin&&r.status==='PENDING'?'<td><div style="display:flex;gap:3px"><button class="btn btn-primary" style="padding:3px 7px;font-size:11px" onclick="doResponseRequest('+r.rowIndex+',\'APPROVED\')">OK</button><button class="btn btn-danger" style="padding:3px 7px;font-size:11px" onclick="doResponseRequest('+r.rowIndex+',\'REJECTED\')">Tolak</button></div></td>':isAdmin?'<td>—</td>':'')+'</tr>').join('')+'</tbody></table>';
 }
 function openModalSubmitRequest(){
   $('mm-req-title').textContent='Request Barang';
-  $('mm-req-body').innerHTML=mi('req-barang','Nama Barang *','text','Gunting Professional','','autocomplete="off"')+mi('req-jml','Jumlah *','number','1','1','inputmode="numeric" min="1"')+mi('req-alasan','Alasan / Keterangan *','text','Gunting sudah tumpul','','autocomplete="off"')+'<label>Foto Barang Rusak (opsional)</label>'+'<div class="foto-upload-wrap" id="req-foto-wrap">'+'<input type="file" id="req-foto-input" accept="image/*" capture="environment" style="display:none" onchange="onFotoSelected(this,\'req\')" />'+'<button type="button" class="foto-upload-btn" id="req-foto-btn" onclick="document.getElementById(\'req-foto-input\').click()">📷 Ambil / Pilih Foto dari Galeri</button>'+'<div class="foto-preview" id="req-foto-preview"><img id="req-foto-img" src="" alt="preview"/><button class="foto-preview-del" onclick="hapusFoto(\'req\')">✕</button></div>'+'<div class="foto-upload-hint">Foto langsung terupload ke Cloudinary saat submit</div>'+'</div>';
+  $('mm-req-body').innerHTML=mi('req-barang','Nama Barang *','text','Gunting Professional','','autocomplete="off"')+mi('req-jml','Jumlah *','number','1','1','inputmode="numeric" min="1"')+mi('req-alasan','Alasan / Keterangan *','text','Gunting sudah tumpul','','autocomplete="off"')+'<label>Foto Barang Rusak (opsional)</label><div class="foto-upload-wrap" id="req-foto-wrap"><input type="file" id="req-foto-input" accept="image/*" capture="environment" style="display:none" onchange="onFotoSelected(this,\'req\')" /><button type="button" class="foto-upload-btn" id="req-foto-btn" onclick="document.getElementById(\'req-foto-input\').click()">📷 Ambil / Pilih Foto dari Galeri</button><div class="foto-preview" id="req-foto-preview"><img id="req-foto-img" src="" alt="preview"/><button class="foto-preview-del" onclick="hapusFoto(\'req\')">✕</button></div><div class="foto-upload-hint">Foto langsung terupload ke Cloudinary saat submit</div></div>';
   openModal('modal-request');
 }
 async function submitModalRequest(){
-  const g=function(id){return($(id)||{value:''}).value.trim();};
+  const g=id=>($(id)||{value:''}).value.trim();
   const barang=g('req-barang'),alasan=g('req-alasan');
   if(!barang||!alasan){toast('Nama barang dan alasan wajib',true);return;}
   try{
-    const r=await apiPost(BASE+'/api/request/submit',{outlet:outlet||(CU&&CU.outlet)||'',capster:CU.nama,namaBarang:barang,jumlah:g('req-jml')||'1',alasan:alasan,fotoUrl:''});
+    const r=await apiPost(BASE+'/api/request/submit',{outlet:outlet||(CU&&CU.outlet)||'',capster:CU.nama,namaBarang:barang,jumlah:g('req-jml')||'1',alasan,fotoUrl:''});
     if(r.success){toast('Request terkirim!');closeModal('modal-request');loadRequestBarang();}
     else toast((r.error||'Gagal'),true);
   }catch{toast('Koneksi gagal',true);}
@@ -1567,265 +1609,138 @@ async function doResponseRequest(rowIndex,status){
   const note=window.prompt(status==='APPROVED'?'Catatan approval (opsional):':'Alasan penolakan:','');
   if(note===null)return;
   try{
-    const r=await apiPost(BASE+'/api/request/response',{outlet:outlet||'',rowIndex:rowIndex,admin:CU.nama,status:status,adminNote:note});
+    const r=await apiPost(BASE+'/api/request/response',{outlet:outlet||'',rowIndex,admin:CU.nama,status,adminNote:note});
     toast(r.success?'Request di-'+status:(r.error||'Gagal'),!r.success);
     if(r.success)loadRequestBarang();
   }catch{toast('Koneksi gagal',true);}
 }
 
-
-
-/* Init tahun selector */
-(function(){
-  var sel=$('kunjungan-tahun');
-  if(sel){var now=new Date();for(var i=0;i<3;i++){var y=now.getFullYear()-i;var o=document.createElement('option');o.value=y;o.textContent=y;sel.appendChild(o);}}
+/* ═══════════════════════════════════════
+   INIT TAHUN SELECTOR
+═══════════════════════════════════════ */
+(()=>{
+  const sel=$('kunjungan-tahun');
+  if(sel){const now=new Date();for(let i=0;i<3;i++){const y=now.getFullYear()-i;const o=document.createElement('option');o.value=y;o.textContent=y;sel.appendChild(o);}}
 })();
 
-
-/* ════════════════════════════════════════
-   CLOUDINARY UNSIGNED UPLOAD — Foto dari Galeri
-   Pakai Upload Preset (unsigned) — aman di frontend
-════════════════════════════════════════ */
-const CLOUD_NAME   = 'dgtkcw13d';
-const UPLOAD_PRESET = 'kasbot_unsigned'; // Buat di Cloudinary Dashboard → Settings → Upload Presets
-
-// State foto per konteks (req / aset)
-const _fotoState = {req:'', aset:''};
-
-function onFotoSelected(input, ctx) {
-  const file = input.files[0];
-  if (!file) return;
-  // Validasi ukuran max 10MB
-  if (file.size > 10 * 1024 * 1024) {
-    toast('Foto terlalu besar, maksimal 10MB', true);
-    input.value = '';
-    return;
-  }
-  // Tampilkan preview lokal
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = $(ctx + '-foto-img');
-    const prev = $(ctx + '-foto-preview');
-    const btn  = $(ctx + '-foto-btn');
-    if (img) img.src = e.target.result;
-    if (prev) prev.style.display = 'block';
-    if (btn) btn.textContent = '✅ Foto dipilih — ganti?';
+/* ═══════════════════════════════════════
+   CLOUDINARY UPLOAD
+═══════════════════════════════════════ */
+const CLOUD_NAME='dgtkcw13d';
+const UPLOAD_PRESET='kasbot_unsigned';
+const _fotoState={req:'',aset:''};
+function onFotoSelected(input,ctx){
+  const file=input.files[0];if(!file)return;
+  if(file.size>10*1024*1024){toast('Foto terlalu besar, maksimal 10MB',true);input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=$(ctx+'-foto-img'),prev=$(ctx+'-foto-preview'),btn=$(ctx+'-foto-btn');
+    if(img)img.src=e.target.result;if(prev)prev.style.display='block';
+    if(btn)btn.textContent='✅ Foto dipilih — ganti?';
   };
-  reader.readAsDataURL(file);
-  // Simpan file di state untuk upload saat submit
-  _fotoState[ctx] = file;
+  reader.readAsDataURL(file);_fotoState[ctx]=file;
+}
+function hapusFoto(ctx){
+  _fotoState[ctx]='';
+  const input=$(ctx+'-foto-input'),prev=$(ctx+'-foto-preview'),btn=$(ctx+'-foto-btn'),img=$(ctx+'-foto-img');
+  if(input)input.value='';if(prev)prev.style.display='none';if(img)img.src='';
+  if(btn)btn.textContent='📷 Ambil / Pilih Foto dari Galeri';
+}
+async function uploadFotoCloudinary(file,folder){
+  if(!file)return'';
+  const fd=new FormData();fd.append('file',file);fd.append('upload_preset',UPLOAD_PRESET);fd.append('folder',folder);
+  try{
+    const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,{method:'POST',body:fd});
+    if(!res.ok)throw new Error('Upload gagal: '+res.status);
+    const data=await res.json();return data.secure_url||'';
+  }catch(e){console.error('Cloudinary upload error:',e);toast('Upload foto gagal: '+e.message,true);return'';}
 }
 
-function hapusFoto(ctx) {
-  _fotoState[ctx] = '';
-  const input = $(ctx + '-foto-input');
-  const prev  = $(ctx + '-foto-preview');
-  const btn   = $(ctx + '-foto-btn');
-  const img   = $(ctx + '-foto-img');
-  if (input) input.value = '';
-  if (prev) prev.style.display = 'none';
-  if (img) img.src = '';
-  if (btn) btn.textContent = '📷 Ambil / Pilih Foto dari Galeri';
-}
-
-async function uploadFotoCloudinary(file, folder) {
-  if (!file) return '';
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('upload_preset', UPLOAD_PRESET);
-  fd.append('folder', folder);
-  try {
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-      { method: 'POST', body: fd }
-    );
-    if (!res.ok) throw new Error('Upload gagal: ' + res.status);
-    const data = await res.json();
-    return data.secure_url || '';
-  } catch(e) {
-    console.error('Cloudinary upload error:', e);
-    toast('Upload foto gagal: ' + e.message, true);
-    return '';
-  }
-}
-
-
-
-
-
-
-/* ════════════════════════════════════════
-   EXPORT PDF — Laporan Bulanan & Komisi
-   Pakai jsPDF (CDN) — tidak perlu backend
-════════════════════════════════════════ */
+/* ═══════════════════════════════════════
+   EXPORT PDF
+═══════════════════════════════════════ */
 async function loadJsPDF(){
   if(window.jspdf)return window.jspdf.jsPDF;
   return new Promise((resolve,reject)=>{
     const s=document.createElement('script');
     s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    s.onload=()=>resolve(window.jspdf.jsPDF);
-    s.onerror=()=>reject(new Error('Gagal load jsPDF'));
+    s.onload=()=>resolve(window.jspdf.jsPDF);s.onerror=()=>reject(new Error('Gagal load jsPDF'));
     document.head.appendChild(s);
   });
 }
-
 function fmtPDF(n){return'Rp '+Math.round(Number(n)||0).toLocaleString('id-ID');}
-
 async function exportLaporanPDF(){
   const btn=$('btn-export-pdf');
   if(btn){btn.textContent='⏳ Membuat PDF...';btn.disabled=true;}
   try{
     const PDF=await loadJsPDF();
     const doc=new PDF({orientation:'portrait',unit:'mm',format:'a4'});
-    const outlet=$('outlet-sel')?.options[$('outlet-sel')?.selectedIndex]?.text||'BOW BARBERSHOP';
+    const outletTxt=$('outlet-sel')?.options[$('outlet-sel')?.selectedIndex]?.text||'BOW BARBERSHOP';
     const periode=$('laporan-period')?.textContent||'Laporan';
     const now=new Date().toLocaleString('id-ID',{timeZone:'Asia/Jakarta'});
-
-    // ── Header ──
-    doc.setFillColor(29,158,117);
-    doc.rect(0,0,210,28,'F');
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(18);doc.setFont('helvetica','bold');
-    doc.text('KasBot',14,12);
-    doc.setFontSize(10);doc.setFont('helvetica','normal');
+    doc.setFillColor(29,158,117);doc.rect(0,0,210,28,'F');
+    doc.setTextColor(255,255,255);doc.setFontSize(18);doc.setFont('helvetica','bold');
+    doc.text('KasBot',14,12);doc.setFontSize(10);doc.setFont('helvetica','normal');
     doc.text('Sistem Manajemen Barbershop',14,19);
-    doc.setFontSize(11);doc.setFont('helvetica','bold');
-    doc.text(outlet,210-14,12,{align:'right'});
-    doc.setFontSize(9);doc.setFont('helvetica','normal');
-    doc.text(periode,210-14,19,{align:'right'});
-
-    // ── Info ──
-    doc.setTextColor(100,100,100);
-    doc.setFontSize(8);
-    doc.text('Dicetak: '+now,14,33);
-
+    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text(outletTxt,210-14,12,{align:'right'});
+    doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text(periode,210-14,19,{align:'right'});
+    doc.setTextColor(100,100,100);doc.setFontSize(8);doc.text('Dicetak: '+now,14,33);
     let y=40;
-
-    // ── Ringkasan Keuangan ──
-    doc.setTextColor(30,30,30);
-    doc.setFontSize(13);doc.setFont('helvetica','bold');
-    doc.text('Ringkasan Keuangan',14,y);y+=7;
-
+    doc.setTextColor(30,30,30);doc.setFontSize(13);doc.setFont('helvetica','bold');doc.text('Ringkasan Keuangan',14,y);y+=7;
     const omzet=parseInt($('lr-omzet')?.textContent?.replace(/[^0-9]/g,'')||'0');
     const expense=parseInt($('lr-exp')?.textContent?.replace(/[^0-9]/g,'')||'0');
-    const profit=omzet-expense;
-    const margin=omzet>0?Math.round(profit/omzet*100):0;
+    const profit=omzet-expense;const margin=omzet>0?Math.round(profit/omzet*100):0;
     const kb=parseInt($('lr-kb')?.textContent?.replace(/[^0-9]/g,'')||'0');
     const pc=parseInt($('lr-pc')?.textContent?.replace(/[^0-9]/g,'')||'0');
-
-    const rows=[
-      ['Total Omzet', fmtPDF(omzet), ''],
-      ['Expense Kas Besar', fmtPDF(kb), ''],
-      ['Expense Petty Cash', fmtPDF(pc), ''],
-      ['Total Expense', fmtPDF(expense), ''],
-      ['Net Profit', fmtPDF(profit), margin+'%'],
-    ];
-
+    const rows=[['Total Omzet',fmtPDF(omzet),''],['Expense Kas Besar',fmtPDF(kb),''],['Expense Petty Cash',fmtPDF(pc),''],['Total Expense',fmtPDF(expense),''],['Net Profit',fmtPDF(profit),margin+'%']];
     doc.setFont('helvetica','normal');doc.setFontSize(9);
     rows.forEach((row,i)=>{
       const isTotal=(row[0]==='Net Profit');
-      if(isTotal){
-        doc.setFillColor(profit>=0?220:255,profit>=0?250:220,profit>=0?230:220);
-        doc.rect(14,y-4,182,8,'F');
-        doc.setFont('helvetica','bold');
-        doc.setTextColor(profit>=0?15:180,profit>=0?100:50,profit>=0?70:50);
-      }else{
-        doc.setFillColor(i%2===0?248:255,i%2===0?248:255,i%2===0?248:255);
-        doc.rect(14,y-4,182,8,'F');
-        doc.setFont('helvetica','normal');doc.setTextColor(50,50,50);
-      }
-      doc.text(row[0],18,y);
-      doc.text(row[1],150,y,{align:'right'});
-      if(row[2])doc.text(row[2],196,y,{align:'right'});
-      y+=8;
+      if(isTotal){doc.setFillColor(profit>=0?220:255,profit>=0?250:220,profit>=0?230:220);doc.rect(14,y-4,182,8,'F');doc.setFont('helvetica','bold');doc.setTextColor(profit>=0?15:180,profit>=0?100:50,profit>=0?70:50);}
+      else{doc.setFillColor(i%2===0?248:255,i%2===0?248:255,i%2===0?248:255);doc.rect(14,y-4,182,8,'F');doc.setFont('helvetica','normal');doc.setTextColor(50,50,50);}
+      doc.text(row[0],18,y);doc.text(row[1],150,y,{align:'right'});if(row[2])doc.text(row[2],196,y,{align:'right'});y+=8;
     });
-
-    // ── Garis batas ──
     y+=5;doc.setDrawColor(200,200,200);doc.setLineWidth(0.3);doc.line(14,y,196,y);y+=8;
-
-    // ── Rekap Komisi Capster ──
     if(komisiData&&komisiData.data&&komisiData.data.length){
-      doc.setTextColor(30,30,30);
-      doc.setFontSize(13);doc.setFont('helvetica','bold');
-      doc.text('Rekap Komisi Capster',14,y);y+=7;
-
-      // Header tabel
-      doc.setFillColor(29,158,117);
-      doc.rect(14,y-4,182,8,'F');
+      doc.setTextColor(30,30,30);doc.setFontSize(13);doc.setFont('helvetica','bold');doc.text('Rekap Komisi Capster',14,y);y+=7;
+      doc.setFillColor(29,158,117);doc.rect(14,y-4,182,8,'F');
       doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(9);
-      doc.text('Capster',18,y);
-      doc.text('Transaksi',80,y,{align:'right'});
-      doc.text('Omzet',130,y,{align:'right'});
-      doc.text('% Komisi',165,y,{align:'right'});
-      doc.text('Komisi',196,y,{align:'right'});
-      y+=8;
-
+      doc.text('Capster',18,y);doc.text('Transaksi',80,y,{align:'right'});doc.text('Omzet',130,y,{align:'right'});doc.text('% Komisi',165,y,{align:'right'});doc.text('Komisi',196,y,{align:'right'});y+=8;
       komisiData.data.forEach((c,i)=>{
         if(y>270){doc.addPage();y=20;}
-        doc.setFillColor(i%2===0?248:255,i%2===0?248:255,i%2===0?248:255);
-        doc.rect(14,y-4,182,8,'F');
+        doc.setFillColor(i%2===0?248:255,i%2===0?248:255,i%2===0?248:255);doc.rect(14,y-4,182,8,'F');
         doc.setTextColor(50,50,50);doc.setFont('helvetica','normal');doc.setFontSize(8);
-        doc.text(String(c.capster||c.nama||''),18,y);
-        doc.text(String(c.transaksi||0),80,y,{align:'right'});
-        doc.text(fmtPDF(c.omzet),130,y,{align:'right'});
+        doc.text(String(c.capster||c.nama||''),18,y);doc.text(String(c.transaksi||0),80,y,{align:'right'});doc.text(fmtPDF(c.omzet),130,y,{align:'right'});
         doc.text(((c.komisiPct||0)*100).toFixed(0)+'%',165,y,{align:'right'});
-        doc.setTextColor(15,100,70);doc.setFont('helvetica','bold');
-        doc.text(fmtPDF(c.komisi),196,y,{align:'right'});
-        y+=8;
+        doc.setTextColor(15,100,70);doc.setFont('helvetica','bold');doc.text(fmtPDF(c.komisi),196,y,{align:'right'});y+=8;
       });
-
-      // Total komisi
       const totK=komisiData.data.reduce((s,c)=>s+(c.komisi||0),0);
       doc.setFillColor(220,250,230);doc.rect(14,y-4,182,8,'F');
       doc.setTextColor(15,100,70);doc.setFont('helvetica','bold');doc.setFontSize(9);
-      doc.text('TOTAL KOMISI',18,y);
-      doc.text(fmtPDF(totK),196,y,{align:'right'});
-      y+=12;
+      doc.text('TOTAL KOMISI',18,y);doc.text(fmtPDF(totK),196,y,{align:'right'});y+=12;
     }
-
-    // ── Ringkasan Penjualan ──
     if(posData&&posData.data&&posData.data.length){
       if(y>220){doc.addPage();y=20;}
-      doc.setTextColor(30,30,30);
-      doc.setFontSize(13);doc.setFont('helvetica','bold');
-      doc.text('Ringkasan Penjualan',14,y);y+=7;
-
-      // Per metode bayar
-      const byMetode={};
-      posData.data.forEach(r=>{byMetode[r.metode||'—']=(byMetode[r.metode||'—']||0)+r.total;});
-      doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(80,80,80);
-      doc.text('Per Metode Pembayaran',18,y);y+=5;
-      Object.entries(byMetode).sort((a,b)=>b[1]-a[1]).forEach(([ m,v],i)=>{
-        doc.setFillColor(i%2===0?248:255,i%2===0?248:255,i%2===0?248:255);
-        doc.rect(14,y-4,182,7,'F');
+      doc.setTextColor(30,30,30);doc.setFontSize(13);doc.setFont('helvetica','bold');doc.text('Ringkasan Penjualan',14,y);y+=7;
+      const byMetode={};posData.data.forEach(r=>{byMetode[r.metode||'—']=(byMetode[r.metode||'—']||0)+r.total;});
+      doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(80,80,80);doc.text('Per Metode Pembayaran',18,y);y+=5;
+      Object.entries(byMetode).sort((a,b)=>b[1]-a[1]).forEach(([m,val],i)=>{
+        doc.setFillColor(i%2===0?248:255,i%2===0?248:255,i%2===0?248:255);doc.rect(14,y-4,182,7,'F');
         doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(50,50,50);
-        doc.text(m,18,y);doc.text(fmtPDF(v),196,y,{align:'right'});
-        y+=7;
+        doc.text(m,18,y);doc.text(fmtPDF(val),196,y,{align:'right'});y+=7;
       });
-      y+=4;
     }
-
-    // ── Footer ──
     const pageCount=doc.getNumberOfPages();
     for(let i=1;i<=pageCount;i++){
-      doc.setPage(i);
-      doc.setTextColor(160,160,160);doc.setFontSize(8);doc.setFont('helvetica','normal');
-      doc.text('KasBot — Sistem Manajemen Barbershop',14,290);
-      doc.text(`Halaman ${i} dari ${pageCount}`,196,290,{align:'right'});
+      doc.setPage(i);doc.setTextColor(160,160,160);doc.setFontSize(8);doc.setFont('helvetica','normal');
+      doc.text('KasBot — Sistem Manajemen Barbershop',14,290);doc.text(`Halaman ${i} dari ${pageCount}`,196,290,{align:'right'});
       doc.setDrawColor(200,200,200);doc.setLineWidth(0.2);doc.line(14,285,196,285);
     }
-
-    // Download
-    const fname=`KasBot_Laporan_${periode.replace(/[^a-zA-Z0-9]/g,'_')}_${outlet.replace(/ /g,'_')}.pdf`;
-    doc.save(fname);
-    toast('✅ PDF berhasil didownload!');
-  }catch(e){
-    console.error(e);toast('❌ Gagal buat PDF: '+e.message,true);
-  }finally{
-    if(btn){btn.textContent='📥 Export PDF';btn.disabled=false;}
-  }
+    const fname=`KasBot_Laporan_${periode.replace(/[^a-zA-Z0-9]/g,'_')}_${outletTxt.replace(/ /g,'_')}.pdf`;
+    doc.save(fname);toast('✅ PDF berhasil didownload!');
+  }catch(e){console.error(e);toast('❌ Gagal buat PDF: '+e.message,true);}
+  finally{if(btn){btn.textContent='📥 Export PDF';btn.disabled=false;}}
 }
-
 </script>
 
 <!-- SECTION CLOSING HARIAN -->
@@ -1845,7 +1760,7 @@ async function exportLaporanPDF(){
     <select id="kunjungan-tahun" onchange="loadKunjungan()" style="-webkit-appearance:none;appearance:none"><option value="">Tahun Ini</option></select>
     <button class="btn" onclick="loadKunjungan()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
   </div>
-  <div class="grid-3" id="kunjungan-metrics">
+  <div class="grid-3">
     <div class="metric"><div class="metric-label">Total Customer Unik</div><div class="metric-value" id="kj-total">—</div></div>
     <div class="metric"><div class="metric-label">Rata-rata Kunjungan</div><div class="metric-value green" id="kj-avg">—</div></div>
     <div class="metric"><div class="metric-label">Total Kunjungan</div><div class="metric-value" id="kj-sum">—</div></div>
@@ -1875,7 +1790,6 @@ async function exportLaporanPDF(){
     <div class="metric"><div class="metric-label">Rusak / Diganti</div><div class="metric-value red" id="aset-rusak">—</div></div>
   </div>
   <div class="card"><div class="card-head"><div class="card-title">Daftar Aset</div></div><div class="tbl-wrap"><div id="aset-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
-  <!-- Request Barang (visible ke Capster juga) -->
   <div class="card">
     <div class="card-head">
       <div class="card-title">📋 Request Barang Capster</div>
@@ -1900,10 +1814,10 @@ async function exportLaporanPDF(){
   </div>
   <label>Cash Aktual di Tangan (Rp) *</label>
   <input class="modal-input" type="number" id="closing-cash-input" placeholder="Masukkan jumlah cash aktual..." inputmode="numeric" oninput="hitungSelisihClosing()" style="margin-top:4px"/>
-  <div id="closing-selisih-info" style="display:none;padding:10px;border-radius:var(--rs);margin-top:8px;font-size:13px;font-weight:600"></div>
+  <div id="closing-selisih-info" style="display:none"></div>
   <div class="modal-actions">
     <button class="modal-cancel" onclick="closeModal('modal-closing')">Batal</button>
-    <button class="modal-confirm" id="closing-submit-btn" onclick="submitClosing()">✓ Submit Closing</button>
+    <button class="modal-confirm" onclick="submitClosing()">✓ Submit Closing</button>
   </div>
 </div></div>
 
