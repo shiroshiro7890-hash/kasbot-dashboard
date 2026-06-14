@@ -2199,6 +2199,67 @@ async function loadShiftList(){
       +'</tr></thead><tbody>'+rows+'</tbody></table>';
   }catch(e){ el.innerHTML='<div class="empty">Error: '+e.message+'</div>'; }
 }
+function openModalTambahShift(){
+  var el=document.getElementById('shift-row');if(el)el.value='0';
+  var nm=document.getElementById('shift-nama');if(nm)nm.value='';
+  var jm=document.getElementById('shift-jam-masuk');if(jm)jm.value='';
+  var jp=document.getElementById('shift-jam-pulang');if(jp)jp.value='';
+  var gr=document.getElementById('shift-grace');if(gr)gr.value='5';
+  var dn=document.getElementById('shift-denda');if(dn)dn.value='10000';
+  var ti=document.getElementById('modal-shift-title');if(ti)ti.textContent='Tambah Shift';
+  openModal('modal-shift');
+}
+function openModalEditShift(ri,nama,jamMasuk,jamPulang,grace,denda){
+  var el=document.getElementById('shift-row');if(el)el.value=ri;
+  var nm=document.getElementById('shift-nama');if(nm)nm.value=nama||'';
+  var jm=document.getElementById('shift-jam-masuk');if(jm)jm.value=jamMasuk||'';
+  var jp=document.getElementById('shift-jam-pulang');if(jp)jp.value=jamPulang||'';
+  var gr=document.getElementById('shift-grace');if(gr)gr.value=grace||5;
+  var dn=document.getElementById('shift-denda');if(dn)dn.value=denda||10000;
+  var ti=document.getElementById('modal-shift-title');if(ti)ti.textContent='Edit Shift';
+  openModal('modal-shift');
+}
+function editShiftBtn(btn){
+  var ri    =parseInt(btn.getAttribute('data-ri'))||0;
+  var nama  =btn.getAttribute('data-nama')||'';
+  var masuk =btn.getAttribute('data-masuk')||'';
+  var pulang=btn.getAttribute('data-pulang')||'';
+  var grace =parseInt(btn.getAttribute('data-grace'))||5;
+  var denda =parseInt(btn.getAttribute('data-denda'))||10000;
+  openModalEditShift(ri,nama,masuk,pulang,grace,denda);
+}
+function hapusShiftBtn(btn){
+  var ri=parseInt(btn.getAttribute('data-ri'))||0;
+  hapusShift(ri);
+}
+async function submitShift(){
+  var ri      =parseInt(v('shift-row'))||0;
+  var nama    =v('shift-nama');
+  var jamMasuk=v('shift-jam-masuk');
+  var jamPulang=v('shift-jam-pulang');
+  var grace   =parseInt(v('shift-grace'))||5;
+  var denda   =parseInt(v('shift-denda'))||10000;
+  var outlet  =v('abs-h-outlet')||'';
+  if(!nama||!jamMasuk||!jamPulang){toast('Nama shift, jam masuk, dan jam pulang wajib diisi',true);return;}
+  try{
+    var url = ri>0 ? BASE+'/api/shift/edit' : BASE+'/api/shift/tambah';
+    var body={outlet:outlet,namaShift:nama,jamMasuk:jamMasuk,jamPulang:jamPulang,gracePeriod:grace,dendaPer15:denda};
+    if(ri>0) body.rowIndex=ri;
+    var r=await apiPost(url,body);
+    toast(r.success?'Shift tersimpan':'❌ '+(r.error||'Gagal'),!r.success);
+    if(r.success){closeModal('modal-shift');loadShiftList();loadShifts();}
+  }catch{toast('Koneksi gagal',true);}
+}
+async function hapusShift(ri){
+  if(!confirm('Hapus shift ini?')) return;
+  var outlet=v('abs-h-outlet')||'';
+  try{
+    var r=await apiPost(BASE+'/api/shift/hapus',{outlet:outlet,rowIndex:ri});
+    toast(r.success?'Shift dihapus':'❌ '+(r.error||'Gagal'),!r.success);
+    if(r.success){loadShiftList();loadShifts();}
+  }catch{toast('Koneksi gagal',true);}
+}
+
 
 /* ═══════════════════════════════════════
    EXPENSE
