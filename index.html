@@ -559,38 +559,46 @@ function switchLoginTab(t){
 }
 async function doLoginAdmin(){
   const val=v('linput-admin'),err=$('lerr-admin'),info=$('linfo-admin');
+  err.style.display='none';info.style.display='none';
   if(!val){err.textContent='Password wajib diisi.';err.style.display='block';return;}
+
+  // Coba backend session API
+  let backendOk=false;
   try{
-    // Coba session API dulu (backend baru)
-    const r=await fetch(BASE+'/api/session/admin',{method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({password:val})});
+    const r=await Promise.race([
+      fetch(BASE+'/api/session/admin',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({password:val})}),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),3000))
+    ]);
     const d=await r.json();
     if(d.success&&d.token){
       fails=0;setToken(d.token);
       CU={nama:'Admin',userId:'admin',role:'ADMIN',outlet:''};
       sessionStorage.setItem('kb_u',JSON.stringify(CU));
-      $('login-overlay').style.display='none';initDash();return;
-    }else{
-      fails++;err.textContent='Password salah.';err.style.display='block';
-      $('linput-admin').value='';
-      if(fails>=MAX_FAIL){$('linput-admin').disabled=true;$('lbtn-admin').disabled=true;}
-      else{info.textContent='Sisa: '+(MAX_FAIL-fails)+'x';info.style.display='block';}
-    }
-  }catch(e){
-    // Fallback: cek password lokal kalau backend session belum ready
-    const ADMIN_PASS='bow2024';
-    if(val===ADMIN_PASS){
-      fails=0;setToken('local-admin-'+Date.now());
-      CU={nama:'Admin',userId:'admin',role:'ADMIN',outlet:''};
-      sessionStorage.setItem('kb_u',JSON.stringify(CU));
       $('login-overlay').style.display='none';initDash();
-    }else{
+      return;
+    } else if(d.error==='Password salah'){
+      // Backend aktif, password memang salah
       fails++;err.textContent='Password salah.';err.style.display='block';
       $('linput-admin').value='';
       if(fails>=MAX_FAIL){$('linput-admin').disabled=true;$('lbtn-admin').disabled=true;}
       else{info.textContent='Sisa: '+(MAX_FAIL-fails)+'x';info.style.display='block';}
+      return;
     }
+  }catch(e){backendOk=false;}
+
+  // Fallback lokal — kalau backend tidak respond / session endpoint belum ada
+  if(val==='bow2024'){
+    fails=0;setToken('local-'+Date.now());
+    CU={nama:'Admin',userId:'admin',role:'ADMIN',outlet:''};
+    sessionStorage.setItem('kb_u',JSON.stringify(CU));
+    $('login-overlay').style.display='none';initDash();
+  }else{
+    fails++;err.textContent='Password salah.';err.style.display='block';
+    $('linput-admin').value='';
+    if(fails>=MAX_FAIL){$('linput-admin').disabled=true;$('lbtn-admin').disabled=true;}
+    else{info.textContent='Sisa: '+(MAX_FAIL-fails)+'x';info.style.display='block';}
   }
 }
 async function doLoginStaff(){
@@ -708,17 +716,20 @@ else{setTimeout(()=>$('linput-admin').focus(),200)}
 
 /* API */
 async function apiFetch(url){
-  const tok=getToken();
-  const res=await fetch(url,{headers:{'X-Session-Token':tok}});
-  // Kalau 401 dan bukan token lokal, logout
-  if(res.status===401&&!tok.startsWith('local-')){logoutUser();return{success:false,error:'Session expired'};}
-  return res.json();
+  const tok=getToken();const hdr={'X-Session-Token':tok};
+  try{
+    const res=await fetch(url,{headers:hdr});
+    if(res.status===401&&tok&&!tok.startsWith('local-')){logoutUser();return{success:false,error:'Session expired'};}
+    return res.json();
+  }catch{return{success:false,error:'Koneksi gagal'};}
 }
 async function apiPost(url,body){
   const tok=getToken();
-  const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-Session-Token':tok},body:JSON.stringify(body)});
-  if(res.status===401&&!tok.startsWith('local-')){logoutUser();return{success:false,error:'Session expired'};}
-  return res.json();
+  try{
+    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-Session-Token':tok},body:JSON.stringify(body)});
+    if(res.status===401&&tok&&!tok.startsWith('local-')){logoutUser();return{success:false,error:'Session expired'};}
+    return res.json();
+  }catch{return{success:false,error:'Koneksi gagal'};}
 }
 
 /* APP INIT */
