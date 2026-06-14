@@ -1885,10 +1885,7 @@ function exportKomisiLintasBulanCSV(){
   );
   const s = komisiLintasData.summary||{};
   rows.push(['TOTAL',s.totalTrx||0,s.totalOmzet||0,s.totalKomisi||0].join(','));
-  const csv = bom + '# Periode: '+bulan.join(' | ')+'
-'+header+'
-'+rows.join('
-');
+  const csv = bom + '# Periode: '+bulan.join(' | ')+'\n'+header+'\n'+rows.join('\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   a.download='komisi-lintas-bulan-'+new Date().toISOString().slice(0,10)+'.csv';
