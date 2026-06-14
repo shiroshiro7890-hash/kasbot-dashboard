@@ -472,17 +472,11 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
     <div class="metric"><div class="metric-label">Capster</div><div class="metric-value" id="komisi-jml-cap">—</div></div>
   </div>
 
-  <!-- REKAP per capster -->
-  <div class="card">
-    <div class="card-head">
-      <div class="card-title">Rekap Komisi per Capster</div>
-      <!-- PATCH: filter capster -->
-      <select id="komisi-filter-capster" onchange="renderKomisiDetail()" style="font-size:12px;padding:4px 8px;-webkit-appearance:none;appearance:none">
-        <option value="">Semua Capster</option>
-      </select>
-    </div>
-    <div class="tbl-wrap"><div id="komisi-tbl"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
-  </div>
+  <!-- Filter capster (hidden, tetap ada untuk fungsi renderKomisiDetail) -->
+  <select id="komisi-filter-capster" onchange="renderKomisiDetail()" style="display:none">
+    <option value="">Semua Capster</option>
+  </select>
+  <div id="komisi-tbl" style="display:none"></div>
 
   <!-- DETAIL TRX VERIFIED dari Rekap Komisi sheet -->
   <div class="card">
@@ -494,7 +488,15 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
   </div>
 
   <!-- TOTAL per capster -->
-  <div class="card"><div class="card-head"><div class="card-title">Total per Capster</div></div><div class="tbl-wrap"><div id="komisi-capster-summary"><div class="empty"><span class="spinner"></span></div></div></div></div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Rekap Komisi per Capster</div>
+      <select id="komisi-filter-capster-summary" onchange="renderKomisiSummaryFiltered()" style="font-size:12px;padding:4px 8px;-webkit-appearance:none;appearance:none;border:1px solid var(--border);border-radius:var(--rs)">
+        <option value="">Semua Capster</option>
+      </select>
+    </div>
+    <div class="tbl-wrap"><div id="komisi-capster-summary"><div class="empty"><span class="spinner"></span></div></div></div>
+  </div>
 
   <!-- REKAP KOMISI LINTAS BULAN -->
   <div class="card" style="margin-bottom:1.25rem">
@@ -1094,37 +1096,18 @@ function renderKomisiFiltered(){
       data.map(c=>`<option value="${c.capster||c.nama}"${(c.capster||c.nama)===prev?' selected':''}>${c.capster||c.nama}</option>`).join('');
   }
 
-  // Tabel rekap per capster
-  const el=$('komisi-tbl');
-  if(!data.length){el.innerHTML='<div class="empty">Tidak ada data</div>';}
-  else{
-    el.innerHTML='<table><thead><tr><th>Capster</th><th style="text-align:right">Trx Verified</th><th style="text-align:right">Omzet</th><th style="text-align:right">%</th><th style="text-align:right">Komisi</th></tr></thead><tbody>'
-      +data.map(c=>`<tr><td><b>${c.capster||c.nama}</b></td><td style="text-align:right" class="mono">${c.transaksi||0}</td><td style="text-align:right" class="mono">${fmt(c.omzet)}</td><td style="text-align:right" class="mono">${((c.komisiPct||0)*100).toFixed(0)}%</td><td style="text-align:right" class="mono green"><b>${fmt(c.komisi)}</b></td></tr>`).join('')
-      +'</tbody></table>';
+  // Isi dropdown filter capster di summary card
+  const selSum=$('komisi-filter-capster-summary');
+  if(selSum){
+    const prevVal=selSum.value;
+    selSum.innerHTML='<option value="">Semua Capster</option>'
+      +data.map(c=>'<option value="'+(c.capster||c.nama)+'"'
+        +((c.capster||c.nama)===prevVal?' selected':'')+'>'
+        +(c.capster||c.nama)+'</option>').join('');
   }
 
-  // Tabel total per capster
-  const el2=$('komisi-capster-summary');
-  if(!data.length){el2.innerHTML='<div class="empty">Tidak ada data</div>';return;}
-  const sorted=data.slice().sort((a,b)=>(b.omzet||0)-(a.omzet||0));
-  el2.innerHTML='<table><thead><tr>'
-    +'<th>Capster</th><th style="text-align:right">Trx</th><th style="text-align:right">Omzet</th><th style="text-align:right">Komisi</th><th style="text-align:right">Rata-rata</th>'
-    +'</tr></thead><tbody>'
-    +sorted.map(c=>`<tr>
-      <td><b>${c.capster||c.nama}</b></td>
-      <td style="text-align:right" class="mono">${c.transaksi||0}</td>
-      <td style="text-align:right" class="mono green">${fmt(c.omzet||0)}</td>
-      <td style="text-align:right" class="mono green"><b>${fmt(c.komisi||0)}</b></td>
-      <td style="text-align:right" class="mono">${fmt((c.transaksi||0)>0?Math.round((c.omzet||0)/(c.transaksi||1)):0)}</td>
-    </tr>`).join('')
-    +`<tr style="background:var(--surface);font-weight:700;border-top:2px solid var(--border)">
-      <td>TOTAL</td>
-      <td style="text-align:right" class="mono">${tot_t}</td>
-      <td style="text-align:right" class="mono green">${fmt(tot_o)}</td>
-      <td style="text-align:right" class="mono green">${fmt(tot_k)}</td>
-      <td style="text-align:right" class="mono">${fmt(tot_t>0?Math.round(tot_o/tot_t):0)}</td>
-    </tr>`
-    +'</tbody></table>';
+  // Render tabel summary (satu-satunya tabel yang tampil)
+  renderKomisiSummaryFiltered();
 }
 
 /* PATCH: renderKomisiDetail — tabel detail TRX verified dari sheet */
@@ -1859,6 +1842,60 @@ async function exportLaporanPDF(){
   }catch(e){console.error(e);toast('❌ Gagal buat PDF: '+e.message,true);}
   finally{if(btn){btn.textContent='📥 Export PDF';btn.disabled=false;}}
 }
+
+/* ═══════════════════════════════════════
+   RENDER KOMISI SUMMARY — satu tabel, dengan filter capster
+═══════════════════════════════════════ */
+function renderKomisiSummaryFiltered(){
+  if(!komisiData||!komisiData.data)return;
+  var data=komisiData.data||[];
+  var filterCap=v('komisi-filter-capster-summary');
+  var filtered=filterCap?data.filter(function(c){return(c.capster||c.nama)===filterCap;}):data;
+
+  var tot_o=filtered.reduce(function(s,c){return s+(c.omzet||0);},0);
+  var tot_k=filtered.reduce(function(s,c){return s+(c.komisi||0);},0);
+  var tot_t=filtered.reduce(function(s,c){return s+(c.transaksi||0);},0);
+
+  // Update metrics di atas
+  $('komisi-omzet').textContent=fmt(tot_o);
+  $('komisi-total-k').textContent=fmt(tot_k);
+  $('komisi-jml-cap').textContent=filtered.length+' capster';
+
+  var el2=$('komisi-capster-summary');
+  if(!filtered.length){el2.innerHTML='<div class="empty">Tidak ada data</div>';return;}
+  var sorted=filtered.slice().sort(function(a,b){return(b.omzet||0)-(a.omzet||0);});
+  var rows=sorted.map(function(c){
+    var pct=typeof c.komisiPct==='number'?c.komisiPct:(parseFloat((c.komisiPct||'0').toString().replace('%',''))||0);
+    if(pct>1)pct=pct/100;
+    var pctStr=pct>0?Math.round(pct*100)+'%':'—';
+    var avg=(c.transaksi||0)>0?Math.round((c.omzet||0)/(c.transaksi||1)):0;
+    return '<tr>'
+      +'<td><b>'+(c.capster||c.nama)+'</b></td>'
+      +'<td style="text-align:right" class="mono">'+(c.transaksi||0)+'</td>'
+      +'<td style="text-align:right" class="mono green">'+fmt(c.omzet||0)+'</td>'
+      +'<td style="text-align:right" class="mono">'+pctStr+'</td>'
+      +'<td style="text-align:right" class="mono green"><b>'+fmt(c.komisi||0)+'</b></td>'
+      +'<td style="text-align:right" class="mono">'+fmt(avg)+'</td>'
+      +'</tr>';
+  }).join('');
+  var totalRow='<tr style="background:var(--surface);font-weight:700;border-top:2px solid var(--border)">'
+    +'<td>TOTAL</td>'
+    +'<td style="text-align:right" class="mono">'+tot_t+'</td>'
+    +'<td style="text-align:right" class="mono green">'+fmt(tot_o)+'</td>'
+    +'<td></td>'
+    +'<td style="text-align:right" class="mono green">'+fmt(tot_k)+'</td>'
+    +'<td style="text-align:right" class="mono">'+fmt(tot_t>0?Math.round(tot_o/tot_t):0)+'</td>'
+    +'</tr>';
+  el2.innerHTML='<table><thead><tr>'
+    +'<th>Capster</th>'
+    +'<th style="text-align:right">TRX</th>'
+    +'<th style="text-align:right">Omzet</th>'
+    +'<th style="text-align:right">%</th>'
+    +'<th style="text-align:right">Komisi</th>'
+    +'<th style="text-align:right">Rata-rata</th>'
+    +'</tr></thead><tbody>'+rows+totalRow+'</tbody></table>';
+}
+
 
 /* ═══════════════════════════════════════
    GANTI PIN
