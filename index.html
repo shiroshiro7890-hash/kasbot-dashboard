@@ -690,7 +690,9 @@ function switchTab(t){
   window.scrollTo({top:0,behavior:'auto'});
   if(t==='pos'&&!posData)loadPOS();if(t==='komisi'&&!komisiData)loadKomisi();
   if(t==='expense')loadExpense();if(t==='absensi')loadAbsensi();
-  if(t==='laporan')loadLaporan();if(t==='notifikasi')loadNotifikasi();if(t==='master')loadMasterData()
+  if(t==='laporan')loadLaporan();if(t==='notifikasi')loadNotifikasi();if(t==='master')loadMasterData();
+  if(t==='closing')loadClosing();if(t==='kunjungan')loadKunjungan();if(t==='aset')loadAset();
+  if(t==='pos')setTimeout(loadAnalisis,800);
 }
 function loadAll(){
   const tabs=ROLE_TABS[CU?.role||'ADMIN']||['pos'];
@@ -1268,21 +1270,7 @@ async function doResponseRequest(rowIndex,status){
   }catch{toast('Koneksi gagal',true);}
 }
 
-/* OVERRIDE switchTab */
-var _origSwitch=switchTab;
-function switchTab(t){
-  _origSwitch(t);
-  if(t==='closing')loadClosing();
-  if(t==='kunjungan')loadKunjungan();
-  if(t==='aset'){loadAset();}
-}
 
-/* OVERRIDE loadAll */
-var _origLoadAll=loadAll;
-function loadAll(){
-  _origLoadAll();
-  if(tab==='pos')setTimeout(loadAnalisis,800);
-}
 
 /* Init tahun selector */
 (function(){
@@ -1358,90 +1346,9 @@ async function uploadFotoCloudinary(file, folder) {
   }
 }
 
-// Override submitModalRequest — tambah upload foto dulu
-const _origSubmitReq = submitModalRequest;
-async function submitModalRequest() {
-  const g = id => ($(id)||{value:''}).value.trim();
-  const barang = g('req-barang'), alasan = g('req-alasan');
-  if (!barang || !alasan) { toast('Nama barang dan alasan wajib', true); return; }
 
-  // Upload foto dulu kalau ada
-  let fotoUrl = '';
-  if (_fotoState.req) {
-    const btn = $('req-foto-btn');
-    if (btn) { btn.textContent = '⏳ Mengupload foto...'; btn.classList.add('loading'); }
-    fotoUrl = await uploadFotoCloudinary(_fotoState.req, 'kasbot_request');
-    if (btn) { btn.classList.remove('loading'); }
-  }
 
-  try {
-    const r = await apiPost(BASE + '/api/request/submit', {
-      outlet: outlet || (CU && CU.outlet) || '',
-      capster: CU.nama,
-      namaBarang: barang,
-      jumlah: g('req-jml') || '1',
-      alasan: alasan,
-      fotoUrl: fotoUrl
-    });
-    if (r.success) {
-      toast('Request terkirim!');
-      closeModal('modal-request');
-      hapusFoto('req');
-      loadRequestBarang();
-    } else toast((r.error || 'Gagal'), true);
-  } catch { toast('Koneksi gagal', true); }
-}
 
-// Override submitModalAset — tambah upload foto dulu
-const _origSubmitAset = submitModalAset;
-async function submitModalAset() {
-  const g = id => ($(id)||{value:''}).value.trim();
-  let r;
-
-  // Upload foto dulu kalau ada
-  let fotoUrl = '';
-  if (_fotoState.aset) {
-    const btn = $('aset-foto-btn');
-    if (btn) { btn.textContent = '⏳ Mengupload foto...'; btn.classList.add('loading'); }
-    const folder = asetMode === 'tambah' ? 'kasbot_aset' : 'kasbot_aset_update';
-    fotoUrl = await uploadFotoCloudinary(_fotoState.aset, folder);
-    if (btn) { btn.classList.remove('loading'); }
-  }
-
-  try {
-    if (asetMode === 'tambah') {
-      const nama = g('a-nama');
-      if (!nama) { toast('Nama aset wajib', true); return; }
-      r = await apiPost(BASE + '/api/aset/tambah', {
-        outlet: outlet || '',
-        nama: nama,
-        kategori: g('a-kat'),
-        kondisi: g('a-kondisi') || 'BAIK',
-        tanggalBeli: g('a-tglbeli'),
-        harga: parseInt(g('a-harga')) || 0,
-        catatan: g('a-catatan'),
-        fotoUrl: fotoUrl,
-        addedBy: CU.nama
-      });
-    } else {
-      r = await apiPost(BASE + '/api/aset/update', {
-        outlet: outlet || '',
-        rowIndex: asetRow,
-        kondisi: g('a-kondisi'),
-        status: g('a-status'),
-        catatan: g('a-catatan'),
-        fotoUrl: fotoUrl,
-        updatedBy: CU.nama
-      });
-    }
-    if (r && r.success) {
-      toast('Aset ' + (asetMode === 'tambah' ? 'ditambahkan' : 'diupdate'));
-      closeModal('modal-aset');
-      hapusFoto('aset');
-      loadAset();
-    } else toast((r && r.error) || 'Gagal', true);
-  } catch { toast('Koneksi gagal', true); }
-}
 
 </script>
 
