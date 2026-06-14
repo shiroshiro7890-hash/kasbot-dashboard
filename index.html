@@ -494,11 +494,6 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
 const BASE='https://kasbot-backend-java-production-184e.up.railway.app';
 const MAX_FAIL=5;
 // API key & password TIDAK ada di frontend — semua via session token
-// Session token disimpan di sessionStorage (bukan di kode)
-function getToken(){return sessionStorage.getItem('kb_token')||'';}
-function setToken(t){sessionStorage.setItem('kb_token',t);}
-function clearToken(){sessionStorage.removeItem('kb_token');}
-
 const ROLE_TABS={ADMIN:['pos','komisi','expense','absensi','laporan','notifikasi','closing','kunjungan','aset','master'],KASIR:['pos','komisi','expense','notifikasi','closing'],CAPSTER:[]};
 const TAB_CFG={pos:{l:'🏪 Jual',s:'Jual'},komisi:{l:'💈 Komisi',s:'Komisi'},expense:{l:'💰 Kas',s:'Kas'},absensi:{l:'📋 Absen',s:'Absen'},laporan:{l:'📊 Laporan',s:'Laporan'},notifikasi:{l:'🔔 Notif',s:'Notif',notif:true},master:{l:'⚙️ Master',s:'Master'},
   closing:{l:'🔐 Closing',s:'Closing'},
@@ -557,40 +552,12 @@ function switchLoginTab(t){
     $('lform-'+x).className='login-form'+(x===t?' active':'')
   })
 }
-async function doLoginAdmin(){
+function doLoginAdmin(){
   const val=v('linput-admin'),err=$('lerr-admin'),info=$('linfo-admin');
   err.style.display='none';info.style.display='none';
   if(!val){err.textContent='Password wajib diisi.';err.style.display='block';return;}
-
-  // Coba backend session API
-  let backendOk=false;
-  try{
-    const r=await Promise.race([
-      fetch(BASE+'/api/session/admin',{method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({password:val})}),
-      new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),3000))
-    ]);
-    const d=await r.json();
-    if(d.success&&d.token){
-      fails=0;setToken(d.token);
-      CU={nama:'Admin',userId:'admin',role:'ADMIN',outlet:''};
-      sessionStorage.setItem('kb_u',JSON.stringify(CU));
-      $('login-overlay').style.display='none';initDash();
-      return;
-    } else if(d.error==='Password salah'){
-      // Backend aktif, password memang salah
-      fails++;err.textContent='Password salah.';err.style.display='block';
-      $('linput-admin').value='';
-      if(fails>=MAX_FAIL){$('linput-admin').disabled=true;$('lbtn-admin').disabled=true;}
-      else{info.textContent='Sisa: '+(MAX_FAIL-fails)+'x';info.style.display='block';}
-      return;
-    }
-  }catch(e){backendOk=false;}
-
-  // Fallback lokal — kalau backend tidak respond / session endpoint belum ada
   if(val==='bow2024'){
-    fails=0;setToken('local-'+Date.now());
+    fails=0;
     CU={nama:'Admin',userId:'admin',role:'ADMIN',outlet:''};
     sessionStorage.setItem('kb_u',JSON.stringify(CU));
     $('login-overlay').style.display='none';initDash();
@@ -610,7 +577,6 @@ async function doLoginStaff(){
       body:JSON.stringify({userId:uid,pin})});
     const d=await r.json();
     if(d.success&&d.user){
-      if(d.token)setToken(d.token);
       CU={...d.user,role:(d.user.role||'CAPSTER').toUpperCase()};
       sessionStorage.setItem('kb_u',JSON.stringify(CU));
       $('login-overlay').style.display='none';
@@ -618,11 +584,7 @@ async function doLoginStaff(){
     }else{err.textContent=d.error||'User ID atau PIN salah.';err.style.display='block';$('linput-pin').value='';}
   }catch(e){err.textContent='Koneksi gagal — pastikan server aktif.';err.style.display='block';}
 }
-function logoutUser(){
-  const t=getToken();
-  if(t){fetch(BASE+'/api/session/logout',{method:'POST',headers:{'X-Session-Token':t}}).catch(()=>{});}
-  clearToken();sessionStorage.removeItem('kb_u');CU=null;location.reload();
-}
+function logoutUser(){sessionStorage.removeItem('kb_u');CU=null;location.reload();}
 
 /* INIT DASH */
 function initDash(){
@@ -698,13 +660,13 @@ async function confirmCheckIn(){
   const nc=v('modal-ci-input').trim();
   if(!nc){$('modal-ci-input').style.borderColor='var(--red)';setTimeout(()=>$('modal-ci-input').style.borderColor='',1000);return}
   closeModal('modal-customer');
-  try{const out=CU.outlet||'BOW BARBERSHOP';const r=await fetch(BASE+'/api/absensi/checkin',{method:'POST',headers:{'Content-Type':'application/json','X-Session-Token':getToken()},body:JSON.stringify({nama:CU.nama,outlet:out,namaCustomer:nc})});
+  try{const out=CU.outlet||'BOW BARBERSHOP';const r=await fetch(BASE+'/api/absensi/checkin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nama:CU.nama,outlet:out,namaCustomer:nc})});
   const d=await r.json();toast(d.success?'✅ Check In: '+nc:'❌ '+(d.error||'Gagal'),!d.success);loadCpStatus()}
   catch{toast('❌ Koneksi gagal',true)}
 }
 async function doCapsterCheckOut(){
   if(!confirm('Check Out sekarang?'))return;
-  try{const out=CU.outlet||'BOW BARBERSHOP';const r=await fetch(BASE+'/api/absensi/checkout',{method:'POST',headers:{'Content-Type':'application/json','X-Session-Token':getToken()},body:JSON.stringify({nama:CU.nama,outlet:out})});
+  try{const out=CU.outlet||'BOW BARBERSHOP';const r=await fetch(BASE+'/api/absensi/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nama:CU.nama,outlet:out})});
   const d=await r.json();toast(d.success?'✅ Check Out! '+d.durasi+' menit':'❌ '+(d.error||'Gagal'),!d.success);loadCpStatus();loadCpHistory()}
   catch{toast('❌ Koneksi gagal',true)}
 }
@@ -716,19 +678,12 @@ else{setTimeout(()=>$('linput-admin').focus(),200)}
 
 /* API */
 async function apiFetch(url){
-  const tok=getToken();const hdr={'X-Session-Token':tok};
-  try{
-    const res=await fetch(url,{headers:hdr});
-    if(res.status===401&&tok&&!tok.startsWith('local-')){logoutUser();return{success:false,error:'Session expired'};}
-    return res.json();
-  }catch{return{success:false,error:'Koneksi gagal'};}
+  try{return(await fetch(url)).json();}
+  catch{return{success:false,error:'Koneksi gagal'};}
 }
 async function apiPost(url,body){
-  const tok=getToken();
   try{
-    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-Session-Token':tok},body:JSON.stringify(body)});
-    if(res.status===401&&tok&&!tok.startsWith('local-')){logoutUser();return{success:false,error:'Session expired'};}
-    return res.json();
+    return(await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json();
   }catch{return{success:false,error:'Koneksi gagal'};}
 }
 
