@@ -808,7 +808,12 @@ function renderPOSTrxTbl(data,q=''){
     fd.slice().reverse().map(r=>{
       const pct=pctMap[r.capster]||0;
       const kom=pct>0?Math.round((r.total||0)*pct):0;
-      const komCell=kom>0?`<td style="text-align:right;font-size:11px" class="mono green" title="${Math.round(pct*100)}%">${fmt(kom)}</td>`:'<td style="text-align:right;color:var(--muted);font-size:11px">—</td>';
+      const isVerified=r.komisiStatus==='VERIFIED';
+      const komCell=isVerified&&kom>0
+        ?`<td style="text-align:right;font-size:11px" class="mono green" title="${Math.round(pct*100)}% - VERIFIED">${fmt(kom)}</td>`
+        :pct>0
+          ?`<td style="text-align:right;font-size:11px;color:#f0a500" title="PENDING - belum diverifikasi">⏳ ${fmt(kom)}</td>`
+          :'<td style="text-align:right;color:var(--muted);font-size:11px">—</td>';
       return `<tr><td class="mono" style="font-size:10px">${r.id||'—'}</td><td class="mono">${r.waktu?r.waktu.substring(0,10):'—'}</td><td>${r.capster||'—'}</td><td>${r.customer||'—'}</td><td style="font-size:11px">${r.produk||'—'}</td><td style="text-align:right" class="mono green">${fmt(r.total)}</td>${komCell}<td style="font-size:11px">${r.metode||'—'}</td>${canEdit?`<td><button class="btn" style="padding:2px 6px;font-size:11px" onclick="openEditTrx('${r.id}','${(r.customer||'').replace(/'/g,"\\'")}','${r.hp||''}')">✏️</button></td>`:''}</tr>`;
     }).join('')
     +`<tr style="background:var(--surface);font-weight:700;border-top:2px solid var(--border)">
@@ -1023,51 +1028,52 @@ async function verifikasiTrxDiKomisi(){
   }catch{el.innerHTML='<div style="color:var(--red);padding:10px;font-size:13px">Koneksi gagal</div>';}
 }
 
-/* CEK CAPSTER BELUM VERIF HARI INI */
+/* CEK TRX PENDING BELUM DIVERIFIKASI */
 async function cekCapsterBelumVerif(){
   const notifEl=$('komisi-notif-belum-verif');
   const listEl=$('komisi-notif-list');
   if(!notifEl||!listEl)return;
-
   try{
-    // Ambil data absensi hari ini untuk tahu siapa yang aktif
     const op=outlet?'?outlet='+encodeURIComponent(outlet):'';
-    const[absensi,trxData]=await Promise.all([
-      apiFetch(BASE+'/api/absensi/status'+op),
-      posData?Promise.resolve(posData):apiFetch(BASE+'/api/penjualan'+op)
-    ]);
+    const trxData=posData||(await apiFetch(BASE+'/api/penjualan'+op));
 
-    if(!absensi.success||!absensi.data)return;
+    // TRX hari ini yang masih PENDING (belum diverif)
+    const todayStr=new Date().toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta',
+      day:'2-digit',month:'2-digit',year:'numeric'});
+    const [d,m,y]=todayStr.split('/');
+    const todayPrefix=`${y}-${m}-${d}`;
 
-    const today=new Date().toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta',
-      day:'2-digit',month:'2-digit',year:'numeric'}).split('/').reverse().join('-');
+    const pending=(trxData&&trxData.data||[]).filter(t=>
+      t.waktu&&t.waktu.startsWith(todayPrefix)&&
+      (!t.komisiStatus||t.komisiStatus==='PENDING')
+    );
 
-    // Capster yang checkin hari ini
-    const capsterAktif=absensi.data
-      .filter(c=>c.status==='AKTIF'||(c.checkIn&&c.checkIn.startsWith(today.substring(0,10))))
-      .map(c=>c.nama);
+    // Kelompok per capster
+    const byCapster={};
+    pending.forEach(t=>{
+      const c=t.capster||'—';
+      if(!byCapster[c])byCapster[c]=[];
+      byCapster[c].push(t);
+    });
 
-    if(!capsterAktif.length){notifEl.style.display='none';return;}
-
-    // TRX hari ini per capster
-    const trxHariIni=(trxData&&trxData.data||[]).filter(t=>t.waktu&&t.waktu.startsWith(today.substring(0,10)));
-    const capsterSudahTrx=new Set(trxHariIni.map(t=>t.capster));
-
-    // Capster aktif tapi belum ada TRX yang diverif
-    const belumVerif=capsterAktif.filter(c=>!capsterSudahTrx.has(c));
-
-    if(belumVerif.length>0){
+    const entries=Object.entries(byCapster);
+    if(entries.length>0){
       notifEl.style.display='block';
-      listEl.innerHTML=belumVerif.map(c=>
-        `<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(240,165,0,0.2)">
-          <span>✂️ <b>${c}</b> — belum ada TRX hari ini</span>
-          <button class="btn" style="padding:3px 8px;font-size:11px;flex-shrink:0" onclick="$('komisi-verif-input').value='';$('komisi-verif-result').innerHTML='';$('komisi-verif-input').focus();$('komisi-verif-input').placeholder='TRX capster ${c}...'">Input TRX</button>
+      listEl.innerHTML=entries.map(([c,trxs])=>
+        `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(240,165,0,0.2)">
+          <span>✂️ <b>${c}</b> — <b>${trxs.length}</b> TRX belum diverifikasi
+            <span style="font-size:10px;color:#a07000;margin-left:6px">(${trxs.map(t=>t.id||'').join(', ')})</span>
+          </span>
+          <button class="btn" style="padding:3px 8px;font-size:11px;flex-shrink:0"
+            onclick="$('komisi-verif-input').value='${trxs[0].id||''}';$('komisi-verif-result').innerHTML='';$('komisi-verif-input').focus()">
+            Input TRX
+          </button>
         </div>`
       ).join('');
     }else{
       notifEl.style.display='none';
     }
-  }catch(e){console.log('cekCapsterBelumVerif error:',e);}
+  }catch(e){console.log('cekCapsterBelumVerif:',e);}
 }
 
 function switchKomisiMode(mode){
