@@ -688,8 +688,14 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
 
   <!-- TAB: MASTER SHIFT -->
   <div id="abs-tab-shift" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-      <div class="section-label" style="margin-bottom:0">Master Shift</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="section-label" style="margin-bottom:0">Master Shift</div>
+        <select id="abs-shift-outlet" onchange="loadShiftList()" style="-webkit-appearance:none;appearance:none;padding:6px 10px;border:1px solid var(--border);border-radius:var(--rs);font-size:13px">
+          <option value="">BOW BARBERSHOP</option>
+          <option value="BOW JELAMBAR">BOW JELAMBAR</option>
+        </select>
+      </div>
       <button class="btn btn-primary" onclick="openModalTambahShift()" style="padding:7px 12px">+ Tambah Shift</button>
     </div>
     <div class="card"><div class="tbl-wrap"><div id="abs-shift-tbl"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
@@ -943,10 +949,16 @@ function initDash(){
 /* PATCH: fillBulanSel includes sel-komisi-bln */
 function fillBulanSel(){
   const bi=['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'],now=new Date();
+  var opts='';
+  for(let i=0;i<6;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const val=bi[d.getMonth()+1]+' '+d.getFullYear();opts+='<option value="'+val+'">'+val+'</option>';}
   ['sel-laporan-bln','sel-cp-bln','sel-komisi-bln'].forEach(id=>{
-    const el=$(id);if(!el)return;el.innerHTML='<option value="">Bulan Ini</option>';
-    for(let i=0;i<6;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const val=bi[d.getMonth()+1]+' '+d.getFullYear();const o=document.createElement('option');o.value=val;o.textContent=val;el.appendChild(o)}
-  })
+    const el=$(id);if(!el)return;
+    el.innerHTML='<option value="">Bulan Ini</option>'+opts;
+  });
+  // Sync dropdown gaji dan absensi rekap
+  var gb=document.getElementById('gaji-bulan');if(gb)gb.innerHTML='<option value="">Bulan Ini</option>'+opts;
+  var gbr=document.getElementById('gaji-rekap-bulan');if(gbr)gbr.innerHTML='<option value="">Bulan Ini</option>'+opts;
+  var abr=document.getElementById('abs-rekap-bln');if(abr)abr.innerHTML='<option value="">Bulan Ini</option>'+opts;
 }
 
 /* ═══════════════════════════════════════
@@ -1790,7 +1802,12 @@ function switchAbsensiTab(t){
   if(t==='harian')  { loadShifts(); loadAbsensiHarian(); loadCapsterForAbsensi(); }
   if(t==='rekap')   { loadAbsensiRekap(); }
   if(t==='izin')    { loadIzinList(); }
-  if(t==='shift')   { loadShiftList(); }
+  if(t==='shift')   {
+    // Sync outlet selector Master Shift dengan outlet global
+    var shiftOutSel=document.getElementById('abs-shift-outlet');
+    if(shiftOutSel&&outlet) shiftOutSel.value=outlet;
+    loadShiftList();
+  }
 }
 
 /* ─── LOAD CAPSTER UNTUK DROPDOWN ─────────────────────────────── */
@@ -2164,8 +2181,14 @@ async function prosesIzin(id, disetujui){
 }
 
 /* ─── MASTER SHIFT ─────────────────────────────────────────────── */
+function getShiftOutlet(){
+  // Prioritas: abs-shift-outlet (Master Shift tab) → outlet global
+  var shiftSel = document.getElementById('abs-shift-outlet');
+  if(shiftSel && shiftSel.value) return shiftSel.value;
+  return outlet||'';
+}
 async function loadShiftList(){
-  var outlet = v('abs-h-outlet')||'';
+  var outlet = getShiftOutlet();
   var el = document.getElementById('abs-shift-tbl');
   if(el) el.innerHTML = '<div class="empty"><span class="spinner"></span>Memuat...</div>';
   try{
@@ -2239,7 +2262,7 @@ async function submitShift(){
   var jamPulang=v('shift-jam-pulang');
   var grace   =parseInt(v('shift-grace'))||5;
   var denda   =parseInt(v('shift-denda'))||10000;
-  var outlet  =v('abs-h-outlet')||'';
+  var outlet  =getShiftOutlet();
   if(!nama||!jamMasuk||!jamPulang){toast('Nama shift, jam masuk, dan jam pulang wajib diisi',true);return;}
   try{
     var url = ri>0 ? BASE+'/api/shift/edit' : BASE+'/api/shift/tambah';
@@ -2252,7 +2275,7 @@ async function submitShift(){
 }
 async function hapusShift(ri){
   if(!confirm('Hapus shift ini?')) return;
-  var outlet=v('abs-h-outlet')||'';
+  var outlet=getShiftOutlet();
   try{
     var r=await apiPost(BASE+'/api/shift/hapus',{outlet:outlet,rowIndex:ri});
     toast(r.success?'Shift dihapus':'❌ '+(r.error||'Gagal'),!r.success);
