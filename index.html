@@ -221,6 +221,21 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
       <button class="cp-btn-ci" id="cp-btn-ci" onclick="openModal('modal-customer')">⬆️ Check In</button>
       <button class="cp-btn-co" id="cp-btn-co" onclick="doCapsterCheckOut()" disabled>⬇️ Check Out</button>
     </div>
+    <!-- Verifikasi Kode Transaksi -->
+    <div class="card" style="margin-bottom:1rem">
+      <div class="card-head"><div class="card-title">🔑 Verifikasi Kode Transaksi</div></div>
+      <div style="padding:1rem">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Masukkan kode struk dari kasir untuk verifikasi transaksi kamu. Kode komisi hanya dihitung jika transaksi terverifikasi.</div>
+        <div style="display:flex;gap:8px">
+          <input class="modal-input" type="text" id="verifNota" placeholder="TRX-xxxxxxxxxx" autocomplete="off" autocapitalize="characters" style="flex:1;padding:10px 12px;text-transform:uppercase;font-family:'DM Mono',monospace;font-size:13px!important" onkeydown="if(event.key==='Enter')verifikasiKodeTransaksi()"/>
+          <button class="btn btn-primary" onclick="verifikasiKodeTransaksi()" style="padding:10px 14px;flex-shrink:0">Cek</button>
+        </div>
+        <div id="verifResult" style="margin-top:10px"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:1rem">
+      <button class="btn" onclick="openModalSubmitRequest()" style="flex:1;padding:12px;font-size:14px;font-weight:600;border-radius:var(--rs);background:var(--orange);color:#fff;border-color:var(--orange)">📋 Request Barang Alat</button>
+    </div>
     <div class="card" style="margin-bottom:1rem">
       <div class="card-head"><div class="card-title">📋 Riwayat Hari Ini</div><span id="cp-tanggal" class="mono" style="color:var(--hint)"></span></div>
       <div class="tbl-wrap"><div id="cp-riwayat"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
@@ -352,6 +367,15 @@ main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
     </div>
     <div class="tbl-wrap"><div id="pos-trx-tbl"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
   </div>
+  <!-- ANALISIS PRODUK -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem">
+    <div class="card" style="margin-bottom:0"><div class="card-head"><div class="card-title">🏆 Produk Terlaris</div></div><div class="tbl-wrap"><div id="analisis-top"><div class="empty"><span class="spinner"></span></div></div></div></div>
+    <div class="card" style="margin-bottom:0"><div class="card-head"><div class="card-title">📉 Produk Tidak Laris</div></div><div class="tbl-wrap"><div id="analisis-bot"><div class="empty"><span class="spinner"></span></div></div></div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="card-title">📈 Tren Omzet 6 Bulan</div><button class="btn" onclick="loadAnalisis()" style="padding:5px 10px;font-size:12px"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button></div>
+    <div class="card-body"><div id="analisis-tren"><div class="empty"><span class="spinner"></span></div></div></div>
+  </div>
 </main></div>
 
 <div id="section-komisi" class="section"><main>
@@ -460,8 +484,12 @@ const BASE='https://kasbot-backend-java-production-184e.up.railway.app';
 const API_KEY='kasbot_sk_2024_BOW_barber99';
 const ADMIN_PASS='bow2024';
 const MAX_FAIL=5;
-const ROLE_TABS={ADMIN:['pos','komisi','expense','absensi','laporan','notifikasi','master'],KASIR:['pos','komisi','expense','notifikasi'],CAPSTER:[]};
-const TAB_CFG={pos:{l:'🏪 Jual',s:'Jual'},komisi:{l:'💈 Komisi',s:'Komisi'},expense:{l:'💰 Kas',s:'Kas'},absensi:{l:'📋 Absen',s:'Absen'},laporan:{l:'📊 Laporan',s:'Laporan'},notifikasi:{l:'🔔 Notif',s:'Notif',notif:true},master:{l:'⚙️ Master',s:'Master'}};
+const ROLE_TABS={ADMIN:['pos','komisi','expense','absensi','laporan','notifikasi','closing','kunjungan','aset','master'],KASIR:['pos','komisi','expense','notifikasi','closing'],CAPSTER:[]};
+const TAB_CFG={pos:{l:'🏪 Jual',s:'Jual'},komisi:{l:'💈 Komisi',s:'Komisi'},expense:{l:'💰 Kas',s:'Kas'},absensi:{l:'📋 Absen',s:'Absen'},laporan:{l:'📊 Laporan',s:'Laporan'},notifikasi:{l:'🔔 Notif',s:'Notif',notif:true},master:{l:'⚙️ Master',s:'Master'},
+  closing:{l:'🔐 Closing',s:'Closing'},
+  kunjungan:{l:'👥 Kunjungan',s:'Kunjungan'},
+  aset:{l:'🏭 Aset',s:'Aset'}
+};
 
 /* STATE */
 let CU=null,outlet='',tab='pos',fails=0;
@@ -998,6 +1026,384 @@ if(Math.abs(dx)>70&&Math.abs(dy)<50&&Math.abs(dx)>Math.abs(dy)*2){
   const tabs=ROLE_TABS[CU?.role||'ADMIN']||['pos'],idx=tabs.indexOf(tab);
   if(dx<0&&idx<tabs.length-1)switchTab(tabs[idx+1]);else if(dx>0&&idx>0)switchTab(tabs[idx-1])
 }},{passive:true})})();
+
+/* ANALISIS */
+let analisisData=null;
+async function loadAnalisis(){
+  try{
+    const op=outlet?'?outlet='+encodeURIComponent(outlet):'';
+    const d=await apiFetch(BASE+'/api/analisis/penjualan'+op);
+    analisisData=d;if(!d.success)return;
+    renderTopBottom(d.top5,d.bottom5);renderTren6Bulan(d.tren6bulan);
+  }catch{}
+}
+function renderTopBottom(top5,bot5){
+  const elT=$('analisis-top'),elB=$('analisis-bot');
+  if(elT){if(!top5||!top5.length){elT.innerHTML='<div class="empty">—</div>';}else{elT.innerHTML='<table><thead><tr><th>Rank</th><th>Produk</th><th style="text-align:right">Qty</th><th style="text-align:right">Omzet</th></tr></thead><tbody>'+top5.map((p,i)=>'<tr><td style="font-weight:700;font-size:14px">'+(['🥇','🥈','🥉','4️⃣','5️⃣'][i]||i+1)+'</td><td><b>'+p.produk+'</b></td><td style="text-align:right" class="mono">'+p.qty+'</td><td style="text-align:right" class="mono green">'+fmt(p.omzet)+'</td></tr>').join('')+'</tbody></table>';}}
+  if(elB){if(!bot5||!bot5.length){elB.innerHTML='<div class="empty">—</div>';}else{elB.innerHTML='<table><thead><tr><th>Produk</th><th style="text-align:right">Qty</th><th style="text-align:right">Omzet</th></tr></thead><tbody>'+bot5.map(p=>'<tr><td>'+p.produk+'</td><td style="text-align:right" class="mono red">'+p.qty+'</td><td style="text-align:right" class="mono">'+fmt(p.omzet)+'</td></tr>').join('')+'</tbody></table>';}}
+}
+function renderTren6Bulan(tren){
+  const el=$('analisis-tren');if(!el||!tren||!tren.length)return;
+  const maxO=Math.max(...tren.map(t=>t.omzet),1);
+  el.innerHTML='<div style="display:flex;align-items:flex-end;gap:6px;height:100px">'+tren.map(t=>{const h=Math.max(Math.round((t.omzet/maxO)*90),2);const bln=t.bulan.split(' ')[0].substring(0,3);return'<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%"><div style="flex:1;display:flex;align-items:flex-end;width:100%"><div style="height:'+h+'px;width:100%;background:var(--green);border-radius:3px 3px 0 0" title="'+fmt(t.omzet)+'"></div></div><div style="font-size:9px;color:var(--hint);font-family:\'DM Mono\',monospace">'+bln+'</div></div>';}).join('')+'</div><div style="display:flex;margin-top:8px">'+tren.map(t=>'<div style="flex:1;text-align:center;font-size:10px;color:var(--muted)">'+t.transaksi+' trx</div>').join('')+'</div>';
+}
+
+/* VERIFIKASI KODE KOMISI */
+async function verifikasiKodeTransaksi(){
+  const kode=v('verifNota').trim().toUpperCase();
+  const el=$('verifResult');
+  if(!kode){toast('Masukkan kode transaksi',true);return;}
+  el.innerHTML='<div style="text-align:center;padding:10px"><span class="spinner"></span></div>';
+  try{
+    const r=await apiPost(BASE+'/api/komisi/verifikasi',{outlet:CU.outlet||'',capster:CU.nama,noNota:kode});
+    if(r.success&&r.verified){
+      el.innerHTML='<div style="background:#e0f5ec;border:1px solid var(--green);border-radius:var(--rs);padding:12px;font-size:13px"><div style="font-weight:700;color:var(--green);margin-bottom:8px">Transaksi Terverifikasi!</div><div><b>No Nota:</b> '+r.noNota+'</div><div><b>Produk:</b> '+r.produk+'</div><div><b>Customer:</b> '+(r.customer||'—')+'</div><div><b>Total:</b> <span class="mono green">'+fmt(r.total)+'</span></div><div><b>Waktu:</b> '+r.waktu+'</div></div>';
+    } else {
+      el.innerHTML='<div style="background:#fff5f5;border:1px solid var(--red);border-radius:var(--rs);padding:12px;font-size:13px;color:var(--red)">'+(r.error||'Kode tidak ditemukan')+'</div>';
+    }
+  }catch{el.innerHTML='<div style="color:var(--red);padding:10px;font-size:13px">Koneksi gagal</div>';}
+}
+
+/* CLOSING HARIAN */
+let closingTunaiToday=0;
+function LocalDate_WIB(){
+  const d=new Date(),wib=new Date(d.toLocaleString('en-US',{timeZone:'Asia/Jakarta'}));
+  return wib.getDate().toString().padStart(2,'0')+'/'+(wib.getMonth()+1).toString().padStart(2,'0')+'/'+wib.getFullYear();
+}
+async function loadClosing(){
+  try{
+    const op=outlet?'?outlet='+encodeURIComponent(outlet):'';
+    const today=LocalDate_WIB();
+    const d=await apiFetch(BASE+'/api/closing?tanggal='+today+(outlet?'&outlet='+encodeURIComponent(outlet):''));
+    renderClosingTable(d.data||[]);
+    const todayC=(d.data||[]).find(c=>c.tanggal===today);
+    const alertEl=$('closing-alert');
+    if(alertEl){if(!todayC){alertEl.textContent='Belum ada closing hari ini ('+today+'). Segera lakukan closing sebelum toko tutup!';alertEl.style.display='block';}else{alertEl.style.display='none';}}
+  }catch{$('closing-table').innerHTML='<div class="empty">Error</div>';}
+}
+function renderClosingTable(data){
+  const el=$('closing-table');
+  if(!data||!data.length){el.innerHTML='<div class="empty">Belum ada data closing</div>';return;}
+  const isAdmin=CU&&CU.role==='ADMIN';
+  el.innerHTML='<table><thead><tr><th>Tanggal</th><th>Kasir</th><th style="text-align:right">Total Tunai</th><th style="text-align:right">Cash Aktual</th><th style="text-align:right">Selisih</th><th>Status</th><th>Approved By</th>'+(isAdmin?'<th>Aksi</th>':'')+'</tr></thead><tbody>'+
+    data.map(c=>{
+      const sel=parseInt(c.selisih)||0;
+      const st=c.status;
+      const stBadge=st==='APPROVED'?'background:#e0f5ec;color:var(--green)':st==='REJECTED'?'background:#fff5f5;color:var(--red)':st==='COCOK'?'background:#e0f5ec;color:var(--green)':st==='LEBIH'?'background:#dbeafe;color:var(--blue)':'background:#fff5f5;color:var(--red)';
+      return'<tr><td class="mono">'+c.tanggal+'</td><td>'+c.kasir+'</td><td style="text-align:right" class="mono">'+fmt(c.totalTunai)+'</td><td style="text-align:right" class="mono">'+fmt(c.cashAktual)+'</td><td style="text-align:right" class="mono '+(sel>=0?'green':'red')+'">'+(sel>=0?'+':'')+' '+fmt(Math.abs(sel))+'</td><td><span class="badge" style="'+stBadge+'">'+st+'</span></td><td style="font-size:11px">'+(c.approvedBy||'—')+'</td>'+(isAdmin?'<td>'+(!['APPROVED','REJECTED'].includes(st)?'<button class="btn" style="padding:3px 8px;font-size:11px" onclick="openApproveClosing(\''+c.id+'\',\''+c.kasir+'\','+c.totalTunai+','+c.cashAktual+',\''+st+'\')">Review</button>':'—')+'</td>':'')+'</tr>';
+    }).join('')+'</tbody></table>';
+}
+async function openModalClosing(){
+  openModal('modal-closing');$('closing-cash-input').value='';$('closing-selisih-info').style.display='none';
+  const today=LocalDate_WIB();let total=0,jml=0;
+  if(posData&&posData.data){posData.data.forEach(r=>{if(r.waktu&&r.waktu.startsWith(today)&&r.metode==='TUNAI'){total+=r.total;jml++;}});}
+  closingTunaiToday=total;$('closing-total-tunai').textContent=fmt(total);$('closing-jml-trx').textContent=jml+' transaksi tunai';
+}
+function hitungSelisihClosing(){
+  const cash=parseInt(v('closing-cash-input'))||0;
+  const sel=cash-closingTunaiToday;
+  const el=$('closing-selisih-info');
+  if(!v('closing-cash-input')){el.style.display='none';return;}
+  el.style.display='block';el.style.padding='10px';el.style.borderRadius='var(--rs)';el.style.marginTop='8px';el.style.fontSize='13px';el.style.fontWeight='600';el.style.border='1px solid';
+  if(sel===0){el.style.background='#e0f5ec';el.style.borderColor='var(--green)';el.style.color='var(--green)';el.textContent='COCOK! Cash sesuai dengan transaksi tunai.';}
+  else if(sel>0){el.style.background='#dbeafe';el.style.borderColor='var(--blue)';el.style.color='var(--blue)';el.textContent='LEBIH Rp '+Math.abs(sel).toLocaleString('id-ID')+' dari transaksi tunai.';}
+  else{el.style.background='#fff5f5';el.style.borderColor='var(--red)';el.style.color='var(--red)';el.textContent='KURANG Rp '+Math.abs(sel).toLocaleString('id-ID')+' dari transaksi tunai!';}
+}
+async function submitClosing(){
+  const cash=parseInt(v('closing-cash-input'));
+  if(isNaN(cash)){toast('Masukkan jumlah cash',true);return;}
+  try{
+    const r=await apiPost(BASE+'/api/closing/submit',{outlet:outlet||'',kasir:CU.nama,cashAktual:cash});
+    if(r.success){closeModal('modal-closing');toast('Closing berhasil! Status: '+(r.data&&r.data.status||'OK'));loadClosing();}
+    else toast((r.error||'Gagal'),true);
+  }catch{toast('Koneksi gagal',true);}
+}
+function openApproveClosing(id,kasir,totalTunai,cashAktual,status){
+  $('approve-closing-id').value=id;
+  $('approve-closing-title').textContent='Review Closing — '+kasir;
+  const sel=cashAktual-totalTunai;
+  $('approve-closing-info').innerHTML='<div><b>Total Tunai:</b> '+fmt(totalTunai)+'</div><div><b>Cash Aktual:</b> '+fmt(cashAktual)+'</div><div><b>Selisih:</b> <span style="font-weight:700;color:'+(sel>=0?'var(--green)':'var(--red)')+'">'+(sel>=0?'+':'')+' '+fmt(Math.abs(sel))+'</span></div><div style="margin-top:6px"><b>Status:</b> '+status+'</div>';
+  $('approve-closing-note').value='';openModal('modal-approve-closing');
+}
+async function doApproveClosing(approve){
+  const id=v('approve-closing-id'),note=v('approve-closing-note').trim();
+  try{
+    const r=await apiPost(BASE+'/api/closing/approve',{id,admin:CU.nama,approve,catatan:note,outlet:outlet||''});
+    toast(r.success?(approve?'Approved':'Rejected'):(r.error||'Gagal'),!r.success);
+    if(r.success){closeModal('modal-approve-closing');loadClosing();}
+  }catch{toast('Koneksi gagal',true);}
+}
+
+/* KUNJUNGAN CUSTOMER */
+let kunjunganData=[];
+async function loadKunjungan(){
+  $('kunjungan-table').innerHTML='<div class="empty"><span class="spinner"></span>Memuat...</div>';
+  try{
+    const op=outlet?'?outlet='+encodeURIComponent(outlet)+'&':'?';
+    const tahun=v('kunjungan-tahun'),q=v('kunjungan-q').trim();
+    const d=await apiFetch(BASE+'/api/kunjungan'+op+(tahun?'tahun='+tahun+'&':'')+(q?'q='+encodeURIComponent(q):''));
+    if(!d.success){$('kunjungan-table').innerHTML='<div class="empty">Error</div>';return;}
+    kunjunganData=d.data||[];
+    $('kj-total').textContent=d.total+' customer';
+    const totalK=kunjunganData.reduce(function(s,c){return s+(c.kunjungan||0);},0);
+    $('kj-sum').textContent=totalK+' kunjungan';
+    $('kj-avg').textContent=d.total>0?(totalK/d.total).toFixed(1)+'x / cust':'—';
+    renderKunjunganTable();
+  }catch{$('kunjungan-table').innerHTML='<div class="empty">Error memuat data</div>';}
+}
+function renderKunjunganTable(){
+  const el=$('kunjungan-table');
+  if(!kunjunganData.length){el.innerHTML='<div class="empty">Tidak ada data kunjungan</div>';return;}
+  el.innerHTML='<table><thead><tr><th>Rank</th><th>Customer</th><th>No HP</th><th style="text-align:right">Kunjungan</th><th style="text-align:right">Total Spend</th><th>Terakhir</th><th></th></tr></thead><tbody>'+
+    kunjunganData.map(function(c,i){return'<tr><td style="font-weight:700">'+( i+1)+'</td><td><b>'+c.customer+'</b></td><td class="mono">'+(c.hp||'—')+'</td><td style="text-align:right"><span style="font-weight:700;font-size:16px;color:var(--green)">'+c.kunjungan+'</span><span style="font-size:11px;color:var(--muted)">x</span></td><td style="text-align:right" class="mono green">'+fmt(c.totalSpend)+'</td><td class="mono" style="font-size:11px">'+(c.lastVisit?c.lastVisit.substring(0,10):'—')+'</td><td><button class="btn" style="padding:3px 8px;font-size:11px" onclick="showKunjunganDetail('+i+')">Detail</button></td></tr>';}).join('')+'</tbody></table>';
+}
+function showKunjunganDetail(idx){
+  const c=kunjunganData[idx];if(!c)return;
+  $('kj-detail-title').textContent='Detail: '+c.customer;
+  const bulanList=c.bulanKunjungan||[];
+  $('kj-detail-body').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"><div class="metric"><div class="metric-label">Total Kunjungan</div><div class="metric-value green">'+c.kunjungan+'x</div></div><div class="metric"><div class="metric-label">Total Spend</div><div class="metric-value">'+fmt(c.totalSpend)+'</div></div></div><div style="font-size:12px;color:var(--muted);margin-bottom:8px">HP: '+(c.hp||'—')+' | Terakhir: '+(c.lastVisit?c.lastVisit.substring(0,10):'—')+'</div><div style="font-size:13px;font-weight:600;margin-bottom:8px">Per Bulan:</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+
+    (bulanList.length?bulanList.map(function(b){return'<div style="background:#e0f5ec;color:var(--green);padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600">'+b.bulan+': '+b.kunjungan+'x</div>';}).join(''):'<div style="color:var(--hint);font-size:13px">Tidak ada data per bulan</div>')+'</div>';
+  openModal('modal-kunjungan-detail');
+}
+
+/* ASET */
+let asetList=[],asetMode='',asetRow=0;
+async function loadAset(){
+  const status=v('aset-filter-status');
+  const op=outlet?'?outlet='+encodeURIComponent(outlet)+'&status='+status:'?status='+status;
+  try{
+    const d=await apiFetch(BASE+'/api/aset'+op);
+    asetList=d.data||[];
+    $('aset-total').textContent=asetList.length;
+    $('aset-aktif').textContent=asetList.filter(function(a){return a.status==='AKTIF';}).length;
+    $('aset-rusak').textContent=asetList.filter(function(a){return a.status==='RUSAK'||a.status==='DIGANTI';}).length;
+    renderAsetTable();loadRequestBarang();
+  }catch{$('aset-table').innerHTML='<div class="empty">Error</div>';}
+}
+function renderAsetTable(){
+  const el=$('aset-table');
+  if(!asetList.length){el.innerHTML='<div class="empty">Belum ada aset terdaftar</div>';return;}
+  el.innerHTML='<table><thead><tr><th>Nama</th><th>Kategori</th><th>Kondisi</th><th>Status</th><th>Tgl Beli</th><th>Tgl Update</th><th style="text-align:right">Harga</th><th>Catatan</th><th></th></tr></thead><tbody>'+
+    asetList.map(function(a){
+      const stColor=a.status==='AKTIF'?'background:#e0f5ec;color:var(--green)':a.status==='RUSAK'?'background:#fff5f5;color:var(--red)':a.status==='DIGANTI'?'background:#fff3cd;color:#856404':'background:#f3f3f1;color:var(--muted)';
+      const kondColor=a.kondisi==='BAIK'?'background:#e0f5ec;color:var(--green)':a.kondisi==='SEDANG'?'background:#fff3cd;color:#856404':'background:#fff5f5;color:var(--red)';
+      return'<tr><td><b>'+a.nama+'</b>'+(a.fotoUrl?'<br><a href="'+a.fotoUrl+'" target="_blank" style="font-size:10px;color:var(--blue)">Foto</a>':'')+'</td><td style="font-size:11px">'+(a.kategori||'—')+'</td><td><span class="badge" style="'+kondColor+'">'+(a.kondisi||'BAIK')+'</span></td><td><span class="badge" style="'+stColor+'">'+a.status+'</span></td><td class="mono" style="font-size:11px">'+(a.tanggalBeli||'—')+'</td><td class="mono" style="font-size:11px">'+(a.tanggalUpdate||'—')+'</td><td style="text-align:right" class="mono">'+(a.harga?fmt(a.harga):'—')+'</td><td style="font-size:11px;max-width:120px">'+(a.catatan||'—')+'</td><td><button class="btn" style="padding:3px 7px;font-size:11px" onclick="openModalUpdateAset('+a.rowIndex+',\''+( a.kondisi||'BAIK')+'\',\''+a.status+'\',\''+( a.catatan||'').replace(/\'/g,"\\'")+'\')">Update</button></td></tr>';
+    }).join('')+'</tbody></table>';
+}
+function openModalTambahAset(){
+  asetMode='tambah';asetRow=0;$('mm-aset-title').textContent='Tambah Aset';
+  $('mm-aset-body').innerHTML=mi('a-nama','Nama Aset *','text','Gunting Rambut','','autocomplete="off"')+mi('a-kat','Kategori','text','Alat Potong','','autocomplete="off"')+'<label>Kondisi</label><select class="modal-select" id="a-kondisi" style="margin-top:4px"><option value="BAIK">Baik</option><option value="SEDANG">Sedang</option><option value="RUSAK">Rusak</option></select>'+mi('a-tglbeli','Tanggal Beli','date','','','')+mi('a-harga','Harga (Rp)','number','','','inputmode="numeric"')+mi('a-catatan','Catatan','text','','','autocomplete="off"')+mi('a-foto','URL Foto (opsional)','url','https://...','','autocomplete="off"');
+  openModal('modal-aset');
+}
+function openModalUpdateAset(rowIndex,kondisi,status,catatan){
+  asetMode='update';asetRow=rowIndex;$('mm-aset-title').textContent='Update Aset';
+  $('mm-aset-body').innerHTML='<label>Kondisi</label><select class="modal-select" id="a-kondisi" style="margin-top:4px"><option value="BAIK"'+(kondisi==='BAIK'?' selected':'')+'>Baik</option><option value="SEDANG"'+(kondisi==='SEDANG'?' selected':'')+'>Sedang</option><option value="RUSAK"'+(kondisi==='RUSAK'?' selected':'')+'>Rusak</option></select><label>Status</label><select class="modal-select" id="a-status" style="margin-top:4px"><option value="AKTIF"'+(status==='AKTIF'?' selected':'')+'>Aktif / Dipakai</option><option value="RUSAK"'+(status==='RUSAK'?' selected':'')+'>Rusak</option><option value="DIGANTI"'+(status==='DIGANTI'?' selected':'')+'>Sudah Diganti</option><option value="HILANG"'+(status==='HILANG'?' selected':'')+'>Hilang</option></select>'+mi('a-catatan','Catatan','text','',catatan,'autocomplete="off"')+mi('a-foto','URL Foto Baru (opsional)','url','https://...','','autocomplete="off"');
+  openModal('modal-aset');
+}
+async function submitModalAset(){
+  const g=function(id){return($(id)||{value:''}).value.trim();};
+  try{
+    var r;
+    if(asetMode==='tambah'){
+      const nama=g('a-nama');if(!nama){toast('Nama aset wajib',true);return;}
+      r=await apiPost(BASE+'/api/aset/tambah',{outlet:outlet||'',nama:nama,kategori:g('a-kat'),kondisi:g('a-kondisi')||'BAIK',tanggalBeli:g('a-tglbeli'),harga:parseInt(g('a-harga'))||0,catatan:g('a-catatan'),fotoUrl:g('a-foto'),addedBy:CU.nama});
+    } else {
+      r=await apiPost(BASE+'/api/aset/update',{outlet:outlet||'',rowIndex:asetRow,kondisi:g('a-kondisi'),status:g('a-status'),catatan:g('a-catatan'),fotoUrl:g('a-foto'),updatedBy:CU.nama});
+    }
+    if(r&&r.success){toast('Aset '+(asetMode==='tambah'?'ditambahkan':'diupdate'));closeModal('modal-aset');loadAset();}
+    else toast((r&&r.error)||'Gagal',true);
+  }catch{toast('Koneksi gagal',true);}
+}
+
+/* REQUEST BARANG */
+async function loadRequestBarang(){
+  const status=v('req-filter-status');
+  const capsterF=(CU&&CU.role==='CAPSTER')?CU.nama:'';
+  const op=(outlet?'?outlet='+encodeURIComponent(outlet)+'&':'?')+(status?'status='+status+'&':'')+(capsterF?'capster='+encodeURIComponent(capsterF):'');
+  try{
+    const d=await apiFetch(BASE+'/api/request'+op);
+    renderRequestTable(d.data||[]);
+  }catch{$('request-table').innerHTML='<div class="empty">Error</div>';}
+}
+function renderRequestTable(data){
+  const el=$('request-table');
+  if(!data||!data.length){el.innerHTML='<div class="empty">Belum ada request barang</div>';return;}
+  const isAdmin=CU&&CU.role==='ADMIN';
+  const stColor={PENDING:'background:#fff3cd;color:#856404',APPROVED:'background:#e0f5ec;color:var(--green)',REJECTED:'background:#fff5f5;color:var(--red)'};
+  el.innerHTML='<table><thead><tr><th>Capster</th><th>Barang</th><th>Jml</th><th>Alasan</th><th>Status</th><th>Waktu</th>'+(isAdmin?'<th>Aksi</th>':'')+'</tr></thead><tbody>'+
+    data.map(function(r){
+      return'<tr><td><b>'+r.capster+'</b></td><td>'+r.namaBarang+(r.fotoUrl?'<br><a href="'+r.fotoUrl+'" target="_blank" style="font-size:10px;color:var(--blue)">Foto</a>':'')+'</td><td class="mono">'+r.jumlah+'</td><td style="font-size:11px;max-width:120px">'+(r.alasan||'—')+'</td><td><span class="badge" style="'+(stColor[r.status]||'')+'">'+r.status+'</span>'+(r.adminNote?'<div style="font-size:10px;color:var(--muted);margin-top:2px">'+r.adminNote+'</div>':'')+'</td><td class="mono" style="font-size:11px">'+(r.waktuRequest?r.waktuRequest.substring(0,10):'—')+'</td>'+(isAdmin&&r.status==='PENDING'?'<td><div style="display:flex;gap:3px"><button class="btn btn-primary" style="padding:3px 7px;font-size:11px" onclick="doResponseRequest('+r.rowIndex+',\'APPROVED\')">OK</button><button class="btn btn-danger" style="padding:3px 7px;font-size:11px" onclick="doResponseRequest('+r.rowIndex+',\'REJECTED\')">Tolak</button></div></td>':isAdmin?'<td>—</td>':'')+'</tr>';
+    }).join('')+'</tbody></table>';
+}
+function openModalSubmitRequest(){
+  $('mm-req-title').textContent='Request Barang';
+  $('mm-req-body').innerHTML=mi('req-barang','Nama Barang *','text','Gunting Professional','','autocomplete="off"')+mi('req-jml','Jumlah *','number','1','1','inputmode="numeric" min="1"')+mi('req-alasan','Alasan / Keterangan *','text','Gunting sudah tumpul','','autocomplete="off"')+mi('req-foto','URL Foto Barang Rusak (opsional)','url','https://...','','autocomplete="off"');
+  openModal('modal-request');
+}
+async function submitModalRequest(){
+  const g=function(id){return($(id)||{value:''}).value.trim();};
+  const barang=g('req-barang'),alasan=g('req-alasan');
+  if(!barang||!alasan){toast('Nama barang dan alasan wajib',true);return;}
+  try{
+    const r=await apiPost(BASE+'/api/request/submit',{outlet:outlet||(CU&&CU.outlet)||'',capster:CU.nama,namaBarang:barang,jumlah:g('req-jml')||'1',alasan:alasan,fotoUrl:g('req-foto')});
+    if(r.success){toast('Request terkirim!');closeModal('modal-request');loadRequestBarang();}
+    else toast((r.error||'Gagal'),true);
+  }catch{toast('Koneksi gagal',true);}
+}
+async function doResponseRequest(rowIndex,status){
+  const note=window.prompt(status==='APPROVED'?'Catatan approval (opsional):':'Alasan penolakan:','');
+  if(note===null)return;
+  try{
+    const r=await apiPost(BASE+'/api/request/response',{outlet:outlet||'',rowIndex:rowIndex,admin:CU.nama,status:status,adminNote:note});
+    toast(r.success?'Request di-'+status:(r.error||'Gagal'),!r.success);
+    if(r.success)loadRequestBarang();
+  }catch{toast('Koneksi gagal',true);}
+}
+
+/* OVERRIDE switchTab */
+var _origSwitch=switchTab;
+function switchTab(t){
+  _origSwitch(t);
+  if(t==='closing')loadClosing();
+  if(t==='kunjungan')loadKunjungan();
+  if(t==='aset'){loadAset();}
+}
+
+/* OVERRIDE loadAll */
+var _origLoadAll=loadAll;
+function loadAll(){
+  _origLoadAll();
+  if(tab==='pos')setTimeout(loadAnalisis,800);
+}
+
+/* Init tahun selector */
+(function(){
+  var sel=$('kunjungan-tahun');
+  if(sel){var now=new Date();for(var i=0;i<3;i++){var y=now.getFullYear()-i;var o=document.createElement('option');o.value=y;o.textContent=y;sel.appendChild(o);}}
+})();
+
 </script>
+
+<!-- SECTION CLOSING HARIAN -->
+<div id="section-closing" class="section"><main>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div><div class="section-label" style="margin-bottom:3px">🔐 Closing Harian</div><div style="font-size:12px;color:var(--muted)">Rekonsiliasi kas harian — pastikan cash cocok dengan transaksi tunai.</div></div>
+    <button class="btn btn-primary" onclick="openModalClosing()">+ Closing Sekarang</button>
+  </div>
+  <div id="closing-alert" style="display:none;padding:12px;background:#fff3cd;border:1px solid #f0ad4e;border-radius:var(--r);margin-bottom:1rem;font-size:13px;color:#856404"></div>
+  <div class="card"><div class="card-head"><div class="card-title">Riwayat Closing</div><button class="btn" onclick="loadClosing()" style="padding:5px 10px;font-size:12px"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button></div><div class="tbl-wrap"><div id="closing-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
+</main></div>
+
+<!-- SECTION KUNJUNGAN CUSTOMER -->
+<div id="section-kunjungan" class="section"><main>
+  <div class="controls">
+    <input id="kunjungan-q" placeholder="Cari nama / HP customer..." oninput="loadKunjungan()" autocomplete="off" style="font-family:'DM Sans',sans-serif;font-size:14px;padding:8px 12px;border-radius:6px;border:1px solid var(--border);outline:none;flex:1;max-width:300px;-webkit-appearance:none"/>
+    <select id="kunjungan-tahun" onchange="loadKunjungan()" style="-webkit-appearance:none;appearance:none"><option value="">Tahun Ini</option></select>
+    <button class="btn" onclick="loadKunjungan()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+  </div>
+  <div class="grid-3" id="kunjungan-metrics">
+    <div class="metric"><div class="metric-label">Total Customer Unik</div><div class="metric-value" id="kj-total">—</div></div>
+    <div class="metric"><div class="metric-label">Rata-rata Kunjungan</div><div class="metric-value green" id="kj-avg">—</div></div>
+    <div class="metric"><div class="metric-label">Total Kunjungan</div><div class="metric-value" id="kj-sum">—</div></div>
+  </div>
+  <div class="card"><div class="card-head"><div class="card-title">👥 Data Kunjungan Customer</div></div><div class="tbl-wrap"><div id="kunjungan-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
+</main></div>
+
+<!-- SECTION ASET -->
+<div id="section-aset" class="section"><main>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div class="section-label" style="margin-bottom:0">🏭 Manajemen Aset</div>
+    <button class="btn btn-primary" onclick="openModalTambahAset()">+ Tambah Aset</button>
+  </div>
+  <div class="controls">
+    <select id="aset-filter-status" onchange="loadAset()" style="-webkit-appearance:none;appearance:none">
+      <option value="">Semua Status</option>
+      <option value="AKTIF">✅ Aktif</option>
+      <option value="RUSAK">❌ Rusak</option>
+      <option value="DIGANTI">🔄 Diganti</option>
+      <option value="HILANG">❗ Hilang</option>
+    </select>
+    <button class="btn" onclick="loadAset()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+  </div>
+  <div class="grid-3" style="margin-bottom:1.25rem">
+    <div class="metric"><div class="metric-label">Total Aset</div><div class="metric-value" id="aset-total">—</div></div>
+    <div class="metric"><div class="metric-label">Aktif</div><div class="metric-value green" id="aset-aktif">—</div></div>
+    <div class="metric"><div class="metric-label">Rusak / Diganti</div><div class="metric-value red" id="aset-rusak">—</div></div>
+  </div>
+  <div class="card"><div class="card-head"><div class="card-title">Daftar Aset</div></div><div class="tbl-wrap"><div id="aset-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div></div>
+  <!-- Request Barang (visible ke Capster juga) -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">📋 Request Barang Capster</div>
+      <div style="display:flex;gap:6px">
+        <select id="req-filter-status" onchange="loadRequestBarang()" style="font-size:12px;padding:4px 8px;-webkit-appearance:none;appearance:none">
+          <option value="">Semua</option><option value="PENDING">⏳ Pending</option><option value="APPROVED">✅ Approved</option><option value="REJECTED">❌ Rejected</option>
+        </select>
+        <button class="btn btn-primary" onclick="openModalSubmitRequest()" style="font-size:12px;padding:6px 10px">+ Request</button>
+      </div>
+    </div>
+    <div class="tbl-wrap"><div id="request-table"><div class="empty"><span class="spinner"></span>Memuat...</div></div></div>
+  </div>
+</main></div>
+
+<!-- MODAL CLOSING -->
+<div id="modal-closing" class="modal-overlay"><div class="modal-box"><div class="modal-drag"></div>
+  <div class="modal-title">🔐 Closing Harian</div>
+  <div style="background:#f0faf6;border:1px solid var(--green);border-radius:var(--rs);padding:12px;margin-bottom:14px;font-size:13px">
+    <div style="font-weight:600;margin-bottom:4px">Total Transaksi Tunai Hari Ini</div>
+    <div style="font-size:22px;font-weight:700;color:var(--green)" id="closing-total-tunai">—</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:2px" id="closing-jml-trx">— transaksi tunai</div>
+  </div>
+  <label>Cash Aktual di Tangan (Rp) *</label>
+  <input class="modal-input" type="number" id="closing-cash-input" placeholder="Masukkan jumlah cash aktual..." inputmode="numeric" oninput="hitungSelisihClosing()" style="margin-top:4px"/>
+  <div id="closing-selisih-info" style="display:none;padding:10px;border-radius:var(--rs);margin-top:8px;font-size:13px;font-weight:600"></div>
+  <div class="modal-actions">
+    <button class="modal-cancel" onclick="closeModal('modal-closing')">Batal</button>
+    <button class="modal-confirm" id="closing-submit-btn" onclick="submitClosing()">✓ Submit Closing</button>
+  </div>
+</div></div>
+
+<!-- MODAL APPROVE CLOSING -->
+<div id="modal-approve-closing" class="modal-overlay"><div class="modal-box"><div class="modal-drag"></div>
+  <div class="modal-title" id="approve-closing-title">Approve Closing</div>
+  <input type="hidden" id="approve-closing-id"/>
+  <div id="approve-closing-info" style="background:#f5f5f3;border-radius:var(--rs);padding:12px;margin-bottom:14px;font-size:13px"></div>
+  <label>Catatan (opsional)</label>
+  <input class="modal-input" type="text" id="approve-closing-note" placeholder="Catatan..." autocomplete="off" style="margin-top:4px"/>
+  <div class="modal-actions">
+    <button class="modal-cancel" onclick="closeModal('modal-approve-closing')">Batal</button>
+    <button class="btn btn-danger" style="flex:1;padding:12px;font-size:14px;font-weight:600;border-radius:var(--rs);cursor:pointer" onclick="doApproveClosing(false)">❌ Reject</button>
+    <button class="modal-confirm" onclick="doApproveClosing(true)">✅ Approve</button>
+  </div>
+</div></div>
+
+<!-- MODAL ASET -->
+<div id="modal-aset" class="modal-overlay"><div class="modal-box"><div class="modal-drag"></div>
+  <div class="modal-title" id="mm-aset-title">Tambah Aset</div>
+  <div id="mm-aset-body"></div>
+  <div class="modal-actions">
+    <button class="modal-cancel" onclick="closeModal('modal-aset')">Batal</button>
+    <button class="modal-confirm" onclick="submitModalAset()">Simpan</button>
+  </div>
+</div></div>
+
+<!-- MODAL REQUEST BARANG -->
+<div id="modal-request" class="modal-overlay"><div class="modal-box"><div class="modal-drag"></div>
+  <div class="modal-title" id="mm-req-title">📋 Request Barang</div>
+  <div id="mm-req-body"></div>
+  <div class="modal-actions">
+    <button class="modal-cancel" onclick="closeModal('modal-request')">Batal</button>
+    <button class="modal-confirm" onclick="submitModalRequest()">Kirim Request</button>
+  </div>
+</div></div>
+
+<!-- MODAL KUNJUNGAN DETAIL -->
+<div id="modal-kunjungan-detail" class="modal-overlay"><div class="modal-box"><div class="modal-drag"></div>
+  <div class="modal-title" id="kj-detail-title">Detail Kunjungan</div>
+  <div id="kj-detail-body"></div>
+  <div class="modal-actions">
+    <button class="modal-confirm" onclick="closeModal('modal-kunjungan-detail')">Tutup</button>
+  </div>
+</div></div>
 </body>
 </html>
